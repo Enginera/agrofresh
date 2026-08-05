@@ -1,0 +1,15 @@
+name: agrofresh
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - streamlit==1.35.0
+      - pandas
+      - numpy
+      - plotly
+      - openpyxl
+      - starlette==0.37.2
+      - fastapi==0.111.0
