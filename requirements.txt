@@ -1,5 +1,7 @@
-streamlit
+streamlit==1.35.0
 pandas
 numpy
 plotly
 openpyxl
+starlette==0.37.2
+fastapi==0.111.0
