@@ -1,15 +1,21 @@
 # ==============================================================================
-# 1. СИСТЕМНЫЙ ФИКС БАГА GZIP STARLETTE НА PYTHON 3.14
+# ЖЕСТКИЙ СИСТЕМНЫЙ ФИКС БАГА STARLETTE ДЛЯ PYTHON 3.14 (ОБХОД ИНИЦИАЛИЗАЦИИ)
 # ==============================================================================
-try:
-    import starlette.middleware.gzip as st_gzip
-    orig_init = st_gzip.GZipResponder.__init__
-    def patched_init(self, *args, **kwargs):
-        kwargs.setdefault('thread_minimum_size', 1024 * 1024)
-        return orig_init(self, *args, **kwargs)
-    st_gzip.GZipResponder.__init__ = patched_init
-except Exception:
-    pass
+import sys
+import types
+
+# Создаем фальшивый модуль-перехватчик, который внедрится в кэш импортов Python
+if 'starlette.middleware.gzip' not in sys.modules:
+    try:
+        import starlette.middleware.gzip as orig_gzip
+        old_init = orig_gzip.GZipResponder.__init__
+        def safe_init(self, app, minimum_size=500, compresslevel=9, **kwargs):
+            # Насильно инжектим обязательный для Python 3.14 аргумент thread_minimum_size
+            kwargs['thread_minimum_size'] = kwargs.get('thread_minimum_size', 1024 * 1024)
+            return old_init(self, app, minimum_size=minimum_size, compresslevel=compresslevel, **kwargs)
+        orig_gzip.GZipResponder.__init__ = safe_init
+    except Exception:
+        pass
 
 import streamlit as st
 import pandas as pd
@@ -17,17 +23,13 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.set_page_config(layout="wide", page_title="AgriCarbon Manager", page_icon="🌱")
-
+# Настройка стилей интерфейса
 st.markdown("""
 <style>
 .stApp { background-color: #F8F9FA; }
-h1, h2, h3 { color: #1A1A1A !important; font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
-.metric-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #E5E7EB; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.3s ease; }
-.metric-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
-.status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; display: inline-block; }
-.status-success { background-color: #E8F5E9; color: #2E7D32; }
-.stRadio div[role="radiogroup"] { flex-wrap: nowrap !important; overflow-x: auto !important; padding-bottom: 5px; }
+h1, h2, h3 { color: #1A1A1A !important; font-family: 'Inter', sans-serif !important; }
+.metric-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #E5E7EB; }
+.stRadio div[role="radiogroup"] { flex-wrap: nowrap !important; overflow-x: auto !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -69,7 +71,7 @@ def advanced_multi_field_parser(file_buffer):
             if "год" in row_text_line or "культура" in row_text_line: continue
                 
             if current_field_name and len(row) >= 10:
-                first_cell = str(row.iloc[0]).strip().replace('.0', '')
+                first_cell = str(row.iloc).strip().replace('.0', '')
                 if first_cell.isdigit() and len(first_cell) == 4:
                     try:
                         year_val = int(first_cell)
@@ -80,13 +82,13 @@ def advanced_multi_field_parser(file_buffer):
                                 
                         accumulated_rows.append({
                             "Год": year_val,
-                            "Культура": str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else "Не указано",
-                            "Урожайность": clean_float(row.iloc[2]),
-                            "Cinputs": clean_float(row.iloc[3]),
-                            "Cnet": clean_float(row.iloc[4]),
-                            "Ravg": clean_float(row.iloc[5]),
-                            "Площадь": clean_float(row.iloc[6]),
-                            "Глубина": clean_float(row.iloc[7])
+                            "Культура": str(row.iloc).strip() if pd.notna(row.iloc) else "Не указано",
+                            "Урожайность": clean_float(row.iloc),
+                            "Cinputs": clean_float(row.iloc),
+                            "Cnet": clean_float(row.iloc),
+                            "Ravg": clean_float(row.iloc),
+                            "Площадь": clean_float(row.iloc),
+                            "Глубина": clean_float(row.iloc)
                         })
                     except Exception: continue
                         
@@ -126,8 +128,8 @@ field_options = list(all_fields_dict.keys())
 selected_field = st.sidebar.selectbox("Выберите Поле для анализа: 🎯", field_options)
 df_active = all_fields_dict[selected_field]
 
-area_value = f"{df_active['Площадь'].iloc[0]:.2f} га" if len(df_active) > 0 else "118.06 га"
-depth_value = f"{df_active['Глубина'].iloc[0]:.2f} м" if len(df_active) > 0 else "0.30 м"
+area_value = f"{df_active['Площадь'].iloc:.2f} га" if len(df_active) > 0 else "118.06 га"
+depth_value = f"{df_active['Глубина'].iloc:.2f} м" if len(df_active) > 0 else "0.30 м"
 avg_e_calculated = df_active['Эффективность'].mean()
 
 tabs = ["Обзор", "Севооборот", "Удобрения и почва", "Защита растений", "Урожайность и качество", "Углеродный след", "Принятие решений"]
@@ -135,7 +137,7 @@ st.radio("", tabs, index=tabs.index(st.session_state.page) if st.session_state.p
 st.markdown("---")
 
 if st.session_state.page == "Обзор":
-    st.markdown(f"<div class='metric-card' style='border-left: 5px solid #2E7D32;'><h2>Объект анализа: {selected_field}</h2><p>Состояние подсистем комплекса.</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='metric-card'><h2>Объект анализа: {selected_field}</h2></div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     with c1: st.markdown(f"<div class='metric-card'><b>Средняя эффективность E</b><h3>{avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
     with c2: st.markdown("<div class='metric-card'><b>Углеродный баланс</b><h3>Прогресс 85%</h3></div>", unsafe_allow_html=True)
