@@ -1,6 +1,1 @@
---kivy-pre-forward=user_settings
-streamlit
-pandas
-numpy
-plotly
-openpyxl
+
