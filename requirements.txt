@@ -1,6 +1,5 @@
---config-settings=--global-option=--build-base
+streamlit
 pandas
 numpy
 plotly
 openpyxl
-streamlit
