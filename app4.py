@@ -1,3 +1,14 @@
+# ХАК ДЛЯ ИСПРАВЛЕНИЯ БАГА STARLETTE GZIP НА PYTHON 3.14
+try:
+    import starlette.middleware.gzip as st_gzip
+    orig_init = st_gzip.GZipResponder.__init__
+    def patched_init(self, *args, **kwargs):
+        kwargs.setdefault('thread_minimum_size', 1024 * 1024)
+        orig_init(self, *args, **kwargs)
+    st_gzip.GZipResponder.__init__ = patched_init
+except:
+    pass
+
 import streamlit as st
 import pandas as pd
 import numpy as np
