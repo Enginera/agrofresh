@@ -66,7 +66,7 @@ def apply_custom_styles():
 
     /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (ЭКРАНЫ МЕНЕЕ 768px) --- */
     @media (max-width: 768px) {
-        /* Принудительно сохраняем 3 колонки в один горизонтальный ряд на телефоне */
+        /* Принудительно сохраняем 3 колонки кнопок в один горизонтальный ряд на телефоне */
         [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             display: flex !important;
@@ -111,7 +111,7 @@ def apply_custom_styles():
             line-height: 1.2 !important;
         }
 
-        /* ФИКС ДЛЯ ВКЛАДКИ ОБЗОР: Карточки с показателями выстраиваются горизонтально друг под другом */
+        /* НА СМАРТФОНЕ: Графы показателей выстраиваются строго вертикально друг под другом */
         .main div.welcome-card + [data-testid="stHorizontalBlock"] {
             flex-direction: column !important;
             display: flex !important;
