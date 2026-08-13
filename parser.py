@@ -45,20 +45,20 @@ def advanced_multi_field_parser(file_buffer):
                 continue
                 
             if current_field_name and len(row) >= 10:
-                first_cell = str(row.iloc[0]).strip().replace('.0', '')
+                first_cell = str(row.iloc).strip().replace('.0', '')
                 if first_cell.isdigit() and len(first_cell) == 4:
                     try:
                         year_val = int(first_cell)
                         if 2020 <= year_val <= 2035:
                             accumulated_rows.append({
                                 "Год": year_val,
-                                "Культура": str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else "Не указано",
-                                "Урожайность": clean_float(row.iloc[2]),
-                                "Cinputs": clean_float(row.iloc[3]),
-                                "Cnet": clean_float(row.iloc[4]),
-                                "Ravg": clean_float(row.iloc[5]),
-                                "Площадь": clean_float(row.iloc[6]),
-                                "Глубина": clean_float(row.iloc[7])
+                                "Культура": str(row.iloc).strip() if pd.notna(row.iloc) else "Не указано",
+                                "Урожайность": clean_float(row.iloc),
+                                "Cinputs": clean_float(row.iloc),
+                                "Cnet": clean_float(row.iloc),
+                                "Ravg": clean_float(row.iloc),
+                                "Площадь": clean_float(row.iloc),
+                                "Глубина": clean_float(row.iloc)
                             })
                     except Exception:
                         continue

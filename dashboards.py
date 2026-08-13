@@ -36,10 +36,10 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
         st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)
         st.markdown(f"<div class='metric-card' style='margin-bottom:20px;'><b>Средняя эффективность (E)</b><h3> 📈 {avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
         
+        # График отцентрирован по середине
         st.subheader("Распределение объемов по культурам 📊")
         df_pie = df_active.groupby("Культура")["Урожайность"].sum().reset_index()
         
-        # Создаем круговой график
         fig_sev_pie = px.pie(
             df_pie, 
             names="Культура", 
@@ -48,19 +48,17 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
             color_discrete_sequence=px.colors.qualitative.Dark2
         )
         
-        # ФИКС ДЛЯ МОБИЛЬНЫХ: Центрируем кружок и переносим легенду вниз
         fig_sev_pie.update_layout(
-            margin=dict(l=10, r=10, t=10, b=10), # Убираем боковые пустые поля
+            margin=dict(l=10, r=10, t=10, b=10),
             showlegend=True,
             legend=dict(
-                orientation="h",       # Делаем легенду горизонтальной
-                yanchor="bottom",      # Привязываем её к низу
-                y=-0.2,                # Сдвигаем ниже самого круга, чтобы не перекрывать
-                xanchor="center",      # Центрируем по горизонтали
+                orientation="h",
+                yanchor="bottom",
+                y=-0.2,
+                xanchor="center",
                 x=0.5
             )
         )
-        # Включаем отображение процентов прямо внутри долек круга
         fig_sev_pie.update_traces(textinfo='percent+label', textposition='inside')
         st.plotly_chart(fig_sev_pie, use_container_width=True)
         
@@ -74,12 +72,14 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
     elif page_name == "Удобрения и почва":
         st.subheader(f"Управление удобрениями и почвенным слоем — 🪱 {selected_field}")
         
+        # Таблица и карточка идут друг за другом
         st.markdown("### Расписание внесения удобрений")
         data_ud = {"Дата": ["2026-07-20", "2026-07-15"], "Мероприятие": ["Органическое удобрение на Поле 1", "Компост на Поле 2"], "Статус": ["Предстоит", "Предстоит"]}
         st.dataframe(pd.DataFrame(data_ud), use_container_width=True)
         
         st.markdown(f"<div class='metric-card' style='margin-top:15px; margin-bottom:25px;'><b>Показатели почвы слоев 🧪</b><br> Глубина пласта: {depth_value} | pH: 6.5 | Азот: 0.12%</div>", unsafe_allow_html=True)
         
+        # Три нижних графика выстраиваются вертикальной лентой
         st.markdown("**Внесение углерода (Cinputs)**")
         fig1 = px.bar(df_active, x="Год", y="Cinputs", color_discrete_sequence=['#2E7D32'])
         fig1.update_layout(height=250, plot_bgcolor='white')
@@ -149,3 +149,4 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
         if "Индекс эффективности (E)" in df_display.columns:
             st.dataframe(df_display.style.format({"Индекс эффективности (E)": "{:.4f}"}), use_container_width=True)
         else:
+            st.dataframe(df_display, use_container_width=True)
