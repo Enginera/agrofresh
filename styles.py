@@ -1,14 +1,14 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и идеально выверенными размерами карточек."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками, яркой рамкой 'В норме' и выравниванием контента."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ */
     .stApp { background-color: #F4F9F4 !important; }
     h1, h2, h3 { color: #1B5E20 !important; font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
     
-    /* СТИЛИЗАЦИЯ И ВЫРАВНИВАНИЕ ВСЕХ КАРТОЧЕК */
+    /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ВСЕХ КАРТОЧЕК */
     .metric-card { 
         background: white !important; 
         padding: 10px 4px !important;     
@@ -25,7 +25,22 @@ def apply_custom_styles():
         text-align: center !important;
     }
     
-    /* СТИЛИЗАЦИЯ НАШИХ НОВЫХ КЛАССОВ ТЕКСТА (ДЛЯ ПК) */
+    /* СТРУКТУРНЫЕ КОНТЕЙНЕРЫ ДЛЯ ВЫРАВНИВАНИЯ ТЕКСТА КАРТОЧЕК */
+    .card-top {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    .card-bottom {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+    
+    /* СТИЛИЗАЦИЯ ТЕКСТА КАРТОЧЕК (ДЛЯ ПК) */
     .card-title-text {
         font-size: 14px;
         font-weight: 600;
@@ -40,6 +55,20 @@ def apply_custom_styles():
     .card-sub-text {
         font-size: 12px;
         color: #4B5563;
+    }
+    
+    /* ИЗЯЩНЫЙ И ЯРКИЙ БЕЙДЖ С ПРИЯТНО-ЗЕЛЕНОЙ ОБВОДКОЙ */
+    .status-badge { 
+        padding: 3px 10px !important; 
+        border-radius: 20px !important; 
+        font-size: 13px; 
+        font-weight: 600 !important; 
+        display: inline-block; 
+    }
+    .status-success { 
+        background-color: #E8F5E9 !important; 
+        color: #1B5E20 !important;            
+        border: 1.5px solid #2E7D32 !important; 
     }
     
     /* Стили для приветственной карточки */
@@ -112,7 +141,7 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* СКОРРЕКТИРОВАННЫЕ НА СТРОГИЕ 2% МЕНЕЕ МОБИЛЬНЫЕ ШРИФТЫ */
+        /* МОБИЛЬНЫЕ ШРИФТЫ (СКОРРЕКТИРОВАНЫ НА 2% МЕНЬШЕ) */
         .card-title-text {
             font-size: 9.3px !important; 
             line-height: 1.1 !important;
@@ -130,7 +159,7 @@ def apply_custom_styles():
         }
         .status-badge {
             font-size: 7.8px !important;
-            padding: 2px 4px !important;
+            padding: 2px 5px !important;
             margin-bottom: 2px !important;
         }
 
