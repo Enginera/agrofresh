@@ -1,7 +1,7 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и жестко увеличенными шрифтами."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и скорректированными шрифтами карточек."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
@@ -121,27 +121,26 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* КОРНЕВОЙ УЛЬТРА-ФИКС ШРИФТОВ ДЛЯ ВСЕХ 6 КАРТОЧЕК НА 8% КРУПНЕЕ */
-        /* Пробиваем внутренние контейнеры текста Стримлита */
+        /* КОРРЕКТИРОВКА ШРИФТОВ НА 2% МЕНЬШЕ ОТ ПРЕДЫДУЩЕГО ВАРИАНТА */
         .metric-card [data-testid="stMarkdownContainer"] b {
-            font-size: 9.5px !important; 
+            font-size: 9.3px !important; 
             line-height: 1.1 !important;
             display: block !important;
         }
         
         .metric-card [data-testid="stMarkdownContainer"] h3 {
-            font-size: 13.5px !important; 
+            font-size: 13.2px !important; 
             margin: 0 !important;
             padding: 0 !important;
         }
         
         .metric-card [data-testid="stMarkdownContainer"] small {
-            font-size: 8px !important;
+            font-size: 7.8px !important;
             display: block !important;
         }
         
         .metric-card [data-testid="stMarkdownContainer"] .status-badge {
-            font-size: 8px !important;
+            font-size: 7.8px !important;
             padding: 2px 4px !important;
         }
 
