@@ -16,27 +16,27 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
             </div>
         """, unsafe_allow_html=True)
         
-        # Верхний ряд карточек с новыми классами для точного контроля размера
+        # Upper row of metric cards
         c1, c2, c3 = st.columns(3)
-        with c1: st.markdown("<div class='metric-card'><span class='card-title-text'>Углеродная 🟢 нейтральность</span><div class='card-value-text'>85%</div></div>", unsafe_allow_html=True)
-        with c2: st.markdown("<div class='metric-card'><span class='card-title-text'>Active Projects 🚜</span><div class='card-value-text'>5 комп.</div></div>", unsafe_allow_html=True)
-        with c3: st.markdown(f"<div class='metric-card'><span class='card-title-text'>Эффективность 📈 (E)</span><div class='card-value-text'>{avg_e_calculated:.4f}</div></div>", unsafe_allow_html=True)
+        with c1: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Углеродная 🟢<br>нейтральность</span></div><div class='card-bottom'><div class='card-value-text'>85%</div></div></div>", unsafe_allow_html=True)
+        with c2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Active Projects 🚜</span></div><div class='card-bottom'><div class='card-value-text'>5 комп.</div></div></div>", unsafe_allow_html=True)
+        with c3: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Эффективность 📈<br>(E)</span></div><div class='card-bottom'><div class='card-value-text'>{avg_e_calculated:.4f}</div></div></div>", unsafe_allow_html=True)
         
         st.markdown("### Состояние модулей")
         
-        # Нижний ряд карточек
+        # Lower row of status cards (Keep vertical order intact)
         m1, m2, m3 = st.columns(3)
-        with m1: st.markdown(f"<div class='metric-card'><span class='card-title-text'>Севооборот 🌿</span><span class='card-sub-text'>{len(df_active)} агросроков</span><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
-        with m2: st.markdown("<div class='metric-card'><span class='card-title-text'>Почва и удобр. 🪱</span><span class='card-sub-text'>Секвестрация</span><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
-        with m3: st.markdown("<div class='metric-card'><span class='card-title-text'>Защита 🛡️</span><span class='card-sub-text'>Риски Rave ок</span><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
+        with m1: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Севооборот 🌿</span></div><div class='card-bottom'><span class='card-sub-text'>{len(df_active)} агросроков</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+        with m2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Почва и удобр. 🪱</span></div><div class='card-bottom'><span class='card-sub-text'>Секвестрация</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+        with m3: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Защита 🛡️</span></div><div class='card-bottom'><span class='card-sub-text'>Риски Rave ок</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
 
     # --- Вкладка 2: СЕВООБОРОТ ---
     elif page_name == "Севооборот":
         st.subheader(f"Планирование и анализ севооборота — 🔄 {selected_field}")
         
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Общая 📐 площадь</b><h3>{area_value}</h3></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:20px;'><b>Средняя эффективность (E)</b><h3> 📈 {avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Общая 📐 площадь</b><h3>{area_value}</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:20px; height:auto !important; display:block !important;'><b>Средняя эффективность (E)</b><h3> 📈 {avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
         
         st.subheader("Распределение объемов по культурам 📊")
         df_pie = df_active.groupby("Культура")["Урожайность"].sum().reset_index()
@@ -82,7 +82,7 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
         data_ud = {"Дата": ["2026-07-20", "2026-07-15"], "Мероприятие": ["Органическое удобрение на Поле 1", "Компост на Поле 2"], "Статус": ["Предстоит", "Предстоит"]}
         st.dataframe(pd.DataFrame(data_ud), use_container_width=True)
         
-        st.markdown(f"<div class='metric-card' style='margin-top:15px; margin-bottom:25px;'><b>Показатели почвы слоев 🧪</b><br> Глубина пласта: {depth_value} | pH: 6.5 | Азот: 0.12%</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-top:15px; margin-bottom:25px; height:auto !important; display:block !important;'><b>Показатели почвы слоев 🧪</b><br> Глубина пласта: {depth_value} | pH: 6.5 | Азот: 0.12%</div>", unsafe_allow_html=True)
         
         st.markdown("**Внесение углерода (Cinputs)**")
         fig1 = px.bar(df_active, x="Год", y="Cinputs", color_discrete_sequence=['#2E7D32'])
@@ -101,7 +101,6 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
         fig3.update_layout(height=250, plot_bgcolor='white')
         fig3.update_xaxes(type='category')
         st.plotly_chart(fig3, use_container_width=True)
-
     # --- Вкладка 4: ЗАЩИТА РАСТЕНИЙ ---
     elif page_name == "Защита растений":
         st.subheader(f"Мониторинг защиты растений — 🛡️ {selected_field}")
@@ -116,9 +115,9 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
     # --- Вкладка 5: УРОЖАЙНОСТЬ И КАЧЕСТВО ---
     elif page_name == "Урожайность и качество":
         st.subheader(f"Управление урожайностью и качеством продукции — 🌾 {selected_field}")
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Общая урожайность</b><h2>{df_active['Урожайность'].sum():.2f} т</h2></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Максимальный сбор</b><h2>{df_active['Урожайность'].max():.2f} т/ga</h2></div>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-card' style='margin-bottom:20px;'><b>Коэффициент качества</b><h2>92%</h2><span style='color:blue;'>Выше среднего</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Общая урожайность</b><h2>{df_active['Урожайность'].sum():.2f} т</h2></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Максимальный сбор</b><h2>{df_active['Урожайность'].max():.2f} т/га</h2></div>", unsafe_allow_html=True)
+        st.markdown("<div class='metric-card' style='margin-bottom:20px; height:auto !important; display:block !important;'><b>Коэффициент качества</b><h2>92%</h2><span style='color:blue;'>Выше среднего</span></div>", unsafe_allow_html=True)
         
         st.subheader("Детализированные отчеты о качестве партий 📋")
         df_quality = pd.DataFrame({"Продукт": ["Пшеница", "Кукуруза", "Соя"], "Партия": ["2026-A", "2026-B", "2026-C"], "Влажность": ["14%", "15%", "11%"], "Статус": ["Отлично", "Хорошо", "Отлично"]})
