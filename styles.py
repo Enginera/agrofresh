@@ -103,12 +103,24 @@ def apply_custom_styles():
         }
         .welcome-card h2 {
             font-size: 14px !important;    
-            font-weight: 700 !important;   /* Текст строго жирный */
+            font-weight: 700 !important;   
             line-height: 1.2 !important;
         }
         .welcome-card p {
             font-size: 11px !important;    
             line-height: 1.2 !important;
+        }
+
+        /* ФИКС ДЛЯ ВКЛАДКИ ОБЗОР: Карточки с показателями выстраиваются горизонтально друг под другом */
+        .main div.welcome-card + [data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+            display: flex !important;
+            gap: 12px !important;
+        }
+        .main div.welcome-card + [data-testid="stHorizontalBlock"] > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
         }
     }
     </style>
