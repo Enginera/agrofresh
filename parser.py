@@ -12,7 +12,7 @@ def clean_float(val):
     except ValueError: 
         return 0.0
 
-@st.cache_data
+# МЫ УБРАЛИ СТРОКУ @st.cache_data, КОТОРАЯ БЛОКИРОВАЛА ОБНОВЛЕНИЕ СПИСКА ПОЛЕЙ
 def advanced_multi_field_parser(file_buffer):
     """Интеллектуальный парсер, динамически находящий индексы колонок агро-таблицы."""
     if file_buffer is None:
@@ -32,7 +32,7 @@ def advanced_multi_field_parser(file_buffer):
                 continue
             row_text_line = " ".join(cells).lower()
             
-            # 1. ОБНАРУЖЕНИЕ НОВОГО БЛОКА ПОЛЯ
+            # 1. ОБНАРУЖЕНИЕ НОВОГО БЛОКА ПОЛЯ (Поле, Field, Участок)
             if "поле" in row_text_line or "field" in row_text_line or "участок" in row_text_line:
                 if current_field_name and accumulated_rows:
                     parsed_fields[current_field_name] = pd.DataFrame(accumulated_rows)
@@ -56,7 +56,7 @@ def advanced_multi_field_parser(file_buffer):
                             col_idx[key] = i
                 continue
                 
-            # 3. СБОР И ПАРСИНГ ДАННЫХ
+            # 3. СБОР И ПАРСИНГ ДАННЫХ СТРОКИ
             if len(row) >= max(col_idx.values()):
                 year_cell = str(row.iloc[col_idx["год"]]).strip().replace('.0', '')
                 if year_cell.isdigit() and len(year_cell) == 4:
@@ -82,6 +82,7 @@ def advanced_multi_field_parser(file_buffer):
         if not parsed_fields and accumulated_rows:
             parsed_fields["Поле 1"] = pd.DataFrame(accumulated_rows)
 
+        # Расчет индекса эффективности E для каждого успешно найденного поля
         standardized_fields = {}
         for f_name, df_field in parsed_fields.items():
             if df_field.empty:
