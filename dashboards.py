@@ -16,10 +16,11 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
             </div>
         """, unsafe_allow_html=True)
         
-        c1, c2, c3 = st.columns(3)
-        with c1: st.markdown("<div class='metric-card'><b>Углеродная 🟢<br>нейтральность</b><br><h3>Прогресс на 85%</h3></div>", unsafe_allow_html=True)
-        with c2: st.markdown("<div class='metric-card'><b>Active Projects 🚜</b><br><h3>5 компаний</h3></div>", unsafe_allow_html=True)
-        with c3: st.markdown(f"<div class='metric-card'><b>Средняя эффективность 📈<br>(E)</b><br><h3>{avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
+        # ЖЕСТКИЙ ФИКС НА УРОВНЕ PYTHON: Убираем st.columns для карточек метрик,
+        # чтобы они принудительно шли красивой горизонтальной лентой друг под другом
+        st.markdown("<div class='metric-card' style='margin-bottom:12px;'><b>Углеродная 🟢<br>нейтральность</b><br><h3>Прогресс на 85%</h3></div>", unsafe_allow_html=True)
+        st.markdown("<div class='metric-card' style='margin-bottom:12px;'><b>Active Projects 🚜</b><br><h3>5 компаний</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:25px;'><b>Средняя эффективность 📈<br>(E)</b><br><h3>{avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
         
         st.markdown("### Состояние модулей")
         m1, m2, m3 = st.columns(3)
