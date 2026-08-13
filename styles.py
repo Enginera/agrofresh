@@ -1,7 +1,7 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и всеми карточками в один ряд."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и крупными вертикальными карточками."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
@@ -11,11 +11,19 @@ def apply_custom_styles():
     /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК */
     [data-testid="stMetric"], .metric-card { 
         background: white !important; 
-        padding: 10px 10px !important;     
+        padding: 12px 8px !important;     
         border-radius: 8px !important; 
         border: 1px solid #C8E6C9 !important; 
         box-shadow: none !important;        
         box-sizing: border-box !important;
+        
+        /* Фиксированная крупная высота для создания вертикально вытянутого эффекта */
+        height: 110px !important; 
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        text-align: center !important;
     }
     
     [data-testid="stMetric"] > div {
@@ -42,7 +50,7 @@ def apply_custom_styles():
         border-right: 1px solid #C8E6C9;
     }
     
-    /* Прямоугольная вертикальная закладочка для мобильного меню */
+    /* Прямоугольная вертикальная закладочка для mobile меню */
     [data-testid="stSidebarCollapsedControl"] {
         background-color: #EBF3E3 !important;
         border: 1px solid #A5D6A7;
@@ -89,7 +97,7 @@ def apply_custom_styles():
             width: 32% !important;
         }
 
-        /* 1. ЖЕСТКО НОРМАЛИЗУЕМ ВЕРХНИЙ РЯД КАРТОЧЕК (ПОД ДОБРО ПОЖАЛОВАТЬ) В ОДИН РЯД */
+        /* 1. ВЕРХНИЙ БЛОК МЕТРИК В ОДИН РЯД */
         .main div.welcome-card + [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             display: flex !important;
@@ -101,16 +109,15 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* Ультра-компактный шрифт для верхних метрик, чтобы всё влезло в строку дисплея */
+        /* Текст внутри верхних метрик */
         .top-kpi-card {
-            padding: 8px 4px !important;
             font-size: 8px !important;
             line-height: 1.1 !important;
         }
-        .top-kpi-card b { font-size: 8px !important; }
-        .top-kpi-card h3 { font-size: 11px !important; margin: 2px 0 0 0 !important; }
+        .top-kpi-card b { font-size: 8px !important; display: block; min-height: 24px; }
+        .top-kpi-card h3 { font-size: 11px !important; margin: 0 !important; padding-bottom: 5px; }
 
-        /* 2. ЖЕСТКО УДЕРЖИВАЕМ НИЖНИЙ БЛОК «СОСТОЯНИЕ МОДУЛЕЙ» В ОДИН РЯД */
+        /* 2. НИЖНИЙ БЛОК МОДУЛЕЙ В ОДИН РЯД */
         .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             display: flex !important;
@@ -122,15 +129,14 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* Шрифт для нижних модулей */
+        /* Текст внутри нижних модулей */
         .module-card {
-            padding: 8px 4px !important;
             font-size: 8px !important;
             line-height: 1.1 !important;
         }
-        .module-card b { font-size: 8px !important; }
-        .module-card small { font-size: 7px !important; }
-        .module-card .status-badge { font-size: 7px !important; padding: 2px 4px !important; }
+        .module-card b { font-size: 8px !important; display: block; min-height: 24px; }
+        .module-card small { font-size: 7px !important; display: block; margin-bottom: 2px; }
+        .module-card .status-badge { font-size: 7px !important; padding: 2px 4px !important; margin-bottom: 2px; }
 
         /* Адаптивные маленькие кнопки на мобильных */
         div.stButton > button:first-child {
