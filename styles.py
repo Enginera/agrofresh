@@ -1,7 +1,7 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и увеличенным на 8% шрифтом в карточках."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и жестко увеличенными шрифтами."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
@@ -11,14 +11,14 @@ def apply_custom_styles():
     /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК */
     [data-testid="stMetric"], .metric-card { 
         background: white !important; 
-        padding: 12px 6px !important;     
+        padding: 10px 4px !important;     
         border-radius: 8px !important; 
         border: 1px solid #C8E6C9 !important; 
         box-shadow: none !important;        
         box-sizing: border-box !important;
         
         /* Фиксированная крупная высота для создания вертикально вытянутого эффекта */
-        height: 110px !important; 
+        height: 115px !important; 
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
@@ -108,14 +108,6 @@ def apply_custom_styles():
             min-width: 0 !important;
             width: 32% !important;
         }
-        
-        /* УВЕЛИЧИЛИ ШРИФТЫ НА 8% ДЛЯ ВЕРХНИХ МЕТРИК */
-        .top-kpi-card {
-            font-size: 8.6px !important; 
-            line-height: 1.1 !important;
-        }
-        .top-kpi-card b { font-size: 8.6px !important; display: block; min-height: 24px; }
-        .top-kpi-card h3 { font-size: 12px !important; margin: 0 !important; padding-bottom: 4px; }
 
         /* 2. НИЖНИЙ БЛОК МОДУЛЕЙ В ОДИН РЯД */
         .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] {
@@ -129,14 +121,29 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* УВЕЛИЧИЛИ ШРИФТЫ НА 8% ДЛЯ НИЖНИХ МОДУЛЕЙ */
-        .module-card {
-            font-size: 8.6px !important; 
+        /* КОРНЕВОЙ УЛЬТРА-ФИКС ШРИФТОВ ДЛЯ ВСЕХ 6 КАРТОЧЕК НА 8% КРУПНЕЕ */
+        /* Пробиваем внутренние контейнеры текста Стримлита */
+        .metric-card [data-testid="stMarkdownContainer"] b {
+            font-size: 9.5px !important; 
             line-height: 1.1 !important;
+            display: block !important;
         }
-        .module-card b { font-size: 8.6px !important; display: block; min-height: 24px; }
-        .module-card small { font-size: 7.5px !important; display: block; margin-bottom: 2px; }
-        .module-card .status-badge { font-size: 7.5px !important; padding: 2px 4px !important; margin-bottom: 2px; }
+        
+        .metric-card [data-testid="stMarkdownContainer"] h3 {
+            font-size: 13.5px !important; 
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .metric-card [data-testid="stMarkdownContainer"] small {
+            font-size: 8px !important;
+            display: block !important;
+        }
+        
+        .metric-card [data-testid="stMarkdownContainer"] .status-badge {
+            font-size: 8px !important;
+            padding: 2px 4px !important;
+        }
 
         /* Адаптивные маленькие кнопки на мобильных */
         div.stButton > button:first-child {
