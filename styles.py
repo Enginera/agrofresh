@@ -1,30 +1,29 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с ярко-зелеными прозрачными кнопками и принудительно плоскими карточками."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и плоскими карточками в один ряд."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
     .stApp { background-color: #F4F9F4 !important; }
     h1, h2, h3 { color: #1B5E20 !important; font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
     
-    /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК СТРИМЛИТА */
+    /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК */
     [data-testid="stMetric"], .metric-card { 
         background: white !important; 
-        padding: 10px 14px !important;     /* Сделали карточки значительно тоньше и компактнее */
+        padding: 10px 12px !important;     
         border-radius: 8px !important; 
-        border: 1px solid #C8E6C9 !important; /* Тонкий плоский контур */
-        box-shadow: none !important;        /* НАГЛУХО УБИРАЕМ ВСЕ ТЕНИ */
+        border: 1px solid #C8E6C9 !important; 
+        box-shadow: none !important;        
         box-sizing: border-box !important;
     }
     
-    /* Убираем тени и скругления со всех внутренних блоков метрик Стримлита */
     [data-testid="stMetric"] > div {
         box-shadow: none !important;
         border: none !important;
     }
     
-    /* Стили для приветственной карточки (тоже делаем плоской) */
+    /* Стили для приветственной карточки */
     .welcome-card {
         background: #E8F5E9; 
         border: 1px solid #C8E6C9 !important;
@@ -32,7 +31,7 @@ def apply_custom_styles():
         padding: 12px 18px !important; 
         border-radius: 8px; 
         margin-bottom: 20px;
-        box-shadow: none !important;        /* Убрали тень у приветствия */
+        box-shadow: none !important;        
     }
     .welcome-card h2 { margin: 0 0 6px 0 !important; font-size: 22px !important; color: #1B5E20 !important; }
     .welcome-card p { margin: 0 !important; color: #3E2723; }
@@ -53,7 +52,7 @@ def apply_custom_styles():
         height: 48px !important;
         top: 15px !important;
         left: 0px !important;
-        box-shadow: none !important; /* Убрали тень у закладочки */
+        box-shadow: none !important; 
         transition: all 0.3s ease;
     }
 
@@ -90,7 +89,30 @@ def apply_custom_styles():
             width: 32% !important;
         }
 
-        /* Адаптивные маленькие яркие прозрачные кнопки на мобильных */
+        /* АДАПТИРУЕМ БЛОК «СОСТОЯНИЕ МОДУЛЕЙ» ДЛЯ ОТОБРАЖЕНИЯ В ОДИН РЯД */
+        /* Находим последний stHorizontalBlock на вкладке Обзор */
+        .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            display: flex !important;
+            gap: 4px !important;
+        }
+        .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] > div {
+            flex: 1 1 32% !important;
+            min-width: 0 !important;
+            width: 32% !important;
+        }
+        
+        /* Уменьшаем шрифт внутри карточек модулей, чтобы текст влез горизонтально */
+        .module-card {
+            padding: 8px 6px !important;
+            font-size: 8px !important;
+            line-height: 1.1 !important;
+        }
+        .module-card b { font-size: 8px !important; }
+        .module-card small { font-size: 7px !important; }
+        .module-card .status-badge { font-size: 7px !important; padding: 2px 6px !important; }
+
+        /* Адаптивные маленькие кнопки на мобильных */
         div.stButton > button:first-child {
             height: 4.8em !important;      
             padding: 2px 4px !important;   
@@ -106,21 +128,10 @@ def apply_custom_styles():
             text-align: center !important;
         }
         
-        /* АДАПТАЦИЯ ПРИВЕТСТВЕННОГО БЛОКА НА ТЕЛЕФОНЕ */
-        .welcome-card {
-            padding: 12px !important;      
-            margin-bottom: 15px !important;
-            border-left-width: 3px !important;
-        }
-        .welcome-card h2 {
-            font-size: 14px !important;    
-            font-weight: 700 !important;   
-            line-height: 1.2 !important;
-        }
-        .welcome-card p {
-            font-size: 11px !important;    
-            line-height: 1.2 !important;
-        }
+        /* Адаптация приветственного блока */
+        .welcome-card { padding: 12px !important; margin-bottom: 15px !important; border-left-width: 3px !important; }
+        .welcome-card h2 { font-size: 14px !important; font-weight: 700 !important; line-height: 1.2 !important; }
+        .welcome-card p { font-size: 11px !important; line-height: 1.2 !important; }
     }
     </style>
     """, unsafe_allow_html=True)
