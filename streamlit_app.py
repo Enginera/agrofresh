@@ -24,9 +24,18 @@ uploaded_file = st.sidebar.file_uploader("Перетащите агрономи�
 file_data = advanced_multi_field_parser(uploaded_file)
 all_fields_dict = file_data if file_data is not None else get_mock_data()
 
+# БЕЗОПАСНЫЙ ПРЕДОХРАНИТЕЛЬ: Проверяем, не пустой ли словарь данных
+if not all_fields_dict:
+    all_fields_dict = get_mock_data()
+
 field_options = list(all_fields_dict.keys())
 selected_field = st.sidebar.selectbox("Выберите Поле для анализа: 🎯", field_options)
-df_active = all_fields_dict[selected_field]
+
+# БЕЗОПАСНЫЙ ПЕРЕХВАТ КЛЮЧА: Если ключ пропал, берем первое доступное поле
+if selected_field in all_fields_dict:
+    df_active = all_fields_dict[selected_field]
+else:
+    df_active = all_fields_dict[list(all_fields_dict.keys())[0]]
 
 # Математический расчет основных параметров выбранного поля
 area_value = f"{df_active['Площадь'].iloc[0]:.2f} га" if (len(df_active) > 0 and 'Площадь' in df_active.columns) else "118.06 га"
