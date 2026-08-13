@@ -1,7 +1,7 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и крупными вертикальными карточками."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и увеличенным на 8% шрифтом в карточках."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
@@ -11,7 +11,7 @@ def apply_custom_styles():
     /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК */
     [data-testid="stMetric"], .metric-card { 
         background: white !important; 
-        padding: 12px 8px !important;     
+        padding: 12px 6px !important;     
         border-radius: 8px !important; 
         border: 1px solid #C8E6C9 !important; 
         box-shadow: none !important;        
@@ -109,13 +109,13 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* Текст внутри верхних метрик */
+        /* УВЕЛИЧИЛИ ШРИФТЫ НА 8% ДЛЯ ВЕРХНИХ МЕТРИК */
         .top-kpi-card {
-            font-size: 8px !important;
+            font-size: 8.6px !important; 
             line-height: 1.1 !important;
         }
-        .top-kpi-card b { font-size: 8px !important; display: block; min-height: 24px; }
-        .top-kpi-card h3 { font-size: 11px !important; margin: 0 !important; padding-bottom: 5px; }
+        .top-kpi-card b { font-size: 8.6px !important; display: block; min-height: 24px; }
+        .top-kpi-card h3 { font-size: 12px !important; margin: 0 !important; padding-bottom: 4px; }
 
         /* 2. НИЖНИЙ БЛОК МОДУЛЕЙ В ОДИН РЯД */
         .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] {
@@ -129,14 +129,14 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* Текст внутри нижних модулей */
+        /* УВЕЛИЧИЛИ ШРИФТЫ НА 8% ДЛЯ НИЖНИХ МОДУЛЕЙ */
         .module-card {
-            font-size: 8px !important;
+            font-size: 8.6px !important; 
             line-height: 1.1 !important;
         }
-        .module-card b { font-size: 8px !important; display: block; min-height: 24px; }
-        .module-card small { font-size: 7px !important; display: block; margin-bottom: 2px; }
-        .module-card .status-badge { font-size: 7px !important; padding: 2px 4px !important; margin-bottom: 2px; }
+        .module-card b { font-size: 8.6px !important; display: block; min-height: 24px; }
+        .module-card small { font-size: 7.5px !important; display: block; margin-bottom: 2px; }
+        .module-card .status-badge { font-size: 7.5px !important; padding: 2px 4px !important; margin-bottom: 2px; }
 
         /* Адаптивные маленькие кнопки на мобильных */
         div.stButton > button:first-child {
