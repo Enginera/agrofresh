@@ -101,7 +101,6 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
         fig3.update_layout(height=250, plot_bgcolor='white')
         fig3.update_xaxes(type='category')
         st.plotly_chart(fig3, use_container_width=True)
-
     # --- Вкладка 4: ЗАЩИТА РАСТЕНИЙ ---
     elif page_name == "Защита растений":
         st.subheader(f"Мониторинг защиты растений — 🛡️ {selected_field}")
@@ -146,3 +145,11 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
     elif page_name == "Принятие решений":
         st.subheader(f"Сводная расчетная матрица севооборота — 💡 {selected_field}")
         st.markdown("Все строки и столбцы выгружены на основе структуры ТЗ:")
+        available_cols = [c for c in ["Год", "Культура", "Урожайность", "Cinputs", "Cnet", "Ravg", "Эффективность"] if c in df_active.columns]
+        df_display = df_active[available_cols].copy()
+        rename_display = {"Год": "Год агросрока", "Культура": "Культура", "Урожайность": "Урожайность (т/га)", "Cinputs": "Внесение Cinputs (кг)", "Cnet": "Чистый след Cnet", "Ravg": "Коэффициент Rave", "Эффективность": "Индекс эффективности (E)"}
+        df_display = df_display.rename(columns=rename_display)
+        if "Индекс эффективности (E)" in df_display.columns:
+            st.dataframe(df_display.style.format({"Индекс эффективности (E)": "{:.4f}"}), use_container_width=True)
+        else:
+            st.dataframe(df_display, use_container_width=True)
