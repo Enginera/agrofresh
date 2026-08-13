@@ -1,38 +1,38 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с ярко-зелеными прозрачными кнопками и плоскими карточками."""
+    """Применяет CSS-стили с ярко-зелеными прозрачными кнопками и принудительно плоскими карточками."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
     .stApp { background-color: #F4F9F4 !important; }
     h1, h2, h3 { color: #1B5E20 !important; font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
     
-    /* СТИЛИЗАЦИЯ ПЛОСКИХ КАРТОЧЕК МЕТРИК БЕЗ ТЕНИ */
-    .metric-card { 
-        background: white; 
-        padding: 14px 18px !important;    /* Уменьшили отступы, сделав карточки уже по высоте */
-        border-radius: 10px; 
-        border: 1px solid #C8E6C9 !important; /* Легкий аккуратный контур вместо жирной рамки */
-        box-shadow: none !important;       /* ПОЛНОСТЬЮ УБРАЛИ ТЕНЬ, КАРТОЧКА СТАЛА ПЛОСКОЙ */
-        transition: all 0.2s ease; 
+    /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК СТРИМЛИТА */
+    [data-testid="stMetric"], .metric-card { 
+        background: white !important; 
+        padding: 10px 14px !important;     /* Сделали карточки значительно тоньше и компактнее */
+        border-radius: 8px !important; 
+        border: 1px solid #C8E6C9 !important; /* Тонкий плоский контур */
+        box-shadow: none !important;        /* НАГЛУХО УБИРАЕМ ВСЕ ТЕНИ */
+        box-sizing: border-box !important;
     }
-    .metric-card:hover { 
-        border-color: #A5D6A7 !important; 
-        background-color: #FAFTFA !important;
+    
+    /* Убираем тени и скругления со всех внутренних блоков метрик Стримлита */
+    [data-testid="stMetric"] > div {
+        box-shadow: none !important;
+        border: none !important;
     }
-    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; display: inline-block; }
-    .status-success { background-color: #E8F5E9; color: #2E7D32; }
     
     /* Стили для приветственной карточки (тоже делаем плоской) */
     .welcome-card {
         background: #E8F5E9; 
         border: 1px solid #C8E6C9 !important;
         border-left: 5px solid #2E7D32 !important; 
-        padding: 15px 20px !important; 
-        border-radius: 10px; 
+        padding: 12px 18px !important; 
+        border-radius: 8px; 
         margin-bottom: 20px;
-        box-shadow: none !important;       /* Убрали тень у приветствия */
+        box-shadow: none !important;        /* Убрали тень у приветствия */
     }
     .welcome-card h2 { margin: 0 0 6px 0 !important; font-size: 22px !important; color: #1B5E20 !important; }
     .welcome-card p { margin: 0 !important; color: #3E2723; }
@@ -53,7 +53,7 @@ def apply_custom_styles():
         height: 48px !important;
         top: 15px !important;
         left: 0px !important;
-        box-shadow: none !important; /* Сделали закладочку плоской */
+        box-shadow: none !important; /* Убрали тень у закладочки */
         transition: all 0.3s ease;
     }
 
