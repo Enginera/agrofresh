@@ -16,23 +16,22 @@ def render_page_content(page_name, df_active, selected_field, area_value, depth_
             </div>
         """, unsafe_allow_html=True)
         
-        # Верхний блок метрик
+        # ДОБАВИЛИ КЛАСС top-kpi-card ДЛЯ ЖЕСТКОЙ ГОРИЗОНТАЛЬНОЙ ФИКСАЦИИ НА МОБИЛЬНЫХ
         c1, c2, c3 = st.columns(3)
-        with c1: st.markdown("<div class='metric-card'><b>Углеродная 🟢<br>нейтральность</b><br><h3>Прогресс на 85%</h3></div>", unsafe_allow_html=True)
-        with c2: st.markdown("<div class='metric-card'><b>Active Projects 🚜</b><br><h3>5 компаний</h3></div>", unsafe_allow_html=True)
-        with c3: st.markdown(f"<div class='metric-card'><b>Средняя эффективность 📈<br>(E)</b><br><h3>{avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
+        with c1: st.markdown("<div class='metric-card top-kpi-card'><b>Углеродная 🟢<br>нейтральность</b><br><h3>Прогресс 85%</h3></div>", unsafe_allow_html=True)
+        with c2: st.markdown("<div class='metric-card top-kpi-card'><b>Active Projects 🚜</b><br><h3>5 компан.</h3></div>", unsafe_allow_html=True)
+        with c3: st.markdown(f"<div class='metric-card top-kpi-card'><b>Эффективность 📈<br>(E)</b><br><h3>{avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
         
         st.markdown("### Состояние модулей")
         
-        # ВОЗВРАЩАЕМ КОЛОНКИ: Упаковываем модули в сетку из 3 столбцов
         m1, m2, m3 = st.columns(3)
         with m1: st.markdown(f"<div class='metric-card module-card'><b>Планирование 🌿<br>севооборота</b><br><small>{len(df_active)} агросроков</small><br><br><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
-        with m2: st.markdown("<div class='metric-card module-card'><b>Удобрения и 🪱<br>почва</b><br><small>Стабильная секвестрация</small><br><br><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
-        with m3: st.markdown("<div class='metric-card module-card'><b>Мониторинг защиты 🛡️<br>растений</b><br><small>Риски Rave рассчитаны</small><br><br><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
+        with m2: st.markdown("<div class='metric-card module-card'><b>Удобрения и 🪱<br>почва</b><br><small>Стабильная секвестр.</small><br><br><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
+        with m3: st.markdown("<div class='metric-card module-card'><b>Мониторинг защиты 🛡️<br>растений</b><br><small>Риски Rave расчит.</small><br><br><span class='status-badge status-success'>В норме</span></div>", unsafe_allow_html=True)
 
     # --- Вкладка 2: СЕВООБОРОТ ---
     elif page_name == "Севооборот":
-        st.subheader(f"Планирование and анализ севооборота — 🔄 {selected_field}")
+        st.subheader(f"Планирование и анализ севооборота — 🔄 {selected_field}")
         
         st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Общая 📐 площадь</b><h3>{area_value}</h3></div>", unsafe_allow_html=True)
         st.markdown(f"<div class='metric-card' style='margin-bottom:10px;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)

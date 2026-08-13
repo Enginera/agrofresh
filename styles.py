@@ -1,7 +1,7 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и плоскими карточками в один ряд."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и всеми карточками в один ряд."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ: Делаем более зеленым, но очень светлым и мягким */
@@ -11,7 +11,7 @@ def apply_custom_styles():
     /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ПЛОСКИХ КАРТОЧЕК */
     [data-testid="stMetric"], .metric-card { 
         background: white !important; 
-        padding: 10px 12px !important;     
+        padding: 10px 10px !important;     
         border-radius: 8px !important; 
         border: 1px solid #C8E6C9 !important; 
         box-shadow: none !important;        
@@ -89,8 +89,28 @@ def apply_custom_styles():
             width: 32% !important;
         }
 
-        /* АДАПТИРУЕМ БЛОК «СОСТОЯНИЕ МОДУЛЕЙ» ДЛЯ ОТОБРАЖЕНИЯ В ОДИН РЯД */
-        /* Находим последний stHorizontalBlock на вкладке Обзор */
+        /* 1. ЖЕСТКО НОРМАЛИЗУЕМ ВЕРХНИЙ РЯД КАРТОЧЕК (ПОД ДОБРО ПОЖАЛОВАТЬ) В ОДИН РЯД */
+        .main div.welcome-card + [data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            display: flex !important;
+            gap: 4px !important;
+        }
+        .main div.welcome-card + [data-testid="stHorizontalBlock"] > div {
+            flex: 1 1 32% !important;
+            min-width: 0 !important;
+            width: 32% !important;
+        }
+        
+        /* Ультра-компактный шрифт для верхних метрик, чтобы всё влезло в строку дисплея */
+        .top-kpi-card {
+            padding: 8px 4px !important;
+            font-size: 8px !important;
+            line-height: 1.1 !important;
+        }
+        .top-kpi-card b { font-size: 8px !important; }
+        .top-kpi-card h3 { font-size: 11px !important; margin: 2px 0 0 0 !important; }
+
+        /* 2. ЖЕСТКО УДЕРЖИВАЕМ НИЖНИЙ БЛОК «СОСТОЯНИЕ МОДУЛЕЙ» В ОДИН РЯД */
         .main [data-testid="stVerticalBlock"] > div:last-child [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             display: flex !important;
@@ -102,15 +122,15 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* Уменьшаем шрифт внутри карточек модулей, чтобы текст влез горизонтально */
+        /* Шрифт для нижних модулей */
         .module-card {
-            padding: 8px 6px !important;
+            padding: 8px 4px !important;
             font-size: 8px !important;
             line-height: 1.1 !important;
         }
         .module-card b { font-size: 8px !important; }
         .module-card small { font-size: 7px !important; }
-        .module-card .status-badge { font-size: 7px !important; padding: 2px 6px !important; }
+        .module-card .status-badge { font-size: 7px !important; padding: 2px 4px !important; }
 
         /* Адаптивные маленькие кнопки на мобильных */
         div.stButton > button:first-child {
