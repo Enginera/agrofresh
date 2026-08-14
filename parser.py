@@ -12,19 +12,20 @@ def clean_float(val):
     except ValueError: 
         return 0.0
 
+# ДОБАВЛЯЕМ УМНЫЙ КЭШ: Таблица весом в 1000+ строк обработается один раз,
+# а кэш автоматически сбросится, только если пользователь загрузит другой файл.
+@st.cache_data(show_spinner="Анализ и оптимизация агросроков...")
 def advanced_multi_field_parser(file_buffer):
     """Интеллектуальный парсер, адаптированный под многоколонный формат агро-таблиц."""
     if file_buffer is None:
         return None
     try:
-        # Читаем все листы Excel одновременно без заголовков для динамического сканирования
         excel_file = pd.read_excel(file_buffer, sheet_name=None, header=None)
         parsed_fields = {}
         
         for sheet_name, df_sheet in excel_file.items():
             accumulated_rows = []
             
-            # Словарь маппинга ваших новых колонок (значение -1 означает, что колонка ищется динамически)
             col_idx = {
                 "год": -1, 
                 "культура": -1, 
@@ -36,7 +37,6 @@ def advanced_multi_field_parser(file_buffer):
                 "глубина": -1
             }
             
-            # Сканируем первые 15 строк листа, чтобы найти точные индексы заголовков
             for idx, row in df_sheet.head(15).iterrows():
                 cells_low = [str(c).lower().strip() for c in row.values if pd.notna(c)]
                 row_text = " ".join(cells_low)
@@ -46,7 +46,6 @@ def advanced_multi_field_parser(file_buffer):
                         if pd.isna(val): continue
                         v_low = str(val).lower().strip()
                         
-                        # Сопоставляем ваши новые колонки из скриншота/PDF
                         if "год" in v_low or "№" == v_low:
                             col_idx["год"] = i
                         elif "культур" in v_low:
@@ -63,25 +62,19 @@ def advanced_multi_field_parser(file_buffer):
                             col_idx["площадь"] = i
                         elif "глубин" in v_low or "пласт" in v_low:
                             col_idx["глубина"] = i
-                    break # Как только нашли строку заголовков, выходим из цикла сканирования
+                    break
             
-            # Если заголовки не распознались по именам, выставляем базовый дефолтный порядок колонок ТЗ
             if col_idx["год"] == -1:
                 col_idx = {"год": 0, "урожайность": 1, "cnet": 2, "cinputs": 4, "ravg": 3, "культура": -1, "площадь": -1, "глубина": -1}
                 
-            # Построчно собираем данные со всей таблицы листа
             for idx, row in df_sheet.iterrows():
                 if len(row) <= max([v for v in col_idx.values() if v >= 0]):
                     continue
                     
-                # Проверяем первую ячейку (индекс/год), чтобы отсечь текстовые шапки
                 year_cell = str(row.iloc[col_idx["год"]]).strip().replace('.0', '')
                 
-                # Если строка начинается с цифры (порядковый номер или год агросрока)
                 if year_cell.isdigit() and len(year_cell) <= 4 and int(year_cell) > 0:
                     try:
-                        # В вашей таблице первая колонка — это № (1, 2, 3...). 
-                        # Если это просто индекс, мы превращаем его в условный расчетный Год
                         raw_year = int(year_cell)
                         final_year = raw_year if raw_year >= 2020 else (2020 + raw_year)
                         
@@ -89,7 +82,6 @@ def advanced_multi_field_parser(file_buffer):
                             i = col_idx[key]
                             return clean_float(row.iloc[i]) if i >= 0 else fallback
                             
-                        # Специфический перехват культуры (если колонки нет, смотрим по значениям)
                         k_i = col_idx["культура"]
                         cult_name = str(row.iloc[k_i]).strip() if k_i >= 0 else "Зерновые (Комплекс)"
                         
@@ -106,16 +98,13 @@ def advanced_multi_field_parser(file_buffer):
                     except Exception:
                         continue
             
-            # Если на листе собрались валидные строки, сохраняем под именем этого листа (например, Поле 1)
             if accumulated_rows:
                 parsed_fields[f"Участок: {sheet_name}"] = pd.DataFrame(accumulated_rows)
                 
-        # Рассчитываем итоговую математическую эффективность E для каждого поля
         standardized_fields = {}
         for f_name, df_field in parsed_fields.items():
             if df_field.empty:
                 continue
-            # Формула ТЗ: E = (Урожайность * (1 - Ravg)) / Cnet
             df_field["Эффективность"] = df_field.apply(
                 lambda r: round(((r["Урожайность"] * (1.0 - r["Ravg"])) / r["Cnet"]) * 10000) / 10000 if r["Cnet"] != 0 else 0.0,
                 axis=1
