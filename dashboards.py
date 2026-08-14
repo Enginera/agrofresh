@@ -1,3 +1,76 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+
+def render_page_content(page_name, df_active, selected_field, area_value, depth_value, avg_e_calculated):
+    """Отрисовывает графики и метрики. Элементы идут строго друг под другим."""
+    
+    # --- Вкладка 1: ОБЗОР ---
+    if page_name == "Обзор":
+        st.markdown(f"""
+            <div class='welcome-card'>
+                <h2>Добро пожаловать! Объект анализа: {selected_field}</h2>
+                <p>Обзор текущего состояния сельскохозяйственных подсистем комплекса.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        c1, c2, c3 = st.columns(3)
+        with c1: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Углеродная 🟢<br>нейтральность</span></div><div class='card-bottom'><div class='card-value-text'>85%</div></div></div>", unsafe_allow_html=True)
+        with c2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Active Projects 🚜</span></div><div class='card-bottom'><div class='card-value-text'>5 комп.</div></div></div>", unsafe_allow_html=True)
+        with c3: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Эффективность 📈<br>(E)</span></div><div class='card-bottom'><div class='card-value-text'>{avg_e_calculated:.4f}</div></div></div>", unsafe_allow_html=True)
+        
+        st.markdown("### Состояние модулей")
+        
+        m1, m2, m3 = st.columns(3)
+        with m1: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Севооборот 🌿</span></div><div class='card-bottom'><span class='card-sub-text'>{len(df_active)} агросроков</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+        with m2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Почва и удобр. 🪱</span></div><div class='card-bottom'><span class='card-sub-text'>Секвестрация</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+        with m3: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Защита 🛡️</span></div><div class='card-bottom'><span class='card-sub-text'>Риски Rave ок</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+
+    # --- Вкладка 2: СЕВООБОРОТ ---
+    elif page_name == "Севооборот":
+        st.subheader(f"Планирование и анализ севооборота — 🔄 {selected_field}")
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Общая 📐 площадь</b><h3>{area_value}</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card' style='margin-bottom:20px; height:auto !important; display:block !important;'><b>Средняя эффективность (E)</b><h3> 📈 {avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
+        
+        st.subheader("Распределение объемов по культурам 📊")
+        df_pie = df_active.groupby("Культура")["Урожайность"].sum().reset_index()
+        fig_sev_pie = px.pie(df_pie, names="Культура", values="Урожайность", hole=0.4, color_discrete_sequence=px.colors.qualitative.Dark2)
+        fig_sev_pie.update_layout(margin=dict(l=10, r=10, t=10, b=10), showlegend=True, legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5))
+        fig_sev_pie.update_traces(textinfo='percent+label', textposition='inside', domain=dict(x=[0.035, 0.965], y=[0.035, 0.965]))
+        st.plotly_chart(fig_sev_pie, width='stretch')
+        
+        st.subheader("Динамика индекса эффективности по годам 📉")
+        fig_sev_trend = go.Figure(go.Scatter(x=df_active["Год"], y=df_active["Эффективность"], mode='lines+markers', line=dict(shape='spline', color='#2E7D32', width=4)))
+        fig_sev_trend.update_layout(plot_bgcolor='white', height=300)
+        fig_sev_trend.update_xaxes(type='category', showgrid=True, gridcolor='#F3F4F6')
+        st.plotly_chart(fig_sev_trend, width='stretch')
+
+    # --- Вкладка 3: УДОБРЕНИЯ И ПОЧВА ---
+    elif page_name == "Удобрения и почва":
+        st.subheader(f"Управление удобрениями и почвенным слоем — 🪱 {selected_field}")
+        st.markdown("### Расписание внесения удобрений")
+        data_ud = {"Дата": ["2026-07-20", "2026-07-15"], "Мероприятие": ["Органическое удобрение на Поле 1", "Компост на Поле 2"], "Статус": ["Предстоит", "Предстоит"]}
+        st.dataframe(pd.DataFrame(data_ud), width='stretch')
+        
+        st.markdown(f"<div class='metric-card' style='margin-top:15px; margin-bottom:25px; height:auto !important; display:block !important;'><b>Показатели почвы слоев 🧪</b><br> Глубина пласта: {depth_value} | pH: 6.5 | Азот: 0.12%</div>", unsafe_allow_html=True)
+        
+        fig1 = px.bar(df_active, x="Год", y="Cinputs", color_discrete_sequence=['#2E7D32'])
+        fig1.update_layout(height=250, plot_bgcolor='white')
+        fig1.update_xaxes(type='category')
+        st.plotly_chart(fig1, width='stretch')
+        
+        mat_ndvi = np.array([[0.2, 0.4, 0.6], [0.4, 0.8, 0.5], [0.3, 0.6, 0.7]])
+        fig2 = px.imshow(mat_ndvi, color_continuous_scale="YlGn")
+        fig2.update_layout(height=250)
+        st.plotly_chart(fig2, width='stretch')
+        
+        fig3 = go.Figure(go.Scatter(x=df_active["Год"], y=df_active["Cinputs"], mode='lines+markers', line=dict(shape='spline', color='#1565C0', width=3)))
+        fig3.update_layout(height=250, plot_bgcolor='white')
+        fig3.update_xaxes(type='category')
+        st.plotly_chart(fig3, width='stretch')
     # --- Вкладка 4: ЗАЩИТА РАСТЕНИЙ ---
     elif page_name == "Защита растений":
         st.subheader(f"Мониторинг защиты растений — 🛡️ {selected_field}")
@@ -8,6 +81,7 @@
         fig_prot.update_layout(height=300, plot_bgcolor='white')
         fig_prot.update_xaxes(type='category')
         st.plotly_chart(fig_prot, width='stretch')
+
     # --- Вкладка 5: УРОЖАЙНОСТЬ И КАЧЕСТВО ---
     elif page_name == "Урожайность и качество":
         st.subheader(f"Управление урожайностью и качеством продукции — 🌾 {selected_field}")
@@ -36,6 +110,7 @@
         fig_cnet.update_layout(plot_bgcolor='white', height=400)
         fig_cnet.update_xaxes(type='category')
         st.plotly_chart(fig_cnet, width='stretch')
+
     # --- Вкладка 7: ПРИНЯТИЕ РЕШЕНИЙ ---
     elif page_name == "Принятие решений":
         st.subheader(f"Сводная расчетная матрица севооборота — 💡 {selected_field}")
