@@ -1,14 +1,14 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками, яркой рамкой 'В норме' и выравниванием контента."""
+    """Применяет CSS-стили с сочными прозрачно-зелеными кнопками и идеально выверенными размерами карточек."""
     st.markdown("""
     <style>
     /* ОБЩИЙ ФОН ПРИЛОЖЕНИЯ */
     .stApp { background-color: #F4F9F4 !important; }
     h1, h2, h3 { color: #1B5E20 !important; font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
     
-    /* СТИЛИЗАЦИЯ И ПРИНУДИТЕЛЬНОЕ ВЫРАВНИВАНИЕ ВСЕХ КАРТОЧЕК */
+    /* СТИЛИЗАЦИЯ И ВЫРАВНИВАНИЕ ВСЕХ КАРТОЧЕК */
     .metric-card { 
         background: white !important; 
         padding: 10px 4px !important;     
@@ -141,7 +141,7 @@ def apply_custom_styles():
             width: 32% !important;
         }
         
-        /* МОБИЛЬНЫЕ ШРИФТЫ (СКОРРЕКТИРОВАНЫ НА 2% МЕНЬШЕ) */
+        /* СКОРРЕКТИРОВАННЫЕ НА СТРОГИЕ 2% МЕНЕЕ МОБИЛЬНЫЕ ШРИФТЫ */
         .card-title-text {
             font-size: 9.3px !important; 
             line-height: 1.1 !important;
