@@ -47,6 +47,17 @@ RESOURCE_MAPPING = {
     "электричество": "Электроэнергия"
 }
 
+def safe_convert_to_float(series: pd.Series) -> pd.Series:
+    """Безопасная конвертация ячеек с запятыми и мусорными символами в float."""
+    cleaned = (
+        series.astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.strip()
+    )
+    # Извлекаем только валидные числа (обязательно содержащие цифры)
+    extracted = cleaned.str.extract(r"(\d+(?:\.\d+)?)", expand=False)
+    return pd.to_numeric(extracted, errors="coerce").fillna(0.0)
+
 @st.cache_data
 def get_mock_data() -> pd.DataFrame:
     """Генерация реалистичного датасета на 1000 строк по структуре документа."""
@@ -132,19 +143,19 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         df = df.iloc[:, :num_cols]
         df.columns = column_names[:num_cols]
 
+        # 1. Безопасная очистка и фильтрация строк
         df = df.dropna(subset=["crop", "technology"], how="all")
+        
+        # Отсекаем итоговые строки вроде "Среднее значение" и "Стандартное отклонение"
+        df = df[~df["crop"].astype(str).str.lower().str.contains("среднее|стандарт|отклонен|дисперси", regex=True)]
 
+        # 2. Безопасная конвертация числовых полей в float
         numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
         for col in numeric_fields:
             if col in df.columns:
-                df[col] = (
-                    df[col]
-                    .astype(str)
-                    .str.replace(",", ".", regex=False)
-                    .str.extract(r"([\d\.]+)", expand=False)
-                    .astype(float)
-                )
+                df[col] = safe_convert_to_float(df[col])
 
+        # 3. Нормализация текста
         crop_aliases = {"лен": "Лён", "озимая": "Озимая пшеница", "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы", "подсолне": "Подсолнечник"}
         tech_aliases = {"no-till": "No-Till", "но-тилл": "No-Till", "классиче": "Классическая"}
         op_aliases = {"предпосев": "Предпосевная обработка", "внесение": "Внесение удобрений/СЗР", "уборка": "Уборка урожая"}
@@ -159,6 +170,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         if "emission_type" in df.columns:
             df["emission_type"] = df["emission_type"].astype(str).str.strip().map(lambda x: next((v for k, v in res_aliases.items() if k in x.lower()), x.capitalize()))
 
+        # 4. Расчет удельного следа (кг CO2 на тонну урожая)
         if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
             df["co2_per_ton"] = np.where(
                 df["yield_t_ha"] > 0,

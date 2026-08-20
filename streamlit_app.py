@@ -20,7 +20,7 @@ if page == "Углеродный след (Эмиссия CO₂)":
 elif page == "Таблица данных и Экспорт":
     st.markdown('<div class="main-header">📋 Обработанные агроэкологические данные</div>', unsafe_allow_html=True)
     st.markdown(f"Всего строк в текущей выборке: **{len(df)}**")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df)
 
     csv_data = df.to_csv(index=False).encode("utf-8-sig")
     st.download_button(
@@ -32,7 +32,7 @@ elif page == "Таблица данных и Экспорт":
 
 elif page == "Справочник агротехнологий":
     st.markdown('<div class="main-header">📖 Справочник коэффициентов и формул</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown(r"""
     ### 1. Фактор разложения гумуса ($F_{разл}$)
     Коэффициент устойчивости органического вещества почвы к минерализации:
     - **Лён:** Классическая — `0.48`, No-Till — `0.70`
