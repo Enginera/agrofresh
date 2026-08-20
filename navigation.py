@@ -1,8 +1,28 @@
 import streamlit as st
-from parser import parse_carbon_excel
+from parser import advanced_multi_field_parser
+
+def render_button_navigation():
+    """Кнопочная навигация в верхней части страницы (для app4.py)."""
+    col1, col2, col3 = st.columns(3)
+    
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "Углеродный след (Эмиссия CO₂)"
+
+    with col1:
+        if st.button("🌍 Углеродный след", use_container_width=True):
+            st.session_state.current_page = "Углеродный след (Эмиссия CO₂)"
+    with col2:
+        if st.button("📋 Данные и Экспорт", use_container_width=True):
+            st.session_state.current_page = "Таблица данных и Экспорт"
+    with col3:
+        if st.button("📖 Справочник агротехнологий", use_container_width=True):
+            st.session_state.current_page = "Справочник агротехнологий"
+
+    st.markdown("---")
+    return st.session_state.current_page
 
 def render_sidebar():
-    """Отрисовка боковой панели с загрузчиком файлов и меню."""
+    """Боковое меню навигации и загрузки файлов."""
     with st.sidebar:
         st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
         st.title("AgroFresh & Carbon")
@@ -26,7 +46,7 @@ def render_sidebar():
             type=["xlsx", "xls", "csv"],
             help="Загрузите таблицу расчетов полевых эмиссий CO2"
         )
-        df_carbon = parse_carbon_excel(uploaded_file)
+        df_carbon = advanced_multi_field_parser(uploaded_file)
 
         st.subheader("🔍 Фильтры выборки")
         if "crop" in df_carbon.columns:

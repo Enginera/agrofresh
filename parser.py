@@ -4,7 +4,7 @@ import numpy as np
 import streamlit as st
 
 # ==========================================================
-# СЛОВАРИ СРАВНЕНИЙ И НОРМАЛИЗАЦИИ СОКРАЩЕНИЙ
+# СЛОВАРИ ДЛЯ НОРМАЛИЗАЦИИ СОКРАЩЕНИЙ ИЗ ТАБЛИЦ
 # ==========================================================
 CROP_MAPPING = {
     "лён": "Лён",
@@ -51,129 +51,11 @@ RESOURCE_MAPPING = {
 }
 
 # ==========================================================
-# ОСНОВНАЯ ФУНКЦИЯ ПАРСИНГА EXCEL
-# ==========================================================
-def parse_carbon_excel(uploaded_file) -> pd.DataFrame:
-    """
-    Универсальный парсер Excel-таблиц по учету углеродного следа и агроопераций.
-    Поддерживает форматы .xlsx и .xls с 9-ю колонками.
-    """
-    if uploaded_file is None:
-        return load_demo_carbon_dataset()
-
-    try:
-        # Чтение Excel (чтение первого листа)
-        df_raw = pd.read_excel(uploaded_file, header=None)
-
-        # Определение строки с заголовком данных (ищем где начинаются строки 1, 2, 3 или названия)
-        start_row = 0
-        for idx, row in df_raw.iterrows():
-            row_str = " ".join([str(val).lower() for val in row.values])
-            if any(k in row_str for k in ["культура", "технология", "урожайность", "выброс"]):
-                start_row = idx + 1
-                break
-            # Если первая колонка содержит число 1 (начало данных)
-            if str(row.values[0]).strip() == "1":
-                start_row = idx
-                break
-
-        # Загружаем датафрейм со смещением
-        df = df_raw.iloc[start_row:].copy().reset_index(drop=True)
-
-        # Стандартные названия 9 колонок из вашего PDF
-        column_names = [
-            "id",                 # 1: №
-            "crop",               # 2: Культура
-            "technology",         # 3: Технология
-            "f_razl",             # 4: Фактор разложения Fразл
-            "yield_t_ha",         # 5: Урожайность (т/га)
-            "emission_coeff_e",   # 6: Коэффициент эмиссии E
-            "operation",          # 7: Операция
-            "emission_type",      # 8: Вид углеродного выброса
-            "co2_emission_kg"     # 9: Значение выброса (кг CO2/га)
-        ]
-
-        # Назначаем имена колонкам
-        num_cols = min(len(df.columns), len(column_names))
-        df = df.iloc[:, :num_cols]
-        df.columns = column_names[:num_cols]
-
-        # Очистка от пустых строк
-        df = df.dropna(subset=["crop", "technology"], how="all")
-
-        # 1. Очистка и нормализация чисел (запятые на точки)
-        numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
-        for col in numeric_fields:
-            if col in df.columns:
-                df[col] = (
-                    df[col]
-                    .astype(str)
-                    .str.replace(",", ".", regex=False)
-                    .str.extract(r"([\d\.]+)", expand=False)
-                    .astype(float)
-                )
-
-        # 2. Нормализация текста (Культура)
-        if "crop" in df.columns:
-            def clean_crop(val):
-                s = str(val).strip().lower()
-                for key, full_name in CROP_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["crop"] = df["crop"].apply(clean_crop)
-
-        # 3. Нормализация текста (Технология)
-        if "technology" in df.columns:
-            def clean_tech(val):
-                s = str(val).strip().lower()
-                for key, full_name in TECH_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["technology"] = df["technology"].apply(clean_tech)
-
-        # 4. Нормализация текста (Операция)
-        if "operation" in df.columns:
-            def clean_op(val):
-                s = str(val).strip().lower()
-                for key, full_name in OPERATION_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["operation"] = df["operation"].apply(clean_op)
-
-        # 5. Нормализация текста (Вид выброса / Ресурс)
-        if "emission_type" in df.columns:
-            def clean_resource(val):
-                s = str(val).strip().lower()
-                for key, full_name in RESOURCE_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["emission_type"] = df["emission_type"].apply(clean_resource)
-
-        # 6. Расчет производных метрик
-        if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
-            df["co2_per_ton"] = np.where(
-                df["yield_t_ha"] > 0,
-                np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2),
-                0.0
-            )
-
-        return df
-
-    except Exception as e:
-        st.error(f"⚠️ Ошибка при чтении Excel файла: {e}")
-        return load_demo_carbon_dataset()
-
-
-# ==========================================================
-# ДЕМО-ДАТАСЕТ (Если файл еще не загружен)
+# ГЕНЕРАТОР ДЕМО-ДАННЫХ (MOCK DATA)
 # ==========================================================
 @st.cache_data
-def load_demo_carbon_dataset() -> pd.DataFrame:
-    """Генерация реалистичного датасета на 1000 строк по паттерну PDF."""
+def get_mock_data() -> pd.DataFrame:
+    """Генерация реалистичного датасета на 1000 строк по структуре документа."""
     np.random.seed(42)
     n = 1000
     crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
@@ -221,3 +103,126 @@ def load_demo_carbon_dataset() -> pd.DataFrame:
         })
 
     return pd.DataFrame(data)
+
+# Алиас для обратной совместимости
+load_demo_carbon_dataset = get_mock_data
+load_sample_data = get_mock_data
+
+# ==========================================================
+# ОСНОВНОЙ ПАРСЕР EXCEL И CSV
+# ==========================================================
+def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
+    """
+    Универсальный парсер Excel (.xlsx, .xls) и CSV таблиц.
+    Автоматически очищает сокращения, конвертирует числа с запятыми и вычисляет удельные показатели.
+    """
+    if uploaded_file is None:
+        return get_mock_data()
+
+    try:
+        filename = uploaded_file.name.lower()
+        if filename.endswith(".csv"):
+            df_raw = pd.read_csv(uploaded_file, header=None)
+        else:
+            df_raw = pd.read_excel(uploaded_file, header=None)
+
+        # Определение начала таблицы данных
+        start_row = 0
+        for idx, row in df_raw.iterrows():
+            row_str = " ".join([str(val).lower() for val in row.values if pd.notna(val)])
+            if any(k in row_str for k in ["культура", "технология", "урожайность", "выброс"]):
+                start_row = idx + 1
+                break
+            if len(row.values) > 0 and str(row.values[0]).strip() == "1":
+                start_row = idx
+                break
+
+        df = df_raw.iloc[start_row:].copy().reset_index(drop=True)
+
+        column_names = [
+            "id",                 # 1: №
+            "crop",               # 2: Культура
+            "technology",         # 3: Технология
+            "f_razl",             # 4: Фактор разложения Fразл
+            "yield_t_ha",         # 5: Урожайность (т/га)
+            "emission_coeff_e",   # 6: Коэффициент эмиссии E
+            "operation",          # 7: Операция
+            "emission_type",      # 8: Вид углеродного выброса
+            "co2_emission_kg"     # 9: Значение выброса (кг CO2/га)
+        ]
+
+        num_cols = min(len(df.columns), len(column_names))
+        df = df.iloc[:, :num_cols]
+        df.columns = column_names[:num_cols]
+
+        df = df.dropna(subset=["crop", "technology"], how="all")
+
+        # 1. Приведение чисел к типу float (запятые -> точки)
+        numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
+        for col in numeric_fields:
+            if col in df.columns:
+                df[col] = (
+                    df[col]
+                    .astype(str)
+                    .str.replace(",", ".", regex=False)
+                    .str.extract(r"([\d\.]+)", expand=False)
+                    .astype(float)
+                )
+
+        # 2. Нормализация текстовых названий (Культура)
+        if "crop" in df.columns:
+            def clean_crop(val):
+                s = str(val).strip().lower()
+                for key, full_name in CROP_MAPPING.items():
+                    if key in s:
+                        return full_name
+                return str(val).strip().capitalize()
+            df["crop"] = df["crop"].apply(clean_crop)
+
+        # 3. Нормализация названий (Технология)
+        if "technology" in df.columns:
+            def clean_tech(val):
+                s = str(val).strip().lower()
+                for key, full_name in TECH_MAPPING.items():
+                    if key in s:
+                        return full_name
+                return str(val).strip().capitalize()
+            df["technology"] = df["technology"].apply(clean_tech)
+
+        # 4. Нормализация названий (Операция)
+        if "operation" in df.columns:
+            def clean_op(val):
+                s = str(val).strip().lower()
+                for key, full_name in OPERATION_MAPPING.items():
+                    if key in s:
+                        return full_name
+                return str(val).strip().capitalize()
+            df["operation"] = df["operation"].apply(clean_op)
+
+        # 5. Нормализация названий (Ресурс / Вид выброса)
+        if "emission_type" in df.columns:
+            def clean_resource(val):
+                s = str(val).strip().lower()
+                for key, full_name in RESOURCE_MAPPING.items():
+                    if key in s:
+                        return full_name
+                return str(val).strip().capitalize()
+            df["emission_type"] = df["emission_type"].apply(clean_resource)
+
+        # 6. Расчет удельного следа (кг CO2 / т продукции)
+        if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
+            df["co2_per_ton"] = np.where(
+                df["yield_t_ha"] > 0,
+                np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2),
+                0.0
+            )
+
+        return df
+
+    except Exception as e:
+        st.error(f"Ошибка при чтении Excel файла: {e}")
+        return get_mock_data()
+
+# Алиасы функций для совместимости со всеми модулями
+parse_carbon_excel = advanced_multi_field_parser
+parse_uploaded_file = advanced_multi_field_parser
