@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-# Импорт конфигурационных и математических блоков
 from styles import apply_custom_styles
 from parser import advanced_multi_field_parser, get_mock_data
+from navigation import render_button_navigation
 from dashboards import render_carbon_dashboard
 
 st.set_page_config(
@@ -13,25 +13,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Применение стилей
+# Применение CSS стилей
 apply_custom_styles()
 
-# Боковая панель
+# Боковая панель для загрузки Excel и фильтрации
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
     st.title("AgroFresh Control")
     st.caption("Анализ углеродного следа")
-    st.markdown("---")
-
-    page = st.radio(
-        "Навигация",
-        options=[
-            "Углеродный след (Эмиссия CO₂)",
-            "Таблица данных и Экспорт",
-            "Справочник агротехнологий"
-        ],
-        index=0
-    )
     st.markdown("---")
 
     st.subheader("📁 Источник данных")
@@ -56,7 +45,10 @@ with st.sidebar:
         if selected_tech:
             df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
 
-# Отрисовка выбранного раздела
+# Верхняя навигация
+page = render_button_navigation()
+
+# Отрисовка страниц
 if page == "Углеродный след (Эмиссия CO₂)":
     render_carbon_dashboard(df_carbon)
 

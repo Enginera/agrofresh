@@ -4,58 +4,11 @@ import numpy as np
 import streamlit as st
 
 # ==========================================================
-# СЛОВАРИ ДЛЯ НОРМАЛИЗАЦИИ СОКРАЩЕНИЙ ИЗ ТАБЛИЦ
-# ==========================================================
-CROP_MAPPING = {
-    "лён": "Лён",
-    "лен": "Лён",
-    "озимая": "Озимая пшеница",
-    "пшеница": "Озимая пшеница",
-    "горох": "Горох",
-    "кукуруза": "Кукуруза",
-    "многолет": "Многолетние травы",
-    "травы": "Многолетние травы",
-    "подсолне": "Подсолнечник",
-    "подсолнечник": "Подсолнечник"
-}
-
-TECH_MAPPING = {
-    "no-till": "No-Till",
-    "notill": "No-Till",
-    "но-тилл": "No-Till",
-    "классичес": "Классическая",
-    "классиче": "Классическая",
-    "классическая": "Классическая",
-    "традиционная": "Классическая"
-}
-
-OPERATION_MAPPING = {
-    "предпосев": "Предпосевная обработка",
-    "обработка": "Предпосевная обработка",
-    "внесение": "Внесение удобрений/СЗР",
-    "удобрен": "Внесение удобрений/СЗР",
-    "уборка": "Уборка урожая"
-}
-
-RESOURCE_MAPPING = {
-    "минеральн": "Минеральные удобрения",
-    "удобрен": "Минеральные удобрения",
-    "бензин": "Бензин",
-    "дизель": "Дизельное топливо",
-    "дизельное": "Дизельное топливо",
-    "дт": "Дизельное топливо",
-    "пестицид": "Пестициды",
-    "сзр": "Пестициды",
-    "электроэн": "Электроэнергия",
-    "электричество": "Электроэнергия"
-}
-
-# ==========================================================
-# ДЕМО-ДАТАСЕТ (MOCK DATA)
+# 1. ГЕНЕРАТОР ДЕМО-ДАННЫХ (MOCK DATA)
 # ==========================================================
 @st.cache_data
 def get_mock_data() -> pd.DataFrame:
-    """Генерация демо-выборки на 1000 строк по структуре документа."""
+    """Генерация демо-выборки по структуре агроэкологической таблицы."""
     np.random.seed(42)
     n = 1000
     crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
@@ -104,18 +57,11 @@ def get_mock_data() -> pd.DataFrame:
 
     return pd.DataFrame(data)
 
-# Алиасы
-load_demo_carbon_dataset = get_mock_data
-load_sample_data = get_mock_data
-
 # ==========================================================
-# ОСНОВНОЙ ПАРСЕР
+# 2. ОСНОВНОЙ ПАРСЕР ТАБЛИЦ (EXCEL / CSV)
 # ==========================================================
 def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
-    """
-    Парсер для файлов Excel (.xlsx, .xls) и CSV.
-    Очищает строки, сокращения, конвертирует числа с запятыми.
-    """
+    """Парсер для загружаемых Excel (.xlsx, .xls) и CSV файлов."""
     if uploaded_file is None:
         return get_mock_data()
 
@@ -126,7 +72,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         else:
             df_raw = pd.read_excel(uploaded_file, header=None)
 
-        # Определение начала таблицы
+        # Определение строки с началом данных
         start_row = 0
         for idx, row in df_raw.iterrows():
             row_str = " ".join([str(val).lower() for val in row.values if pd.notna(val)])
@@ -140,15 +86,9 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         df = df_raw.iloc[start_row:].copy().reset_index(drop=True)
 
         column_names = [
-            "id",                 # 1: №
-            "crop",               # 2: Культура
-            "technology",         # 3: Технология
-            "f_razl",             # 4: Фактор разложения Fразл
-            "yield_t_ha",         # 5: Урожайность (т/га)
-            "emission_coeff_e",   # 6: Коэффициент эмиссии E
-            "operation",          # 7: Операция
-            "emission_type",      # 8: Вид углеродного выброса
-            "co2_emission_kg"     # 9: Значение выброса (кг CO2/га)
+            "id", "crop", "technology", "f_razl", 
+            "yield_t_ha", "emission_coeff_e", "operation", 
+            "emission_type", "co2_emission_kg"
         ]
 
         num_cols = min(len(df.columns), len(column_names))
@@ -157,9 +97,8 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
 
         df = df.dropna(subset=["crop", "technology"], how="all")
 
-        # 1. Приведение чисел
-        numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
-        for col in numeric_fields:
+        # Очистка чисел
+        for col in ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]:
             if col in df.columns:
                 df[col] = (
                     df[col]
@@ -169,50 +108,24 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                     .astype(float)
                 )
 
-        # 2. Нормализация текстовых полей
+        # Словари нормализации
+        crop_aliases = {"лен": "Лён", "озимая": "Озимая пшеница", "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы", "подсолне": "Подсолнечник"}
+        tech_aliases = {"no-till": "No-Till", "но-тилл": "No-Till", "классиче": "Классическая"}
+        op_aliases = {"предпосев": "Предпосевная обработка", "внесение": "Внесение удобрений/СЗР", "уборка": "Уборка урожая"}
+        res_aliases = {"минеральн": "Минеральные удобрения", "бензин": "Бензин", "дизель": "Дизельное топливо", "пестицид": "Пестициды", "электроэн": "Электроэнергия"}
+
         if "crop" in df.columns:
-            def clean_crop(val):
-                s = str(val).strip().lower()
-                for key, full_name in CROP_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["crop"] = df["crop"].apply(clean_crop)
-
+            df["crop"] = df["crop"].astype(str).str.strip().map(lambda x: next((v for k, v in crop_aliases.items() if k in x.lower()), x.capitalize()))
         if "technology" in df.columns:
-            def clean_tech(val):
-                s = str(val).strip().lower()
-                for key, full_name in TECH_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["technology"] = df["technology"].apply(clean_tech)
-
+            df["technology"] = df["technology"].astype(str).str.strip().map(lambda x: next((v for k, v in tech_aliases.items() if k in x.lower()), x.capitalize()))
         if "operation" in df.columns:
-            def clean_op(val):
-                s = str(val).strip().lower()
-                for key, full_name in OPERATION_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["operation"] = df["operation"].apply(clean_op)
-
+            df["operation"] = df["operation"].astype(str).str.strip().map(lambda x: next((v for k, v in op_aliases.items() if k in x.lower()), x.capitalize()))
         if "emission_type" in df.columns:
-            def clean_resource(val):
-                s = str(val).strip().lower()
-                for key, full_name in RESOURCE_MAPPING.items():
-                    if key in s:
-                        return full_name
-                return str(val).strip().capitalize()
-            df["emission_type"] = df["emission_type"].apply(clean_resource)
+            df["emission_type"] = df["emission_type"].astype(str).str.strip().map(lambda x: next((v for k, v in res_aliases.items() if k in x.lower()), x.capitalize()))
 
-        # 3. Расчет удельного следа (кг CO2 / т продукции)
+        # Расчет удельного следа (кг CO2 на тонну урожая)
         if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
-            df["co2_per_ton"] = np.where(
-                df["yield_t_ha"] > 0,
-                np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2),
-                0.0
-            )
+            df["co2_per_ton"] = np.where(df["yield_t_ha"] > 0, np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2), 0.0)
 
         return df
 
@@ -220,6 +133,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         st.error(f"Ошибка при чтении Excel файла: {e}")
         return get_mock_data()
 
-# Алиасы для полной совместимости
+# Алиасы
 parse_carbon_excel = advanced_multi_field_parser
 parse_uploaded_file = advanced_multi_field_parser
+load_demo_carbon_dataset = get_mock_data
