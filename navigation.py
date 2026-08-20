@@ -1,34 +1,52 @@
 import streamlit as st
+from parser import parse_carbon_excel
 
-def render_button_navigation():
-    """Строит сетку кнопок. Вместо устаревшего use_container_width=True используется width='stretch'."""
-    
-    # 1 кнопка — длинная прямоугольная сверху (Обзор)
-    if st.button("Обзор 🌱", width='stretch', key="btn_tab_1"):
-        st.session_state.page = "Обзор"
+def render_sidebar():
+    """Отрисовка боковой панели с загрузчиком файлов и меню."""
+    with st.sidebar:
+        st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
+        st.title("AgroFresh & Carbon")
+        st.caption("Система расчета углеродного следа")
+        st.markdown("---")
 
-    # Ряд 1: кнопки 2, 3, 4 (по 1/3 ширины экрана)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("Севооборот 🔄", width='stretch', key="btn_tab_2"):
-            st.session_state.page = "Севооборот"
-    with col2:
-        if st.button("Удобнения и почва 🪱", width='stretch', key="btn_tab_3"):
-            st.session_state.page = "Удобрения и почва"
-    with col3:
-        if st.button("Защита растений 🛡️", width='stretch', key="btn_tab_4"):
-            st.session_state.page = "Защита растений"
+        page = st.radio(
+            "Разделы приложения",
+            options=[
+                "Углеродный след (Эмиссия CO₂)",
+                "Таблица данных и Экспорт",
+                "Справочник агротехнологий"
+            ],
+            index=0
+        )
+        st.markdown("---")
 
-    # Ряд 2: кнопки 5, 6, 7 (ровно под кнопками 2, 3, 4)
-    col4, col5, col6 = st.columns(3)
-    with col4:
-        if st.button("Урожайность и качество 🌾", width='stretch', key="btn_tab_5"):
-            st.session_state.page = "Урожайность и качество"
-    with col5:
-        if st.button("Углеродный след ☁️", width='stretch', key="btn_tab_6"):
-            st.session_state.page = "Углеродный след"
-    with col6:
-        if st.button("Принятие решений 💡", width='stretch', key="btn_tab_7"):
-            st.session_state.page = "Принятие решений"
+        st.subheader("📁 Источник данных")
+        uploaded_file = st.file_uploader(
+            "Загрузить Excel файл (.xlsx, .xls)",
+            type=["xlsx", "xls", "csv"],
+            help="Загрузите таблицу расчетов полевых эмиссий CO2"
+        )
+        df_carbon = parse_carbon_excel(uploaded_file)
 
-    st.markdown("---")
+        st.subheader("🔍 Фильтры выборки")
+        if "crop" in df_carbon.columns:
+            all_crops = sorted(list(df_carbon["crop"].unique()))
+            selected_crops = st.multiselect(
+                "Культура",
+                options=all_crops,
+                default=all_crops
+            )
+            if selected_crops:
+                df_carbon = df_carbon[df_carbon["crop"].isin(selected_crops)]
+
+        if "technology" in df_carbon.columns:
+            all_techs = sorted(list(df_carbon["technology"].unique()))
+            selected_tech = st.multiselect(
+                "Технология",
+                options=all_techs,
+                default=all_techs
+            )
+            if selected_tech:
+                df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
+
+        return page, df_carbon

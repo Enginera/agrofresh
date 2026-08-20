@@ -4,122 +4,149 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-def render_page_content(page_name, df_active, selected_field, area_value, depth_value, avg_e_calculated):
-    """Отрисовывает графики и метрики. Элементы идут строго друг под другим."""
-    
-    # --- Вкладка 1: ОБЗОР ---
-    if page_name == "Обзор":
+# ==========================================
+# ДАШБОРД УГЛЕРОДНОГО СЛЕДА (НОВЫЙ)
+# ==========================================
+def render_carbon_dashboard(df: pd.DataFrame):
+    """Отрисовка интерактивной панели углеродного следа и эмиссий CO2."""
+    st.markdown("## 🌍 Углеродный след в растениеводстве (CO₂-эмиссия)")
+    st.caption("Анализ эмиссий на основе агротехнологий (No-Till vs Традиционная), операций и видов энергоресурсов")
+
+    # --- KPI Карточки ---
+    c1, c2, c3, c4 = st.columns(4)
+    total_co2_ton = (df["co2_emission_kg"].sum() / 1000) if "co2_emission_kg" in df.columns else 0
+    avg_per_ton = df["co2_per_ton"].mean() if "co2_per_ton" in df.columns else 0
+    avg_f_razl = df["f_razl"].mean() if "f_razl" in df.columns else 0
+    avg_yield = df["yield_t_ha"].mean() if "yield_t_ha" in df.columns else 0
+
+    with c1:
         st.markdown(f"""
-            <div class='welcome-card'>
-                <h2>Добро пожаловать! Объект анализа: {selected_field}</h2>
-                <p>Обзор текущего состояния сельскохозяйственных подсистем комплекса.</p>
-            </div>
+        <div class="metric-card">
+            <div class="metric-title">Всего выбросов CO₂-экв</div>
+            <div class="metric-value">{total_co2_ton:,.1f} т</div>
+        </div>
         """, unsafe_allow_html=True)
-        
-        c1, c2, c3 = st.columns(3)
-        with c1: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Углеродная 🟢<br>нейтральность</span></div><div class='card-bottom'><div class='card-value-text'>85%</div></div></div>", unsafe_allow_html=True)
-        with c2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Active Projects 🚜</span></div><div class='card-bottom'><div class='card-value-text'>5 комп.</div></div></div>", unsafe_allow_html=True)
-        with c3: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Эффективность 📈<br>(E)</span></div><div class='card-bottom'><div class='card-value-text'>{avg_e_calculated:.4f}</div></div></div>", unsafe_allow_html=True)
-        
-        st.markdown("### Состояние модулей")
-        
-        m1, m2, m3 = st.columns(3)
-        with m1: st.markdown(f"<div class='metric-card'><div class='card-top'><span class='card-title-text'>Севооборот 🌿</span></div><div class='card-bottom'><span class='card-sub-text'>{len(df_active)} агросроков</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
-        with m2: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Почва и удобр. 🪱</span></div><div class='card-bottom'><span class='card-sub-text'>Секвестрация</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
-        with m3: st.markdown("<div class='metric-card'><div class='card-top'><span class='card-title-text'>Защита 🛡️</span></div><div class='card-bottom'><span class='card-sub-text'>Риски Rave ок</span><span class='status-badge status-success'>В норме</span></div></div>", unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-title">Удельный след (ср.)</div>
+            <div class="metric-value">{avg_per_ton:.1f} кг/т</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-title">Ср. Фактор разложения Fразл</div>
+            <div class="metric-value">{avg_f_razl:.2f}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-title">Ср. Урожайность</div>
+            <div class="metric-value">{avg_yield:.2f} т/га</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # --- Вкладка 2: СЕВООБОРОТ ---
-    elif page_name == "Севооборот":
-        st.subheader(f"Планирование и анализ севооборота — 🔄 {selected_field}")
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Общая 📐 площадь</b><h3>{area_value}</h3></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Количество записей</b><h3>{len(df_active)} активных</h3></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:20px; height:auto !important; display:block !important;'><b>Средняя эффективность (E)</b><h3> 📈 {avg_e_calculated:.4f}</h3></div>", unsafe_allow_html=True)
-        
-        st.subheader("Распределение объемов по культурам 📊")
-        df_pie = df_active.groupby("Культура")["Урожайность"].sum().reset_index()
-        fig_sev_pie = px.pie(df_pie, names="Культура", values="Урожайность", hole=0.4, color_discrete_sequence=px.colors.qualitative.Dark2)
-        fig_sev_pie.update_layout(margin=dict(l=10, r=10, t=10, b=10), showlegend=True, legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5))
-        fig_sev_pie.update_traces(textinfo='percent+label', textposition='inside', domain=dict(x=[0.035, 0.965], y=[0.035, 0.965]))
-        st.plotly_chart(fig_sev_pie, width='stretch')
-        
-        st.subheader("Динамика индекса эффективности по годам 📉")
-        fig_sev_trend = go.Figure(go.Scatter(x=df_active["Год"], y=df_active["Эффективность"], mode='lines+markers', line=dict(shape='spline', color='#2E7D32', width=4)))
-        fig_sev_trend.update_layout(plot_bgcolor='white', height=300)
-        fig_sev_trend.update_xaxes(type='category', showgrid=True, gridcolor='#F3F4F6')
-        st.plotly_chart(fig_sev_trend, width='stretch')
+    st.markdown("---")
 
-    # --- Вкладка 3: УДОБРЕНИЯ И ПОЧВА ---
-    elif page_name == "Удобрения и почва":
-        st.subheader(f"Управление удобрениями и почвенным слоем — 🪱 {selected_field}")
-        st.markdown("### Расписание внесения удобрений")
-        data_ud = {"Дата": ["2026-07-20", "2026-07-15"], "Мероприятие": ["Органическое удобрение на Поле 1", "Компост на Поле 2"], "Статус": ["Предстоит", "Предстоит"]}
-        st.dataframe(pd.DataFrame(data_ud), width='stretch')
-        
-        st.markdown(f"<div class='metric-card' style='margin-top:15px; margin-bottom:25px; height:auto !important; display:block !important;'><b>Показатели почвы слоев 🧪</b><br> Глубина пласта: {depth_value} | pH: 6.5 | Азот: 0.12%</div>", unsafe_allow_html=True)
-        
-        fig1 = px.bar(df_active, x="Год", y="Cinputs", color_discrete_sequence=['#2E7D32'])
-        fig1.update_layout(height=250, plot_bgcolor='white')
-        fig1.update_xaxes(type='category')
-        st.plotly_chart(fig1, width='stretch')
-        
-        mat_ndvi = np.array([[0.2, 0.4, 0.6], [0.4, 0.8, 0.5], [0.3, 0.6, 0.7]])
-        fig2 = px.imshow(mat_ndvi, color_continuous_scale="YlGn")
-        fig2.update_layout(height=250)
-        st.plotly_chart(fig2, width='stretch')
-        
-        fig3 = go.Figure(go.Scatter(x=df_active["Год"], y=df_active["Cinputs"], mode='lines+markers', line=dict(shape='spline', color='#1565C0', width=3)))
-        fig3.update_layout(height=250, plot_bgcolor='white')
-        fig3.update_xaxes(type='category')
-        st.plotly_chart(fig3, width='stretch')
-    # --- Вкладка 4: ЗАЩИТА РАСТЕНИЙ ---
-    elif page_name == "Защита растений":
-        st.subheader(f"Мониторинг защиты растений — 🛡️ {selected_field}")
-        st.metric("Active сессии контроля", len(df_active))
-        st.metric("Процент здоровых культур", "92%")
-        st.markdown("**Динамика коэффициента рисков Ravg по годам**")
-        fig_prot = go.Figure(go.Scatter(x=df_active["Год"], y=df_active["Ravg"], mode='lines+markers', line=dict(shape='spline', color='#C62828', width=3)))
-        fig_prot.update_layout(height=300, plot_bgcolor='white')
-        fig_prot.update_xaxes(type='category')
-        st.plotly_chart(fig_prot, width='stretch')
+    # --- Графики 1-го уровня ---
+    g1, g2 = st.columns(2)
 
-    # --- Вкладка 5: УРОЖАЙНОСТЬ И КАЧЕСТВО ---
-    elif page_name == "Урожайность и качество":
-        st.subheader(f"Управление урожайностью и качеством продукции — 🌾 {selected_field}")
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Общая урожайность</b><h2>{df_active['Урожайность'].sum():.2f} т</h2></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='metric-card' style='margin-bottom:10px; height:auto !important; display:block !important;'><b>Максимальный сбор</b><h2>{df_active['Урожайность'].max():.2f} т/га</h2></div>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-card' style='margin-bottom:20px; height:auto !important; display:block !important;'><b>Коэффициент качества</b><h2>92%</h2><span style='color:blue;'>Выше среднего</span></div>", unsafe_allow_html=True)
-        
-        st.subheader("Детализированные отчеты о качестве партий 📋")
-        df_quality = pd.DataFrame({"Продукт": ["Пшеница", "Кукуруза", "Соя"], "Партия": ["2026-A", "2026-B", "2026-C"], "Влажность": ["14%", "15%", "11%"], "Статус": ["Отлично", "Хорошо", "Отлично"]})
-        st.dataframe(df_quality, width='stretch')
-        
-        st.subheader("Распределение урожайности по годам 📊")
-        fig_factors = px.bar(df_active, x="Год", y="Урожайность", text_auto='.2f', color_discrete_sequence=['#2E7D32'])
-        fig_factors.update_layout(height=280, plot_bgcolor='white', xaxis_title="", yaxis_title="т/га")
-        fig_factors.update_xaxes(type='category')
-        st.plotly_chart(fig_factors, width='stretch')
+    with g1:
+        if "technology" in df.columns and "co2_per_ton" in df.columns:
+            fig_tech = px.box(
+                df,
+                x="crop",
+                y="co2_per_ton",
+                color="technology",
+                title="🌱 Удельный углеродный след (кг CO₂/т): No-Till vs Классическая",
+                labels={"co2_per_ton": "кг CO₂ на 1 т продукции", "crop": "Культура", "technology": "Технология"},
+                color_discrete_map={"No-Till": "#2E7D32", "Классическая": "#D32F2F"},
+                template="plotly_white"
+            )
+            st.plotly_chart(fig_tech, use_container_width=True)
 
-    # --- Вкладка 6: УГЛЕРОДНЫЙ СЛЕД ---
-    elif page_name == "Углеродный след":
-        st.subheader(f"Моделирование баланса декарбонизации — ☁️ {selected_field}")
-        st.metric("Чистый след Cnet (Средний)", f"{df_active['Cnet'].mean():.2f} т")
-        st.metric("Внесение Cinputs (Среднее)", f"{df_active['Cinputs'].mean():.2f} кг")
-        st.metric("Целевой прогноз секвестрации", "Выполнено 🌳")
-        
-        fig_cnet = px.area(df_active, x="Год", y="Cnet", title="Динамическая модель изменения чистого следа Cnet", color_discrete_sequence=['#78909C'])
-        fig_cnet.update_layout(plot_bgcolor='white', height=400)
-        fig_cnet.update_xaxes(type='category')
-        st.plotly_chart(fig_cnet, width='stretch')
+    with g2:
+        if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
+            df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
+            fig_donut = px.pie(
+                df_src,
+                names="emission_type",
+                values="co2_emission_kg",
+                hole=0.45,
+                title="⚡ Структура выбросов по видам ресурсов и энергоносителей",
+                color_discrete_sequence=px.colors.qualitative.Safe,
+                template="plotly_white"
+            )
+            st.plotly_chart(fig_donut, use_container_width=True)
 
-    # --- Вкладка 7: ПРИНЯТИЕ РЕШЕНИЙ ---
-    elif page_name == "Принятие решений":
-        st.subheader(f"Сводная расчетная матрица севооборота — 💡 {selected_field}")
-        st.markdown("Все строки и столбцы выгружены на основе структуры ТЗ:")
-        available_cols = [c for c in ["Год", "Культура", "Урожайность", "Cinputs", "Cnet", "Ravg", "Эффективность"] if c in df_active.columns]
-        df_display = df_active[available_cols].copy()
-        rename_display = {"Год": "Год агросрока", "Культура": "Культура", "Урожайность": "Урожайность (т/га)", "Cinputs": "Внесение Cinputs (кг)", "Cnet": "Чистый след Cnet", "Ravg": "Коэффициент Rave", "Эффективность": "Индекс эффективности (E)"}
-        df_display = df_display.rename(columns=rename_display)
-        if "Индекс эффективности (E)" in df_display.columns:
-            st.dataframe(df_display.style.format({"Индекс эффективности (E)": "{:.4f}"}), width='stretch')
-        else:
-            st.dataframe(df_display, width='stretch')
+    # --- Графики 2-го уровня ---
+    g3, g4 = st.columns(2)
+
+    with g3:
+        if "operation" in df.columns and "co2_emission_kg" in df.columns:
+            df_ops = df.groupby(["operation", "technology"])["co2_emission_kg"].sum().reset_index()
+            fig_ops = px.bar(
+                df_ops,
+                x="operation",
+                y="co2_emission_kg",
+                color="technology",
+                barmode="group",
+                title="🚜 Выбросы CO₂ по этапам полевых операций (кг)",
+                labels={"co2_emission_kg": "Выбросы CO₂ (кг)", "operation": "Операция"},
+                template="plotly_white",
+                color_discrete_map={"No-Till": "#388E3C", "Классическая": "#E57373"}
+            )
+            st.plotly_chart(fig_ops, use_container_width=True)
+
+    with g4:
+        if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
+            fig_scatter = px.scatter(
+                df,
+                x="yield_t_ha",
+                y="co2_emission_kg",
+                color="crop",
+                size="emission_coeff_e",
+                hover_data=["technology", "operation"],
+                title="🌾 Связь урожайности (т/га) и общего объема эмиссий (кг CO₂)",
+                labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)"},
+                template="plotly_white"
+            )
+            st.plotly_chart(fig_scatter, use_container_width=True)
+
+    # --- Интерактивный калькулятор агроэкологического эффекта ---
+    st.markdown("### 🧮 Интерактивный калькулятор снижения углеродного следа")
+    with st.expander("Расчет перехода с Классической технологии на No-Till", expanded=False):
+        c_calc1, c_calc2, c_calc3 = st.columns(3)
+        with c_calc1:
+            area_ha = st.number_input("Площадь угодий (га)", min_value=1.0, value=500.0, step=50.0)
+        with c_calc2:
+            calc_crop = st.selectbox("Культура", list(df["crop"].unique()))
+        with c_calc3:
+            diesel_economy_l = st.number_input("Экономия ДТ при No-Till (л/га)", min_value=0.0, value=35.0, step=5.0)
+
+        # Коэффициент эмиссии дизеля ~ 2.68 кг CO2 / л
+        co2_saved_diesel = area_ha * diesel_economy_l * 2.68
+        f_diff = 0.20  # В среднем No-Till дает прирост гумификации Fразл на 15-25%
+        
+        col_res1, col_res2 = st.columns(2)
+        with col_res1:
+            st.success(f"🌱 Сокращение прямых выбросов топлива: **{co2_saved_diesel / 1000:,.2f} т CO₂-экв** в сезон")
+        with col_res2:
+            st.info(f"📈 Дополнительное удержание углерода в почве за счет $F_{{разл}}$: **~{(area_ha * 180) / 1000:,.2f} т C**")
+
+# ==========================================
+# СТАНДАРТНЫЕ МИКРОКЛИМАТИЧЕСКИЕ ДАШБОРДЫ
+# ==========================================
+def render_kpi_metrics(df):
+    c1, c2, c3 = st.columns(3)
+    avg_temp = df["temperature"].mean() if "temperature" in df.columns else 0
+    avg_hum = df["humidity"].mean() if "humidity" in df.columns else 0
+    total_records = len(df)
+    with c1:
+        st.metric("Ср. Температура", f"{avg_temp:.1f} °C")
+    with c2:
+        st.metric("Ср. Влажность", f"{avg_hum:.1f} %")
+    with c3:
+        st.metric("Всего записей", total_records)
