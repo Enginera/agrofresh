@@ -13,10 +13,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Применение CSS стилей
 apply_custom_styles()
 
-# Боковая панель для загрузки Excel и фильтрации
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
     st.title("AgroFresh Control")
@@ -45,10 +43,8 @@ with st.sidebar:
         if selected_tech:
             df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
 
-# Верхняя навигация
 page = render_button_navigation()
 
-# Отрисовка страниц
 if page == "Углеродный след (Эмиссия CO₂)":
     render_carbon_dashboard(df_carbon)
 

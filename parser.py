@@ -3,12 +3,53 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 
-# ==========================================================
-# 1. ГЕНЕРАТОР ДЕМО-ДАННЫХ (MOCK DATA)
-# ==========================================================
+CROP_MAPPING = {
+    "лён": "Лён",
+    "лен": "Лён",
+    "озимая": "Озимая пшеница",
+    "пшеница": "Озимая пшеница",
+    "горох": "Горох",
+    "кукуруза": "Кукуруза",
+    "многолет": "Многолетние травы",
+    "травы": "Многолетние травы",
+    "подсолне": "Подсолнечник",
+    "подсолнечник": "Подсолнечник"
+}
+
+TECH_MAPPING = {
+    "no-till": "No-Till",
+    "notill": "No-Till",
+    "но-тилл": "No-Till",
+    "классичес": "Классическая",
+    "классиче": "Классическая",
+    "классическая": "Классическая",
+    "традиционная": "Классическая"
+}
+
+OPERATION_MAPPING = {
+    "предпосев": "Предпосевная обработка",
+    "обработка": "Предпосевная обработка",
+    "внесение": "Внесение удобрений/СЗР",
+    "удобрен": "Внесение удобрений/СЗР",
+    "уборка": "Уборка урожая"
+}
+
+RESOURCE_MAPPING = {
+    "минеральн": "Минеральные удобрения",
+    "удобрен": "Минеральные удобрения",
+    "бензин": "Бензин",
+    "дизель": "Дизельное топливо",
+    "дизельное": "Дизельное топливо",
+    "дт": "Дизельное топливо",
+    "пестицид": "Пестициды",
+    "сзр": "Пестициды",
+    "электроэн": "Электроэнергия",
+    "электричество": "Электроэнергия"
+}
+
 @st.cache_data
 def get_mock_data() -> pd.DataFrame:
-    """Генерация демо-выборки по структуре агроэкологической таблицы."""
+    """Генерация реалистичного датасета на 1000 строк по структуре документа."""
     np.random.seed(42)
     n = 1000
     crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
@@ -57,9 +98,6 @@ def get_mock_data() -> pd.DataFrame:
 
     return pd.DataFrame(data)
 
-# ==========================================================
-# 2. ОСНОВНОЙ ПАРСЕР ТАБЛИЦ (EXCEL / CSV)
-# ==========================================================
 def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
     """Парсер для загружаемых Excel (.xlsx, .xls) и CSV файлов."""
     if uploaded_file is None:
@@ -72,7 +110,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         else:
             df_raw = pd.read_excel(uploaded_file, header=None)
 
-        # Определение строки с началом данных
         start_row = 0
         for idx, row in df_raw.iterrows():
             row_str = " ".join([str(val).lower() for val in row.values if pd.notna(val)])
@@ -97,8 +134,8 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
 
         df = df.dropna(subset=["crop", "technology"], how="all")
 
-        # Очистка чисел
-        for col in ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]:
+        numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
+        for col in numeric_fields:
             if col in df.columns:
                 df[col] = (
                     df[col]
@@ -108,7 +145,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                     .astype(float)
                 )
 
-        # Словари нормализации
         crop_aliases = {"лен": "Лён", "озимая": "Озимая пшеница", "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы", "подсолне": "Подсолнечник"}
         tech_aliases = {"no-till": "No-Till", "но-тилл": "No-Till", "классиче": "Классическая"}
         op_aliases = {"предпосев": "Предпосевная обработка", "внесение": "Внесение удобрений/СЗР", "уборка": "Уборка урожая"}
@@ -123,9 +159,12 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         if "emission_type" in df.columns:
             df["emission_type"] = df["emission_type"].astype(str).str.strip().map(lambda x: next((v for k, v in res_aliases.items() if k in x.lower()), x.capitalize()))
 
-        # Расчет удельного следа (кг CO2 на тонну урожая)
         if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
-            df["co2_per_ton"] = np.where(df["yield_t_ha"] > 0, np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2), 0.0)
+            df["co2_per_ton"] = np.where(
+                df["yield_t_ha"] > 0,
+                np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2),
+                0.0
+            )
 
         return df
 
@@ -133,7 +172,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         st.error(f"Ошибка при чтении Excel файла: {e}")
         return get_mock_data()
 
-# Алиасы
 parse_carbon_excel = advanced_multi_field_parser
 parse_uploaded_file = advanced_multi_field_parser
 load_demo_carbon_dataset = get_mock_data
+load_sample_data = get_mock_data
