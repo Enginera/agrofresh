@@ -51,11 +51,11 @@ RESOURCE_MAPPING = {
 }
 
 # ==========================================================
-# ГЕНЕРАТОР ДЕМО-ДАННЫХ (MOCK DATA)
+# ДЕМО-ДАТАСЕТ (MOCK DATA)
 # ==========================================================
 @st.cache_data
 def get_mock_data() -> pd.DataFrame:
-    """Генерация реалистичного датасета на 1000 строк по структуре документа."""
+    """Генерация демо-выборки на 1000 строк по структуре документа."""
     np.random.seed(42)
     n = 1000
     crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
@@ -104,17 +104,17 @@ def get_mock_data() -> pd.DataFrame:
 
     return pd.DataFrame(data)
 
-# Алиас для обратной совместимости
+# Алиасы
 load_demo_carbon_dataset = get_mock_data
 load_sample_data = get_mock_data
 
 # ==========================================================
-# ОСНОВНОЙ ПАРСЕР EXCEL И CSV
+# ОСНОВНОЙ ПАРСЕР
 # ==========================================================
 def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
     """
-    Универсальный парсер Excel (.xlsx, .xls) и CSV таблиц.
-    Автоматически очищает сокращения, конвертирует числа с запятыми и вычисляет удельные показатели.
+    Парсер для файлов Excel (.xlsx, .xls) и CSV.
+    Очищает строки, сокращения, конвертирует числа с запятыми.
     """
     if uploaded_file is None:
         return get_mock_data()
@@ -126,7 +126,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         else:
             df_raw = pd.read_excel(uploaded_file, header=None)
 
-        # Определение начала таблицы данных
+        # Определение начала таблицы
         start_row = 0
         for idx, row in df_raw.iterrows():
             row_str = " ".join([str(val).lower() for val in row.values if pd.notna(val)])
@@ -157,7 +157,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
 
         df = df.dropna(subset=["crop", "technology"], how="all")
 
-        # 1. Приведение чисел к типу float (запятые -> точки)
+        # 1. Приведение чисел
         numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
         for col in numeric_fields:
             if col in df.columns:
@@ -169,7 +169,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                     .astype(float)
                 )
 
-        # 2. Нормализация текстовых названий (Культура)
+        # 2. Нормализация текстовых полей
         if "crop" in df.columns:
             def clean_crop(val):
                 s = str(val).strip().lower()
@@ -179,7 +179,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                 return str(val).strip().capitalize()
             df["crop"] = df["crop"].apply(clean_crop)
 
-        # 3. Нормализация названий (Технология)
         if "technology" in df.columns:
             def clean_tech(val):
                 s = str(val).strip().lower()
@@ -189,7 +188,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                 return str(val).strip().capitalize()
             df["technology"] = df["technology"].apply(clean_tech)
 
-        # 4. Нормализация названий (Операция)
         if "operation" in df.columns:
             def clean_op(val):
                 s = str(val).strip().lower()
@@ -199,7 +197,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                 return str(val).strip().capitalize()
             df["operation"] = df["operation"].apply(clean_op)
 
-        # 5. Нормализация названий (Ресурс / Вид выброса)
         if "emission_type" in df.columns:
             def clean_resource(val):
                 s = str(val).strip().lower()
@@ -209,7 +206,7 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                 return str(val).strip().capitalize()
             df["emission_type"] = df["emission_type"].apply(clean_resource)
 
-        # 6. Расчет удельного следа (кг CO2 / т продукции)
+        # 3. Расчет удельного следа (кг CO2 / т продукции)
         if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
             df["co2_per_ton"] = np.where(
                 df["yield_t_ha"] > 0,
@@ -223,6 +220,6 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         st.error(f"Ошибка при чтении Excel файла: {e}")
         return get_mock_data()
 
-# Алиасы функций для совместимости со всеми модулями
+# Алиасы для полной совместимости
 parse_carbon_excel = advanced_multi_field_parser
 parse_uploaded_file = advanced_multi_field_parser
