@@ -61,7 +61,7 @@ def render_carbon_dashboard(df: pd.DataFrame):
                 template="plotly_white"
             )
             fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-            st.plotly_chart(fig_tech, use_container_width=True)
+            st.plotly_chart(fig_tech)
 
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
@@ -75,7 +75,7 @@ def render_carbon_dashboard(df: pd.DataFrame):
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 template="plotly_white"
             )
-            st.plotly_chart(fig_donut, use_container_width=True)
+            st.plotly_chart(fig_donut)
 
     g3, g4 = st.columns(2)
 
@@ -93,7 +93,7 @@ def render_carbon_dashboard(df: pd.DataFrame):
                 template="plotly_white",
                 color_discrete_map={"No-Till": "#388E3C", "Классическая": "#E57373"}
             )
-            st.plotly_chart(fig_ops, use_container_width=True)
+            st.plotly_chart(fig_ops)
 
     with g4:
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
@@ -108,7 +108,7 @@ def render_carbon_dashboard(df: pd.DataFrame):
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)"},
                 template="plotly_white"
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter)
 
     st.markdown("### 🧮 Калькулятор эффекта внедрения No-Till")
     with st.expander("Расчет сокращения углеродного следа и экономии топлива", expanded=True):
@@ -130,7 +130,6 @@ def render_carbon_dashboard(df: pd.DataFrame):
             st.info(f"📈 Дополнительное депонирование углерода в почве: **~{humus_carbon_saved:,.2f} т C/год**")
 
 def render_kpi_metrics(df):
-    """Отрисовка базовых карточек для склада."""
     c1, c2 = st.columns(2)
     with c1:
         st.metric("Температура", "4.2 °C")
@@ -138,5 +137,4 @@ def render_kpi_metrics(df):
         st.metric("Влажность", "91.5 %")
 
 def render_storage_climate(df):
-    """Отрисовка климатических параметров."""
     render_kpi_metrics(df)

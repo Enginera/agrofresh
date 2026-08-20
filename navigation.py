@@ -9,13 +9,13 @@ def render_button_navigation():
         st.session_state.current_page = "Углеродный след (Эмиссия CO₂)"
 
     with col1:
-        if st.button("🌍 Углеродный след", use_container_width=True):
+        if st.button("🌍 Углеродный след"):
             st.session_state.current_page = "Углеродный след (Эмиссия CO₂)"
     with col2:
-        if st.button("📋 Данные и Экспорт", use_container_width=True):
+        if st.button("📋 Данные и Экспорт"):
             st.session_state.current_page = "Таблица данных и Экспорт"
     with col3:
-        if st.button("📖 Справочник агротехнологий", use_container_width=True):
+        if st.button("📖 Справочник агротехнологий"):
             st.session_state.current_page = "Справочник агротехнологий"
 
     st.markdown("---")
