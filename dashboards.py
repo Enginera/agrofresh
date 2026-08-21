@@ -32,7 +32,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     # 2. Графики Ряд 1
     g1, g2 = st.columns(2)
     with g1:
-        # График 1 (ИСХОДНЫЙ)
         if "technology" in df.columns and "co2_per_ton" in df.columns:
             fig_tech = px.box(
                 df, x="crop", y="co2_per_ton", color="technology",
@@ -41,11 +40,20 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors,
                 template=plot_template
             )
-            fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+            fig_tech.update_layout(
+                title=dict(
+                    text="🌱 Удельный след (кг CO₂/т): No-Till vs Классическая",
+                    font=dict(size=12.5),
+                    y=0.96,
+                    x=0.01,
+                    xanchor="left"
+                ),
+                margin=dict(t=50, l=30, r=20, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
             st.plotly_chart(fig_tech, use_container_width=True)
 
     with g2:
-        # График 2 (ТОЛЬКО ЗДЕСЬ ИЗМЕНЕН БУБЛИК)
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
             fig_donut = px.pie(
@@ -55,6 +63,13 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 template=plot_template
             )
             fig_donut.update_layout(
+                title=dict(
+                    text="⚡ Структура выбросов по ресурсам",
+                    font=dict(size=12.5),
+                    y=0.96,
+                    x=0.01,
+                    xanchor="left"
+                ),
                 margin=dict(t=50, r=20, l=20, b=20)
             )
             st.plotly_chart(fig_donut, use_container_width=True, config={'displayModeBar': 'hover', 'displaylogo': False})
@@ -62,7 +77,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     # 3. Графики Ряд 2
     g3, g4 = st.columns(2)
     with g3:
-        # График 3 (ИСХОДНЫЙ)
         if "operation" in df.columns and "co2_emission_kg" in df.columns:
             df_ops = df.groupby(["operation", "technology"])["co2_emission_kg"].sum().reset_index()
             fig_ops = px.bar(
@@ -72,10 +86,20 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors,
                 template=plot_template
             )
+            fig_ops.update_layout(
+                title=dict(
+                    text="🚜 Выбросы CO₂ по полевым операциям (кг)",
+                    font=dict(size=12.5),
+                    y=0.96,
+                    x=0.01,
+                    xanchor="left"
+                ),
+                margin=dict(t=50, l=30, r=20, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
             st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
-        # График 4 (ИСХОДНЫЙ)
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
             fig_scatter = px.scatter(
                 df, x="yield_t_ha", y="co2_emission_kg", color="crop",
@@ -84,6 +108,16 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)"},
                 template=plot_template
+            )
+            fig_scatter.update_layout(
+                title=dict(
+                    text="🌾 Зависимость объема выбросов от урожайности",
+                    font=dict(size=12.5),
+                    y=0.96,
+                    x=0.01,
+                    xanchor="left"
+                ),
+                margin=dict(t=50, l=30, r=20, b=40)
             )
             st.plotly_chart(fig_scatter, use_container_width=True)
 
