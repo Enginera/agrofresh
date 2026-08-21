@@ -26,34 +26,39 @@ def apply_custom_styles(theme="dark"):
         --calc-res-bg: #283C31;
         --table-badge-bg: #2D4438;
         --table-badge-text: #BEE3CD;
-        --input-bg: #283C31;
+        
+        /* Инверсия мультиселекта под тёмную тему */
+        --input-bg: #24332B;
+        --input-border: #385042;
         --tag-bg: #354E40;
         --tag-text: #EEF6F1;
         --tag-border: #4D6D5B;
+        --icon-color: #9DB4A7;
+
         --btn-inactive-bg: #283C31;
         --btn-inactive-text: #EEF6F1;
         --btn-active-bg: #3B614B;
         --btn-active-text: #FFFFFF;
-        --upload-bg: #283C31;
+        --upload-bg: #24332B;
         --upload-btn-bg: #354E40;
         --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.3);
         """
     else:
-        # === ☀️ СВЕТЛАЯ ТЕМА (Мягкая, светлая, без черных пятен) ===
+        # === ☀️ СВЕТЛАЯ ТЕМА (Полная инверсия в светлый) ===
         theme_vars = """
         --bg-main: #F4F7F4;
         --sidebar-bg: #FFFFFF;
         --surface: #FFFFFF;
         --surface-elevated: #F6F9F7;
-        --surface-header-band: #EBF2ED;      /* Светлая шалфейная плашка в шапках метрик */
-        --kpi-title-color: #1B3F2B;          /* Четкий хвойный текст */
+        --surface-header-band: #EBF2ED;
+        --kpi-title-color: #1B3F2B;
         --text-primary: #12281C;
         --text-secondary: #526B5C;
         --border-subtle: #D5E2D9;
         --border-accent: #2D6A4F;
         --brand-primary: #2D6A4F;
-        --hero-bg: linear-gradient(135deg, #E2EFE7 0%, #D4E8DC 50%, #C7E0D1 100%); /* Светлый баннер */
-        --hero-text: #0E291C;                /* Темный текст на светлом баннере */
+        --hero-bg: linear-gradient(135deg, #E2EFE7 0%, #D4E8DC 50%, #C7E0D1 100%);
+        --hero-text: #0E291C;
         --hero-sub: #2B4E3A;
         --hero-badge-bg: #C7E2D0;
         --hero-badge-text: #0E291C;
@@ -61,13 +66,18 @@ def apply_custom_styles(theme="dark"):
         --calc-res-bg: #F4F8F5;
         --table-badge-bg: #E3EDE6;
         --table-badge-text: #1B3F2B;
-        --input-bg: #FFFFFF;                 /* Белый чистый фон селектов */
-        --tag-bg: #E2EDE6;                   /* Светлые мягкие плашки культур */
+
+        /* Инверсия мультиселекта под светлую тему */
+        --input-bg: #FFFFFF;
+        --input-border: #CFDCD3;
+        --tag-bg: #E2EDE6;
         --tag-text: #1B3F2B;
         --tag-border: #BCD1C3;
+        --icon-color: #1B3F2B;
+
         --btn-inactive-bg: #FFFFFF;
         --btn-inactive-text: #1E3B2C;
-        --btn-active-bg: #2D6A4F;            /* Аккуратная акцентная кнопка */
+        --btn-active-bg: #2D6A4F;
         --btn-active-text: #FFFFFF;
         --upload-bg: #F8FAF8;
         --upload-btn-bg: #EAEFEA;
@@ -152,33 +162,60 @@ def apply_custom_styles(theme="dark"):
         font-weight: 700 !important;
     }
 
-    /* 4. Мультиселект (фильтры выборки) */
+    /* 4. ТОЧНАЯ ИНВЕРСИЯ МУЛЬТИСЕЛЕКТА (ФИЛЬТРЫ ВЫБОРКИ) */
+    [data-testid="stMultiSelect"],
+    [data-testid="stMultiSelect"] > div,
+    [data-testid="stMultiSelect"] [data-baseweb="select"],
+    [data-testid="stMultiSelect"] [data-baseweb="select"] > div,
     div[data-baseweb="select"],
-    div[data-baseweb="select"] > div,
-    div[data-testid="stMultiSelect"] > div,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+    div[data-baseweb="select"] > div {
         background-color: var(--input-bg) !important;
-        border: 1px solid var(--border-subtle) !important;
+        border: 1px solid var(--input-border) !important;
         border-radius: 8px !important;
     }
 
+    /* Плашки (теги) культур и технологий */
+    [data-testid="stMultiSelect"] [data-baseweb="tag"],
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"],
     div[data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+    span[data-baseweb="tag"] {
         background-color: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
         padding: 3px 8px !important;
     }
+
+    /* Текст внутри плашек */
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] span,
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"] span,
     div[data-baseweb="tag"] span,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
+    span[data-baseweb="tag"] span {
         color: var(--tag-text) !important;
         font-weight: 600 !important;
         font-size: 0.85rem !important;
     }
+
+    /* Крестики (x), стрелки и иконки мультиселекта */
+    [data-testid="stMultiSelect"] svg,
+    div[data-baseweb="select"] svg,
     div[data-baseweb="tag"] svg,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
-        fill: var(--tag-text) !important;
-        color: var(--tag-text) !important;
+    span[data-baseweb="tag"] svg {
+        fill: var(--icon-color) !important;
+        color: var(--icon-color) !important;
+    }
+
+    /* Выпадающий список мультиселекта */
+    div[data-baseweb="popover"],
+    ul[role="listbox"] {
+        background-color: var(--surface) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }
+    li[role="option"] {
+        background-color: var(--surface) !important;
+        color: var(--text-primary) !important;
+    }
+    li[role="option"]:hover {
+        background-color: var(--surface-elevated) !important;
     }
 
     /* 5. Загрузчик файлов */
