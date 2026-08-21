@@ -4,6 +4,12 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
+# Отключаем всплывающее меню с масштабом, лупой и инструментами, чтобы не засорять график
+CHART_CONFIG = {
+    'displayModeBar': False,
+    'responsive': True
+}
+
 def get_plot_theme(theme="dark"):
     is_dark = theme == "dark"
     bg_color = "#1A2E24" if is_dark else "#FFFFFF"
@@ -23,7 +29,7 @@ def get_plot_theme(theme="dark"):
                 x=0.01,
                 xanchor="left"
             ),
-            margin=dict(l=35, r=135, t=55, b=45), # Унифицированный просторный отступ справа под вертикальную легенду
+            margin=dict(l=35, r=135, t=55, b=45),
             xaxis=dict(
                 gridcolor=grid_color,
                 linecolor=line_color,
@@ -91,7 +97,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 )
             )
             fig_tech.update_xaxes(tickangle=-15, automargin=True)
-            st.plotly_chart(fig_tech, use_container_width=True)
+            st.plotly_chart(fig_tech, use_container_width=True, config=CHART_CONFIG)
 
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
@@ -101,7 +107,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title="⚡ Структура выбросов по энергоносителям и ресурсам",
                 color_discrete_sequence=agro_palette
             )
-            # Внутри долей выводим проценты, а полные названия аккуратно выносим в легенду справа
             fig_donut.update_traces(
                 textposition='inside',
                 textinfo='percent',
@@ -113,7 +118,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                     title=dict(text="<b>Ресурс / Энергия</b>", font=dict(size=11, color=text_color))
                 )
             )
-            st.plotly_chart(fig_donut, use_container_width=True)
+            st.plotly_chart(fig_donut, use_container_width=True, config=CHART_CONFIG)
 
     # 3. Графики Ряд 2
     g3, g4 = st.columns(2)
@@ -133,7 +138,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 )
             )
             fig_ops.update_xaxes(tickangle=-15, automargin=True)
-            st.plotly_chart(fig_ops, use_container_width=True)
+            st.plotly_chart(fig_ops, use_container_width=True, config=CHART_CONFIG)
 
     with g4:
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
@@ -147,7 +152,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_sequence=agro_palette
             )
             
-            # Четкие контуры и полупрозрачность пузырьков
             border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
             fig_scatter.update_traces(
                 marker=dict(
@@ -162,7 +166,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                     title=dict(text="<b>Культура</b>", font=dict(size=11, color=text_color))
                 )
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter, use_container_width=True, config=CHART_CONFIG)
 
     # 4. Калькулятор No-Till
     st.markdown("### 🧮 Калькулятор эффекта внедрения No-Till")
