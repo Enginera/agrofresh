@@ -1,5 +1,4 @@
 import streamlit as st
-from parser import advanced_multi_field_parser
 
 def render_button_navigation():
     pages = [

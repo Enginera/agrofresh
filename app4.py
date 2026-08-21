@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Сайдбар: тема, загрузка и фильтры
+# Единый блок сайдбара
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
     st.markdown("### **AgroFresh Control**")
@@ -26,7 +26,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader(
         "Загрузить отчет",
         type=["xlsx", "xls", "csv"],
-        help="Поддерживаются сырые отчеты полевых замеров"
+        help="Поддерживаются отчеты полевых замеров"
     )
     df_carbon = advanced_multi_field_parser(uploaded_file)
 
@@ -48,7 +48,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Применяем кастомные стили после выбора темы
+# Применяем оптимизированные стили
 apply_custom_styles(theme=active_theme)
 
 # Верхняя навигация
