@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Выбор темы в боковой панели
+# Переключатель темы
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
     st.markdown("### **AgroFresh Control**")
@@ -22,7 +22,7 @@ with st.sidebar:
     active_theme = "dark" if "🌙" in theme_choice else "light"
     st.markdown("---")
 
-# Применение кастомных стилей
+# Применяем стили (быстро, без перегрузки браузера)
 apply_custom_styles(theme=active_theme)
 
 with st.sidebar:
@@ -44,91 +44,3 @@ with st.sidebar:
             df_carbon = df_carbon[df_carbon["crop"].isin(selected_crops)]
 
     if "technology" in df_carbon.columns:
-        all_techs = sorted(list(df_carbon["technology"].unique()))
-        selected_tech = st.multiselect("Агротехнология", options=all_techs, default=all_techs)
-        if selected_tech:
-            df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
-
-    st.markdown("---")
-    st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
-
-# Навигация по вкладкам
-page = render_button_navigation()
-
-if page == "Углеродный след (Эмиссия CO₂)":
-    render_carbon_dashboard(df_carbon, theme=active_theme)
-
-elif page == "Таблица данных и Экспорт":
-    st.markdown("""
-    <div class="hero-banner">
-        <div class="hero-badge">📊 Data Warehouse</div>
-        <div class="hero-title">Нормализованные данные</div>
-        <div class="hero-subtitle">Выборка после автоматического парсинга, валидации числовых полей и маппинга справочников.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Стилизация таблицы: грязно-серо-зеленый фон ячеек и шапки
-    styled_df = df_carbon.style.set_properties(**{
-        'background-color': '#33443A',
-        'color': '#EEF4F0',
-        'border-color': '#45594D'
-    }).set_table_styles([
-        {'selector': 'th', 'props': [('background-color', '#24332B'), ('color', '#BCE0CD'), ('font-weight', '600')]},
-        {'selector': 'tr:hover', 'props': [('background-color', '#3D5246')]}
-    ])
-
-    st.dataframe(styled_df, use_container_width=True, height=520)
-
-    csv_data = df_carbon.to_csv(index=False).encode("utf-8-sig")
-    st.download_button(
-        "📥 Скачать выборку (CSV)",
-        data=csv_data,
-        file_name="agrofresh_carbon_export.csv",
-        mime="text/csv",
-        type="primary"
-    )
-
-elif page == "Справочник агротехнологий":
-    st.markdown("""
-    <div class="hero-banner">
-        <div class="hero-badge">📖 Reference & Methodology</div>
-        <div class="hero-title">Методические коэффициенты и формулы</div>
-        <div class="hero-subtitle">Параметры минерализации, секвестрации и удельных выбросов для оценки климатического баланса.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        <div class="formula-card">
-            <h3>1. Фактор разложения гумуса ($F_{разл}$)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Характеризует устойчивость органического вещества почвы к деградации при различных технологиях обработки:</p>
-            <ul>
-                <li><b>Лён:</b> Классическая — <span class="data-table-badge">0.48</span>, No-Till — <span class="data-table-badge">0.70</span></li>
-                <li><b>Озимая пшеница:</b> Классическая — <span class="data-table-badge">0.65</span>, No-Till — <span class="data-table-badge">0.82</span></li>
-                <li><b>Горох:</b> Классическая — <span class="data-table-badge">0.55</span>, No-Till — <span class="data-table-badge">0.80</span></li>
-                <li><b>Многолетние травы:</b> Классическая — <span class="data-table-badge">0.55</span>, No-Till — <span class="data-table-badge">0.70</span></li>
-                <li><b>Кукуруза:</b> Классическая — <span class="data-table-badge">0.65</span>, No-Till — <span class="data-table-badge">0.85</span></li>
-                <li><b>Подсолнечник:</b> Классическая — <span class="data-table-badge">0.68</span>, No-Till — <span class="data-table-badge">0.75</span></li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="formula-card">
-            <h3>2. Базовый потенциал орудий ($\Delta C_{баз}$)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Прямые механические потери углерода почвы за проход орудия:</p>
-            <ul>
-                <li><b>Плуг:</b> <span class="data-table-badge">525 кг CO₂/га</span></li>
-                <li><b>Борона:</b> <span class="data-table-badge">400 кг CO₂/га</span></li>
-                <li><b>Чизель:</b> <span class="data-table-badge">350 кг CO₂/га</span></li>
-            </ul>
-            <h3 style="margin-top: 22px;">3. Нормы и коэффициенты эмиссий СЗР</h3>
-            <ul>
-                <li><b>Гербициды:</b> Норма 1.5 кг/га, $EF = 25$ кг CO₂-экв/кг д.в.</li>
-                <li><b>Фунгициды:</b> Норма 0.5 кг/га, $EF = 20$ кг CO₂-экв/кг д.в.</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
