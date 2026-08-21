@@ -46,7 +46,7 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* 1. Блокировка системной темы браузера */
+    /* 1. Блокировка системной темы */
     :root, html, body, .stApp, [data-testid="stAppViewContainer"] {
         color-scheme: var(--color-scheme) !important;
         background-color: var(--bg-main) !important;
@@ -106,7 +106,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-main) !important;
     }
 
-    /* 4. Кнопки верхней навигации */
+    /* 4. Кнопки навигации */
     .stButton > button {
         background-color: var(--btn-bg) !important;
         color: var(--btn-text) !important;
@@ -120,7 +120,7 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--btn-active-bg) !important;
     }
 
-    /* 5. Мультиселект (Контейнер) */
+    /* 5. Мультиселект */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
     [data-testid="stMultiSelect"] > div {
@@ -129,8 +129,7 @@ def apply_custom_styles(theme="dark"):
         border-radius: 6px !important;
     }
 
-    /* 6. ИНДИВИДУАЛЬНЫЕ ЦВЕТА ПЛАШЕК В САЙДБАРЕ ПО КУЛЬТУРАМ И ТЕХНОЛОГИЯМ */
-    /* Базовый текст для всех плашек */
+    /* 6. Цвета плашек по культурам и технологиям */
     div[data-baseweb="tag"],
     [data-testid="stMultiSelect"] span[data-baseweb="tag"] {
         border-radius: 4px !important;
@@ -148,7 +147,6 @@ def apply_custom_styles(theme="dark"):
         color: #FFFFFF !important;
     }
 
-    /* Кукуруза -> Голубой (#4EA8DE) */
     div[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
     span[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
     [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Кукуруза"]) {
@@ -156,7 +154,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #3A8EC0 !important;
     }
 
-    /* Горох -> Мятно-зеленый (#52B788) */
     div[data-baseweb="tag"]:has(span[title*="Горох"]),
     span[data-baseweb="tag"]:has(span[title*="Горох"]),
     [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Горох"]) {
@@ -164,7 +161,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #3F9A70 !important;
     }
 
-    /* Озимая пшеница -> Янтарно-оранжевый (#F4A261) */
     div[data-baseweb="tag"]:has(span[title*="Озимая"]),
     div[data-baseweb="tag"]:has(span[title*="пшеница"]),
     span[data-baseweb="tag"]:has(span[title*="Озимая"]),
@@ -173,7 +169,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #D98848 !important;
     }
 
-    /* Лён -> Кораллово-терракотовый (#E07A5F) */
     div[data-baseweb="tag"]:has(span[title*="Лён"]),
     div[data-baseweb="tag"]:has(span[title*="лен"]),
     span[data-baseweb="tag"]:has(span[title*="Лён"]),
@@ -182,7 +177,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #C46247 !important;
     }
 
-    /* Многолетние травы -> Глубокий индиго (#3D5A80) */
     div[data-baseweb="tag"]:has(span[title*="Многолет"]),
     div[data-baseweb="tag"]:has(span[title*="травы"]),
     span[data-baseweb="tag"]:has(span[title*="Многолет"]),
@@ -191,7 +185,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #2B4360 !important;
     }
 
-    /* Подсолнечник -> Фиолетовый (#9D4EDD) */
     div[data-baseweb="tag"]:has(span[title*="Подсолне"]),
     span[data-baseweb="tag"]:has(span[title*="Подсолне"]),
     [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Подсолне"]) {
@@ -199,7 +192,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #7F35BF !important;
     }
 
-    /* No-Till -> Зеленый (#2E7D32) */
     div[data-baseweb="tag"]:has(span[title*="No-Till"]),
     div[data-baseweb="tag"]:has(span[title*="notill"]),
     span[data-baseweb="tag"]:has(span[title*="No-Till"]),
@@ -208,7 +200,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid #1B5E20 !important;
     }
 
-    /* Классическая -> Терракотово-красный (#C62828) */
     div[data-baseweb="tag"]:has(span[title*="Классиче"]),
     span[data-baseweb="tag"]:has(span[title*="Классиче"]),
     [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Классиче"]) {
