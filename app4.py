@@ -22,7 +22,7 @@ with st.sidebar:
     active_theme = "dark" if "🌙" in theme_choice else "light"
     st.markdown("---")
 
-# Применение кастомных стилей под выбранную тему
+# Применение кастомных стилей
 apply_custom_styles(theme=active_theme)
 
 with st.sidebar:
@@ -52,7 +52,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Навигация по страницам
+# Навигация по вкладкам
 page = render_button_navigation()
 
 if page == "Углеродный след (Эмиссия CO₂)":
@@ -67,7 +67,17 @@ elif page == "Таблица данных и Экспорт":
     </div>
     """, unsafe_allow_html=True)
 
-    st.dataframe(df_carbon, use_container_width=True, height=520)
+    # Стилизация таблицы: грязно-серо-зеленый фон ячеек и шапки
+    styled_df = df_carbon.style.set_properties(**{
+        'background-color': '#33443A',
+        'color': '#EEF4F0',
+        'border-color': '#45594D'
+    }).set_table_styles([
+        {'selector': 'th', 'props': [('background-color', '#24332B'), ('color', '#BCE0CD'), ('font-weight', '600')]},
+        {'selector': 'tr:hover', 'props': [('background-color', '#3D5246')]}
+    ])
+
+    st.dataframe(styled_df, use_container_width=True, height=520)
 
     csv_data = df_carbon.to_csv(index=False).encode("utf-8-sig")
     st.download_button(

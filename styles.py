@@ -3,62 +3,64 @@ import streamlit as st
 def apply_custom_styles(theme="dark"):
     is_dark = theme == "dark"
     
-    # Серо-зеленая палитра вместо черного
-    theme_vars = """
-    --bg-main: #1F2A24;
-    --surface: #27362E;
-    --surface-elevated: #314239;
-    --surface-header-band: #3A4C41;
-    --kpi-title-color: #D3E4DA;
-    --text-primary: #EEF4F0;
-    --text-secondary: #ADC1B5;
-    --border-subtle: #41554A;
-    --border-accent: #618A73;
-    --brand-primary: #52B788;
-    --hero-bg: linear-gradient(135deg, #27362E 0%, #33443A 50%, #405448 100%);
-    --hero-text: #FFFFFF;
-    --hero-sub: #D5E5DC;
-    --calc-bg: #27362E;
-    --calc-res-bg: #314239;
-    --table-badge-bg: #3D4F44;
-    --table-badge-text: #BCE0CD;
-    --input-bg: #33443A;
-    --tag-bg: #44574C;
-    --tag-text: #E2ECE5;
-    --tag-border: #586F62;
-    --btn-inactive-bg: #33443A;
-    --btn-inactive-text: #E2ECE5;
-    --btn-active-bg: #436653;
-    --btn-active-text: #FFFFFF;
-    --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.2);
-    """ if is_dark else """
-    --bg-main: #F4F7F4;
-    --surface: #FFFFFF;
-    --surface-elevated: #F6FAF7;
-    --surface-header-band: #43554A; /* Грязно-серо-зеленая контрастная шапка */
-    --kpi-title-color: #FFFFFF;
-    --text-primary: #12241A;
-    --text-secondary: #4F6357;
-    --border-subtle: #C8D6CD;
-    --border-accent: #3F5E4D;
-    --brand-primary: #335341;
-    --hero-bg: linear-gradient(135deg, #2D3E34 0%, #3D5246 60%, #4F6859 100%);
-    --hero-text: #FFFFFF;
-    --hero-sub: #E2ECE5;
-    --calc-bg: #FFFFFF;
-    --calc-res-bg: #F2F7F4;
-    --table-badge-bg: #E1EDE5;
-    --table-badge-text: #223B2D;
-    --input-bg: #384A3F;          /* Грязно-серо-зеленый мультиселект */
-    --tag-bg: #4D6355;            /* Грязно-серо-зеленые плашки */
-    --tag-text: #F0F6F2;
-    --tag-border: #627C6C;
-    --btn-inactive-bg: #FFFFFF;
-    --btn-inactive-text: #223B2D;
-    --btn-active-bg: #384F41;
-    --btn-active-text: #FFFFFF;
-    --shadow-card: 0 2px 10px rgba(45, 62, 52, 0.08);
-    """
+    if is_dark:
+        theme_vars = """
+        --bg-main: #1C2620;
+        --surface: #24332B;
+        --surface-elevated: #2C3D34;
+        --surface-header-band: #33443A;
+        --kpi-title-color: #D3E4DA;
+        --text-primary: #EEF4F0;
+        --text-secondary: #A6BCB0;
+        --border-subtle: #3D5246;
+        --border-accent: #52B788;
+        --brand-primary: #52B788;
+        --hero-bg: linear-gradient(135deg, #24332B 0%, #33443A 50%, #3D5246 100%);
+        --hero-text: #FFFFFF;
+        --hero-sub: #D5E5DC;
+        --calc-bg: #24332B;
+        --calc-res-bg: #2C3D34;
+        --table-badge-bg: #33443A;
+        --table-badge-text: #BCE0CD;
+        --input-bg: #33443A;
+        --tag-bg: #44574C;
+        --tag-text: #EEF4F0;
+        --tag-border: #5C7365;
+        --btn-inactive-bg: #33443A;
+        --btn-inactive-text: #EEF4F0;
+        --btn-active-bg: #3D5C4A;
+        --btn-active-text: #FFFFFF;
+        --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.25);
+        """
+    else:
+        theme_vars = """
+        --bg-main: #F4F7F4;
+        --surface: #FFFFFF;
+        --surface-elevated: #F6FAF7;
+        --surface-header-band: #33443A;
+        --kpi-title-color: #FFFFFF;
+        --text-primary: #12241A;
+        --text-secondary: #4F6357;
+        --border-subtle: #C8D6CD;
+        --border-accent: #33443A;
+        --brand-primary: #33443A;
+        --hero-bg: linear-gradient(135deg, #24332B 0%, #33443A 60%, #44574C 100%);
+        --hero-text: #FFFFFF;
+        --hero-sub: #E2ECE5;
+        --calc-bg: #FFFFFF;
+        --calc-res-bg: #F2F7F4;
+        --table-badge-bg: #E1EDE5;
+        --table-badge-text: #223B2D;
+        --input-bg: #33443A;
+        --tag-bg: #44574C;
+        --tag-text: #EEF4F0;
+        --tag-border: #5C7365;
+        --btn-inactive-bg: #FFFFFF;
+        --btn-inactive-text: #223B2D;
+        --btn-active-bg: #33443A;
+        --btn-active-text: #FFFFFF;
+        --shadow-card: 0 2px 10px rgba(45, 62, 52, 0.08);
+        """
 
     custom_css = f"""
     <style>
@@ -68,7 +70,7 @@ def apply_custom_styles(theme="dark"):
         {theme_vars}
     }}
 
-    /* 1. Глобальный фон и шапка */
+    /* 1. Глобальный сброс фона и шрифтов */
     html, body, [class*="css"], .stApp, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"],
@@ -82,6 +84,9 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stHeader"] {{
         background-color: var(--bg-main) !important;
         border-bottom: 1px solid var(--border-subtle) !important;
+    }}
+    [data-testid="stHeader"] * {{
+        color: var(--text-primary) !important;
     }}
 
     /* 2. Сайдбар */
@@ -97,6 +102,7 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3,
     [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5,
     [data-testid="stSidebar"] div {{
         color: var(--text-primary) !important;
     }}
@@ -105,7 +111,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-secondary) !important;
     }}
 
-    /* 3. Кнопки навигации */
+    /* 3. Кнопки верхней навигации */
     .stButton > button {{
         background-color: var(--btn-inactive-bg) !important;
         border: 1px solid var(--border-subtle) !important;
@@ -126,7 +132,8 @@ def apply_custom_styles(theme="dark"):
     }}
     .stButton > button[kind="primary"] p,
     .stButton > button[kind="primary"] span,
-    .stButton > button[data-testid="baseButton-primary"] p {{
+    .stButton > button[data-testid="baseButton-primary"] p,
+    .stButton > button[data-testid="baseButton-primary"] span {{
         color: var(--btn-active-text) !important;
         font-weight: 700 !important;
     }}
@@ -141,19 +148,19 @@ def apply_custom_styles(theme="dark"):
         border-radius: 8px !important;
     }}
 
-    /* Плашки внутри мультиселекта */
+    /* Плашки мультиселекта (Горох, Кукуруза, No-Till...) */
     div[data-baseweb="tag"],
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
         background-color: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
-        padding: 2px 8px !important;
+        padding: 3px 8px !important;
     }}
     div[data-baseweb="tag"] span,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
         color: var(--tag-text) !important;
         font-weight: 600 !important;
-        font-size: 0.82rem !important;
+        font-size: 0.85rem !important;
     }}
     div[data-baseweb="tag"] svg,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {{
@@ -171,13 +178,25 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-primary) !important;
     }}
 
-    /* 5. Карточки метрик */
+    /* 5. Загрузчик файлов */
+    [data-testid="stFileUploader"] section {{
+        background-color: var(--surface-elevated) !important;
+        border: 1px dashed var(--border-subtle) !important;
+        border-radius: 12px !important;
+    }}
+    [data-testid="stFileUploader"] section * {{
+        color: var(--text-primary) !important;
+    }}
+
+    /* 6. Карточки метрик (Двухтоновые) */
     .kpi-card {{
         background: var(--surface);
         border-radius: 14px;
         border: 1px solid var(--border-subtle);
         box-shadow: var(--shadow-card);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }}
     .kpi-card-header {{
         background: var(--surface-header-band);
@@ -220,7 +239,7 @@ def apply_custom_styles(theme="dark"):
         font-weight: 600;
     }}
 
-    /* 6. Баннер, Графики и Таблица */
+    /* 7. Баннер, Графики и Калькулятор */
     .hero-banner {{
         background: var(--hero-bg);
         border-radius: 16px;
@@ -228,7 +247,39 @@ def apply_custom_styles(theme="dark"):
         color: var(--hero-text) !important;
         margin-bottom: 24px;
         box-shadow: var(--shadow-card);
+        border: 1px solid rgba(255, 255, 255, 0.12);
     }}
+    .hero-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        color: #E8F8EE;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        padding: 4px 12px;
+        border-radius: 30px;
+        margin-bottom: 10px;
+    }}
+    .hero-title {{
+        font-size: 2.0rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--hero-text) !important;
+        margin: 0 0 6px 0;
+    }}
+    .hero-subtitle {{
+        font-size: 0.98rem;
+        color: var(--hero-sub) !important;
+        font-weight: 400;
+        max-width: 800px;
+        margin: 0;
+        line-height: 1.5;
+    }}
+
     .stPlotlyChart {{
         background: var(--surface);
         border-radius: 14px;
@@ -236,12 +287,59 @@ def apply_custom_styles(theme="dark"):
         padding: 10px;
         box-shadow: var(--shadow-card);
     }}
-    .stDataFrame {{
-        background: var(--surface);
-        border-radius: 12px;
+    .calc-container {{
+        background: var(--calc-bg);
         border: 1px solid var(--border-subtle);
-        padding: 4px;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-card);
+        margin-top: 24px;
     }}
+    .calc-result-card {{
+        background: var(--calc-res-bg);
+        border-radius: 12px;
+        padding: 18px;
+        border: 1px solid var(--border-subtle);
+    }}
+    .calc-res-title {{
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: var(--text-secondary) !important;
+    }}
+    .calc-res-val {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary) !important;
+    }}
+
+    /* 8. Справочник */
+    .formula-card {{
+        background: var(--surface);
+        border-radius: 14px;
+        border: 1px solid var(--border-subtle);
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-card);
+    }}
+    .formula-card h3 {{
+        color: var(--brand-primary);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 0;
+    }}
+    .data-table-badge {{
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        background: var(--table-badge-bg);
+        color: var(--table-badge-text);
+        padding: 2px 7px;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+    }}
+
     footer {{visibility: hidden;}}
     </style>
     """

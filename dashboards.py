@@ -5,11 +5,11 @@ import plotly.graph_objects as go
 
 def get_plot_theme(theme="dark"):
     is_dark = theme == "dark"
-    bg_color = "#13251E" if is_dark else "#FFFFFF"
-    text_color = "#F0F6F2" if is_dark else "#0F2419"
-    sub_color = "#95AA9E" if is_dark else "#4A6355"
-    grid_color = "#1D3A2F" if is_dark else "#E8EFEA"
-    line_color = "#234436" if is_dark else "#D2DDD5"
+    bg_color = "#24332B" if is_dark else "#FFFFFF"
+    text_color = "#EEF4F0" if is_dark else "#12241A"
+    sub_color = "#A6BCB0" if is_dark else "#4F6357"
+    grid_color = "#33443A" if is_dark else "#E5ECE7"
+    line_color = "#3D5246" if is_dark else "#C8D6CD"
 
     return {
         "layout": go.Layout(
@@ -64,7 +64,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="kpi-card">
             <div class="kpi-card-header">
                 <span class="kpi-title">Суммарные выбросы</span>
-                <span class="kpi-icon">☁️</span>
+                <span style="font-size: 1.05rem;">☁️</span>
             </div>
             <div class="kpi-card-body">
                 <span class="kpi-value">{total_co2_ton:,.1f}</span>
@@ -80,7 +80,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="kpi-card">
             <div class="kpi-card-header">
                 <span class="kpi-title">Удельный след (ср.)</span>
-                <span class="kpi-icon">🎯</span>
+                <span style="font-size: 1.05rem;">🎯</span>
             </div>
             <div class="kpi-card-body">
                 <span class="kpi-value">{avg_per_ton:.1f}</span>
@@ -96,7 +96,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="kpi-card">
             <div class="kpi-card-header">
                 <span class="kpi-title">Фактор разложения Fразл</span>
-                <span class="kpi-icon">🍂</span>
+                <span style="font-size: 1.05rem;">🍂</span>
             </div>
             <div class="kpi-card-body">
                 <span class="kpi-value">{avg_f_razl:.2f}</span>
@@ -112,7 +112,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="kpi-card">
             <div class="kpi-card-header">
                 <span class="kpi-title">Ср. Урожайность</span>
-                <span class="kpi-icon">🌾</span>
+                <span style="font-size: 1.05rem;">🌾</span>
             </div>
             <div class="kpi-card-body">
                 <span class="kpi-value">{avg_yield:.2f}</span>
@@ -125,8 +125,8 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
 
     st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-    tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#2D6A4F", "Классическая": "#D95D39"}
-    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else ["#2D6A4F", "#52B788", "#D95D39", "#3D5A80", "#E07A5F", "#81B29A"]
+    tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#335341", "Классическая": "#C75D38"}
+    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else ["#33443A", "#44574C", "#C75D38", "#3D5A80", "#E07A5F", "#81B29A"]
 
     # 2. Графики Ряд 1
     g1, g2 = st.columns(2)
@@ -152,7 +152,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_donut.update_traces(
                 textposition='inside',
                 textinfo='percent+label',
-                marker=dict(line=dict(color='#13251E' if theme=="dark" else '#FFFFFF', width=2))
+                marker=dict(line=dict(color='#24332B' if theme=="dark" else '#FFFFFF', width=2))
             )
             fig_donut.update_layout(get_plot_theme(theme)["layout"])
             st.plotly_chart(fig_donut, use_container_width=True)
@@ -208,7 +208,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="calc-result-card">
             <div class="calc-res-title">Сокращение прямых выбросов топлива</div>
             <div class="calc-res-val">-{co2_saved_fuel:,.2f} <span style="font-size: 0.9rem; font-weight: 500;">т CO₂-экв/год</span></div>
-            <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">Фактор эмиссии ДТ: 2.68 кг CO₂/л</div>
+            <div style="font-size: 0.8rem; color: var(--border-accent); margin-top: 6px;">Фактор эмиссии ДТ: 2.68 кг CO₂/л</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -222,3 +222,13 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         """, unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+def render_kpi_metrics(df):
+    c1, c2 = st.columns(2)
+    with c1:
+        st.metric("Температура", "4.2 °C")
+    with c2:
+        st.metric("Влажность", "91.5 %")
+
+def render_storage_climate(df):
+    render_kpi_metrics(df)
