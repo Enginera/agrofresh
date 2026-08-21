@@ -43,34 +43,26 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
             st.plotly_chart(fig_tech, use_container_width=True)
 
-    # === БЛОК С БУБЛИКОМ (7 КНОПОК PLOTLY + РОДНАЯ КНОПКА ФУЛСКРИНА STREAMLIT) ===
+    # === НАСТОЯЩИЙ РАБОЧИЙ БУБЛИК БЕЗ ФЕЙКОВЫХ КНОПОК ===
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
             fig_donut = px.pie(
                 df_src, names="emission_type", values="co2_emission_kg", hole=0.45,
-                title="Структура выбросов по ресурсам",
+                title="⚡ Структура выбросов по ресурсам",
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 template=plot_template
             )
             fig_donut.update_layout(
                 margin=dict(t=50, r=20, l=20, b=20)
             )
-            donut_toolbar_config = {
+            # Настоящая конфигурация с реальными рабочими функциями
+            donut_real_config = {
                 'displayModeBar': True,
                 'displaylogo': False,
-                'modeBarButtons': [[
-                    'toImage',
-                    'zoom2d',
-                    'pan2d',
-                    'zoomIn2d',
-                    'zoomOut2d',
-                    'autoScale2d',
-                    'resetScale2d'
-                ]],
                 'responsive': True
             }
-            st.plotly_chart(fig_donut, use_container_width=True, config=donut_toolbar_config)
+            st.plotly_chart(fig_donut, use_container_width=True, config=donut_real_config)
 
     # 3. Графики Ряд 2
     g3, g4 = st.columns(2)
