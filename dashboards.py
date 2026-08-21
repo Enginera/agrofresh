@@ -6,27 +6,30 @@ import plotly.graph_objects as go
 def get_plot_theme(theme="dark"):
     is_dark = theme == "dark"
     bg_color = "#13251E" if is_dark else "#FFFFFF"
-    text_color = "#F0F6F2" if is_dark else "#0E1E16"
-    sub_color = "#95AA9E" if is_dark else "#52665B"
+    text_color = "#F0F6F2" if is_dark else "#0F2419"
+    sub_color = "#95AA9E" if is_dark else "#4A6355"
     grid_color = "#1D3A2F" if is_dark else "#E8EFEA"
-    line_color = "#234436" if is_dark else "#D5E0D8"
+    line_color = "#234436" if is_dark else "#D2DDD5"
 
     return {
         "layout": go.Layout(
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
             font=dict(family="Plus Jakarta Sans, sans-serif", color=text_color, size=12),
+            title=dict(font=dict(color=text_color, size=14)),
             margin=dict(l=30, r=20, t=50, b=30),
             xaxis=dict(
                 gridcolor=grid_color,
                 showline=True,
                 linecolor=line_color,
+                title=dict(font=dict(color=sub_color)),
                 tickfont=dict(size=11, color=sub_color)
             ),
             yaxis=dict(
                 gridcolor=grid_color,
                 showline=True,
                 linecolor=line_color,
+                title=dict(font=dict(color=sub_color)),
                 tickfont=dict(size=11, color=sub_color)
             ),
             legend=dict(
@@ -49,7 +52,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. KPI Cards с контрастными темными шапками
+    # 1. KPI Cards
     total_co2_ton = (df["co2_emission_kg"].sum() / 1000) if "co2_emission_kg" in df.columns else 0.0
     avg_per_ton = df["co2_per_ton"].mean() if "co2_per_ton" in df.columns else 0.0
     avg_f_razl = df["f_razl"].mean() if "f_razl" in df.columns else 0.0
@@ -120,11 +123,10 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-    # Цветовые палитры для светлой и темной тем
     tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#2D6A4F", "Классическая": "#D95D39"}
-    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"]
+    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else ["#2D6A4F", "#52B788", "#D95D39", "#3D5A80", "#E07A5F", "#81B29A"]
 
     # 2. Графики Ряд 1
     g1, g2 = st.columns(2)
@@ -147,7 +149,11 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title="<b>Структура выбросов по энергоносителям и ресурсам</b>",
                 color_discrete_sequence=agro_palette
             )
-            fig_donut.update_traces(textposition='inside', textinfo='percent+label', marker=dict(line=dict(color='#13251E' if theme=="dark" else '#FFFFFF', width=2)))
+            fig_donut.update_traces(
+                textposition='inside',
+                textinfo='percent+label',
+                marker=dict(line=dict(color='#13251E' if theme=="dark" else '#FFFFFF', width=2))
+            )
             fig_donut.update_layout(get_plot_theme(theme)["layout"])
             st.plotly_chart(fig_donut, use_container_width=True)
 
@@ -180,8 +186,8 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     # 4. Калькулятор No-Till
     st.markdown("""
     <div class="calc-container">
-        <div class="calc-header">⚡ Интерактивный калькулятор эффекта No-Till</div>
-        <div class="calc-desc">Расчет потенциала сокращения карбонового следа за счет исключения вспашки и экономии топлива.</div>
+        <div class="calc-header" style="font-weight: 700; font-size: 1.2rem; margin-bottom: 4px;">⚡ Интерактивный калькулятор эффекта No-Till</div>
+        <div class="calc-desc" style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">Расчет потенциала сокращения карбонового следа за счет исключения вспашки и экономии топлива.</div>
     """, unsafe_allow_html=True)
 
     c_calc1, c_calc2, c_calc3 = st.columns(3)
@@ -202,7 +208,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="calc-result-card">
             <div class="calc-res-title">Сокращение прямых выбросов топлива</div>
             <div class="calc-res-val">-{co2_saved_fuel:,.2f} <span style="font-size: 0.9rem; font-weight: 500;">т CO₂-экв/год</span></div>
-            <div style="font-size: 0.8rem; color: #52B788; margin-top: 6px;">Фактор эмиссии ДТ: 2.68 кг CO₂/л</div>
+            <div style="font-size: 0.8rem; color: var(--brand-primary); margin-top: 6px;">Фактор эмиссии ДТ: 2.68 кг CO₂/л</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -211,7 +217,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         <div class="calc-result-card">
             <div class="calc-res-title">Депонирование углерода в почве</div>
             <div class="calc-res-val">+{humus_carbon_saved:,.2f} <span style="font-size: 0.9rem; font-weight: 500;">т C/год</span></div>
-            <div style="font-size: 0.8rem; color: #74C69D; margin-top: 6px;">Сохранение гумуса почвы</div>
+            <div style="font-size: 0.8rem; color: var(--border-accent); margin-top: 6px;">Сохранение гумуса почвы</div>
         </div>
         """, unsafe_allow_html=True)
 

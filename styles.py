@@ -23,8 +23,14 @@ def apply_custom_styles(theme="dark"):
         --calc-res-bg: #182E25;
         --table-badge-bg: #1B382B;
         --table-badge-text: #74C69D;
-        --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
         --input-bg: #182E25;
+        --tag-bg: #1F3E30;
+        --tag-text: #95D5B2;
+        --btn-inactive-bg: #182E25;
+        --btn-inactive-text: #C3D9CC;
+        --btn-active-bg: #2D6A4F;
+        --btn-active-text: #FFFFFF;
+        --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
         """
     else:
         # СВЕТЛАЯ ТЕМА (Precision Botanical Light)
@@ -32,8 +38,8 @@ def apply_custom_styles(theme="dark"):
         --bg-main: #F4F7F4;
         --surface: #FFFFFF;
         --surface-elevated: #F8FAF8;
-        --surface-header-band: #E3EDE6; /* Мягкая контрастная шалфейная плашка */
-        --kpi-title-color: #1B4332;       /* Четкий глубокий хвойный текст */
+        --surface-header-band: #E3EDE6;
+        --kpi-title-color: #1B4332;
         --text-primary: #0F2419;
         --text-secondary: #4A6355;
         --border-subtle: #D2DDD5;
@@ -46,8 +52,14 @@ def apply_custom_styles(theme="dark"):
         --calc-res-bg: #F4F8F5;
         --table-badge-bg: #E8F2EC;
         --table-badge-text: #1B4332;
-        --shadow-card: 0 2px 12px rgba(27, 67, 50, 0.06);
         --input-bg: #FFFFFF;
+        --tag-bg: #E8F5E9;
+        --tag-text: #1B4332;
+        --btn-inactive-bg: #FFFFFF;
+        --btn-inactive-text: #2D4A3A;
+        --btn-active-bg: #2D6A4F;
+        --btn-active-text: #FFFFFF;
+        --shadow-card: 0 2px 12px rgba(27, 67, 50, 0.06);
         """
 
     custom_css = f"""
@@ -58,14 +70,92 @@ def apply_custom_styles(theme="dark"):
         {theme_vars}
     }}
 
-    /* Глобальные настройки */
+    /* 1. Глобальный сброс цветов и фонов */
     html, body, [class*="css"], .stApp {{
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
         background-color: var(--bg-main) !important;
         color: var(--text-primary) !important;
     }}
 
-    /* Главный баннер */
+    h1, h2, h3, h4, h5, h6, p, span, label, div {{
+        color: var(--text-primary);
+    }}
+
+    /* 2. Сайдбар и все текстовые элементы внутри него */
+    [data-testid="stSidebar"] {{
+        background-color: var(--surface) !important;
+        border-right: 1px solid var(--border-subtle) !important;
+    }}
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] span, 
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5 {{
+        color: var(--text-primary) !important;
+    }}
+    [data-testid="stSidebar"] .stCaption, 
+    [data-testid="stSidebar"] small {{
+        color: var(--text-secondary) !important;
+    }}
+
+    /* 3. Кнопки навигации (верхние вкладки) */
+    .stButton > button {{
+        background-color: var(--btn-inactive-bg) !important;
+        color: var(--btn-inactive-text) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        box-shadow: var(--shadow-card) !important;
+        transition: all 0.2s ease !important;
+    }}
+    .stButton > button[kind="primary"] {{
+        background-color: var(--btn-active-bg) !important;
+        color: var(--btn-active-text) !important;
+        border: 1px solid var(--btn-active-bg) !important;
+    }}
+    .stButton > button:hover {{
+        border-color: var(--border-accent) !important;
+        transform: translateY(-1px);
+    }}
+
+    /* 4. Мультиселекты и выпадающие списки */
+    div[data-baseweb="select"] > div {{
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--border-subtle) !important;
+        color: var(--text-primary) !important;
+    }}
+    div[data-baseweb="select"] span {{
+        color: var(--text-primary) !important;
+    }}
+    div[data-baseweb="tag"] {{
+        background-color: var(--tag-bg) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }}
+    div[data-baseweb="tag"] span {{
+        color: var(--tag-text) !important;
+        font-weight: 600 !important;
+    }}
+
+    /* 5. Загрузчик файлов (File Uploader) */
+    [data-testid="stFileUploader"] section {{
+        background-color: var(--input-bg) !important;
+        border: 1px dashed var(--border-subtle) !important;
+        border-radius: 12px !important;
+        color: var(--text-primary) !important;
+    }}
+    [data-testid="stFileUploader"] section * {{
+        color: var(--text-primary) !important;
+    }}
+    [data-testid="stFileUploader"] section button {{
+        background-color: var(--surface-elevated) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }}
+
+    /* 6. Главный баннер */
     .hero-banner {{
         background: var(--hero-bg);
         border-radius: 16px;
@@ -94,19 +184,19 @@ def apply_custom_styles(theme="dark"):
         font-size: 2.0rem;
         font-weight: 800;
         letter-spacing: -0.5px;
-        color: var(--hero-text);
+        color: var(--hero-text) !important;
         margin: 0 0 6px 0;
     }}
     .hero-subtitle {{
         font-size: 0.98rem;
-        color: var(--hero-sub);
+        color: var(--hero-sub) !important;
         font-weight: 400;
         max-width: 800px;
         margin: 0;
         line-height: 1.5;
     }}
 
-    /* ДВУХТОНОВЫЕ КАРТОЧКИ МЕТРИК */
+    /* 7. KPI-карточки */
     .kpi-card {{
         background: var(--surface);
         border-radius: 14px;
@@ -115,11 +205,6 @@ def apply_custom_styles(theme="dark"):
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }}
-    .kpi-card:hover {{
-        transform: translateY(-2px);
-        border-color: var(--border-accent);
     }}
     .kpi-card-header {{
         background: var(--surface-header-band);
@@ -132,13 +217,9 @@ def apply_custom_styles(theme="dark"):
     .kpi-title {{
         font-size: 0.78rem;
         font-weight: 700;
-        color: var(--kpi-title-color);
+        color: var(--kpi-title-color) !important;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-    }}
-    .kpi-icon {{
-        font-size: 1.05rem;
-        line-height: 1;
     }}
     .kpi-card-body {{
         padding: 16px;
@@ -148,13 +229,13 @@ def apply_custom_styles(theme="dark"):
         font-family: 'JetBrains Mono', monospace;
         font-size: 1.85rem;
         font-weight: 700;
-        color: var(--text-primary);
+        color: var(--text-primary) !important;
         letter-spacing: -0.5px;
     }}
     .kpi-unit {{
         font-size: 0.88rem;
         font-weight: 500;
-        color: var(--text-secondary);
+        color: var(--text-secondary) !important;
         font-family: 'Plus Jakarta Sans', sans-serif;
         margin-left: 4px;
     }}
@@ -168,11 +249,11 @@ def apply_custom_styles(theme="dark"):
         padding: 3px 8px;
         border-radius: 6px;
         background: var(--surface-elevated);
-        color: var(--text-secondary);
+        color: var(--text-secondary) !important;
         border: 1px solid var(--border-subtle);
     }}
 
-    /* Калькулятор эффекта */
+    /* 8. Калькулятор и Plotly */
     .calc-container {{
         background: var(--calc-bg);
         border: 1px solid var(--border-subtle);
@@ -180,70 +261,25 @@ def apply_custom_styles(theme="dark"):
         padding: 24px;
         box-shadow: var(--shadow-card);
         margin-top: 24px;
-        margin-bottom: 24px;
-    }}
-    .calc-header {{
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 4px;
-    }}
-    .calc-desc {{
-        color: var(--text-secondary);
-        font-size: 0.88rem;
-        margin-bottom: 18px;
     }}
     .calc-result-card {{
         background: var(--calc-res-bg);
         border-radius: 12px;
         padding: 18px;
         border: 1px solid var(--border-subtle);
-        height: 100%;
     }}
     .calc-res-title {{
         font-size: 0.78rem;
         text-transform: uppercase;
         font-weight: 700;
         letter-spacing: 0.6px;
-        color: var(--text-secondary);
+        color: var(--text-secondary) !important;
     }}
     .calc-res-val {{
         font-family: 'JetBrains Mono', monospace;
         font-size: 1.6rem;
         font-weight: 700;
-        color: var(--text-primary);
-        margin-top: 4px;
-    }}
-
-    /* Справочник формул */
-    .formula-card {{
-        background: var(--surface);
-        border-radius: 14px;
-        border: 1px solid var(--border-subtle);
-        padding: 22px;
-        margin-bottom: 18px;
-        box-shadow: var(--shadow-card);
-    }}
-    .formula-card h3 {{
-        color: var(--brand-primary);
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-top: 0;
-    }}
-    .data-table-badge {{
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 600;
-        background: var(--table-badge-bg);
-        color: var(--table-badge-text);
-        padding: 2px 7px;
-        border-radius: 6px;
-        border: 1px solid var(--border-subtle);
-    }}
-
-    /* Боковая панель и графики */
-    [data-testid="stSidebar"] {{
-        background-color: var(--surface) !important;
-        border-right: 1px solid var(--border-subtle) !important;
+        color: var(--text-primary) !important;
     }}
     .stPlotlyChart {{
         background: var(--surface);
@@ -252,7 +288,6 @@ def apply_custom_styles(theme="dark"):
         padding: 10px;
         box-shadow: var(--shadow-card);
     }}
-
     footer {{visibility: hidden;}}
     </style>
     """
