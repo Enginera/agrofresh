@@ -40,10 +40,12 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors,
                 template=plot_template
             )
-            fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+            fig_tech.update_layout(
+                margin=dict(t=50, l=30, r=20, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
             st.plotly_chart(fig_tech, use_container_width=True)
 
-    # === НАСТОЯЩИЙ РАБОЧИЙ БУБЛИК БЕЗ ФЕЙКОВЫХ КНОПОК ===
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
@@ -56,13 +58,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_donut.update_layout(
                 margin=dict(t=50, r=20, l=20, b=20)
             )
-            # Настоящая конфигурация с реальными рабочими функциями
-            donut_real_config = {
-                'displayModeBar': True,
-                'displaylogo': False,
-                'responsive': True
-            }
-            st.plotly_chart(fig_donut, use_container_width=True, config=donut_real_config)
+            st.plotly_chart(fig_donut, use_container_width=True)
 
     # 3. Графики Ряд 2
     g3, g4 = st.columns(2)
@@ -76,6 +72,10 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors,
                 template=plot_template
             )
+            fig_ops.update_layout(
+                margin=dict(t=50, l=30, r=20, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
             st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
@@ -87,6 +87,9 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)"},
                 template=plot_template
+            )
+            fig_scatter.update_layout(
+                margin=dict(t=50, l=30, r=20, b=40)
             )
             st.plotly_chart(fig_scatter, use_container_width=True)
 

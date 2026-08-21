@@ -5,6 +5,7 @@ def apply_custom_styles(theme="dark"):
 
     if is_dark:
         theme_vars = """
+        --browser-scheme: dark;
         --bg-main: #0E1A14;
         --sidebar-bg: #14241C;
         --card-bg: #1A2E24;
@@ -22,6 +23,7 @@ def apply_custom_styles(theme="dark"):
         """
     else:
         theme_vars = """
+        --browser-scheme: light;
         --bg-main: #F4F7F4;
         --sidebar-bg: #F4F9F4;
         --card-bg: #FFFFFF;
@@ -125,6 +127,31 @@ def apply_custom_styles(theme="dark"):
     .stDataFrame {
         border: 1px solid var(--table-border) !important;
         border-radius: 6px;
+    }
+    .stPlotlyChart {
+        border-radius: 8px;
+        position: relative;
+    }
+
+    /* 🎯 ПАНЕЛЬ ПОЛНОСТЬЮ СКРЫТА В ПОКОЕ И ПОЯВЛЯЕТСЯ ТОЛЬКО ПРИ НАВЕДЕНИИ МЫШИ НА ГРАФИК */
+    .modebar-container,
+    div[data-testid="stPlotlyChart"] .modebar-container,
+    .js-plotly-plot .plotly .modebar-container {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        top: 6px !important;
+        right: 20px !important;
+    }
+
+    /* Срабатывает ТОЛЬКО при наведении курсора на конкретный график */
+    .stPlotlyChart:hover .modebar-container,
+    div[data-testid="stPlotlyChart"]:hover .modebar-container,
+    .js-plotly-plot:hover .modebar-container {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
     }
 
     footer {visibility: hidden;}
