@@ -23,7 +23,7 @@ def get_plot_theme(theme="dark"):
                 x=0.01,
                 xanchor="left"
             ),
-            margin=dict(l=35, r=25, t=55, b=45),
+            margin=dict(l=35, r=135, t=55, b=45), # Унифицированный просторный отступ справа под вертикальную легенду
             xaxis=dict(
                 gridcolor=grid_color,
                 linecolor=line_color,
@@ -37,11 +37,11 @@ def get_plot_theme(theme="dark"):
                 automargin=True
             ),
             legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1,
+                orientation="v",
+                yanchor="top",
+                y=0.98,
+                xanchor="left",
+                x=1.02,
                 font=dict(color=text_color, size=11)
             )
         )
@@ -51,6 +51,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     st.markdown('<div class="main-header">🌍 Углеродный след в растениеводстве</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Оценка эмиссий CO₂-эквивалента по культурам, агротехнологиям и операциям</div>', unsafe_allow_html=True)
 
+    # 1. Карточки KPI
     c1, c2, c3, c4 = st.columns(4)
     total_co2_ton = (df["co2_emission_kg"].sum() / 1000) if "co2_emission_kg" in df.columns else 0
     avg_per_ton = df["co2_per_ton"].mean() if "co2_per_ton" in df.columns else 0
@@ -70,7 +71,10 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
 
     tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#2E7D32", "Классическая": "#C62828"}
     agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else px.colors.qualitative.Safe
+    text_color = "#EEF6F1" if theme == "dark" else "#1B3826"
+    pie_border = "#1A2E24" if theme == "dark" else "#FFFFFF"
 
+    # 2. Графики Ряд 1
     g1, g2 = st.columns(2)
     with g1:
         if "technology" in df.columns and "co2_per_ton" in df.columns:
@@ -81,6 +85,11 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors
             )
             fig_tech.update_layout(get_plot_theme(theme)["layout"])
+            fig_tech.update_layout(
+                legend=dict(
+                    title=dict(text="<b>Технология</b>", font=dict(size=11, color=text_color))
+                )
+            )
             fig_tech.update_xaxes(tickangle=-15, automargin=True)
             st.plotly_chart(fig_tech, use_container_width=True)
 
@@ -88,14 +97,25 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
             fig_donut = px.pie(
-                df_src, names="emission_type", values="co2_emission_kg", hole=0.45,
+                df_src, names="emission_type", values="co2_emission_kg", hole=0.50,
                 title="⚡ Структура выбросов по энергоносителям и ресурсам",
                 color_discrete_sequence=agro_palette
             )
-            fig_donut.update_traces(marker=dict(line=dict(color='#1A2E24' if theme == "dark" else '#FFFFFF', width=2)))
+            # Внутри долей выводим проценты, а полные названия аккуратно выносим в легенду справа
+            fig_donut.update_traces(
+                textposition='inside',
+                textinfo='percent',
+                marker=dict(line=dict(color=pie_border, width=2))
+            )
             fig_donut.update_layout(get_plot_theme(theme)["layout"])
+            fig_donut.update_layout(
+                legend=dict(
+                    title=dict(text="<b>Ресурс / Энергия</b>", font=dict(size=11, color=text_color))
+                )
+            )
             st.plotly_chart(fig_donut, use_container_width=True)
 
+    # 3. Графики Ряд 2
     g3, g4 = st.columns(2)
     with g3:
         if "operation" in df.columns and "co2_emission_kg" in df.columns:
@@ -107,12 +127,16 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors
             )
             fig_ops.update_layout(get_plot_theme(theme)["layout"])
+            fig_ops.update_layout(
+                legend=dict(
+                    title=dict(text="<b>Технология</b>", font=dict(size=11, color=text_color))
+                )
+            )
             fig_ops.update_xaxes(tickangle=-15, automargin=True)
             st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
-            text_color = "#EEF6F1" if theme == "dark" else "#1B3826"
             fig_scatter = px.scatter(
                 df, x="yield_t_ha", y="co2_emission_kg", color="crop",
                 size="emission_coeff_e",
@@ -123,7 +147,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_sequence=agro_palette
             )
             
-            # Контуры и прозрачность пузырьков
+            # Четкие контуры и полупрозрачность пузырьков
             border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
             fig_scatter.update_traces(
                 marker=dict(
@@ -132,25 +156,15 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 )
             )
             
-            # Применяем базовую тему
-            plot_layout = get_plot_theme(theme)["layout"]
-            fig_scatter.update_layout(plot_layout)
-            
-            # ЧИТАЕМАЯ ВЕРТИКАЛЬНАЯ ЛЕГЕНДА СПРАВА ДЛЯ 6 КУЛЬТУР
+            fig_scatter.update_layout(get_plot_theme(theme)["layout"])
             fig_scatter.update_layout(
                 legend=dict(
-                    orientation="v",
-                    yanchor="top",
-                    y=0.98,
-                    xanchor="left",
-                    x=1.02,
-                    title=dict(text="<b>Культура</b>", font=dict(size=11, color=text_color)),
-                    font=dict(size=11, color=text_color)
-                ),
-                margin=dict(l=35, r=130, t=55, b=45) # Достаточно места справа для аккуратного списка культур
+                    title=dict(text="<b>Культура</b>", font=dict(size=11, color=text_color))
+                )
             )
             st.plotly_chart(fig_scatter, use_container_width=True)
 
+    # 4. Калькулятор No-Till
     st.markdown("### 🧮 Калькулятор эффекта внедрения No-Till")
     with st.expander("Расчет сокращения углеродного следа и экономии топлива", expanded=True):
         c_calc1, c_calc2, c_calc3 = st.columns(3)
