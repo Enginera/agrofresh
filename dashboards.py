@@ -17,10 +17,23 @@ def get_plot_theme(theme="dark"):
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
             font=dict(color=text_color, size=12),
-            margin=dict(l=30, r=20, t=50, b=30),
+            title=dict(
+                font=dict(color=text_color, size=13),
+                y=0.98,
+                x=0.01,
+                xanchor="left"
+            ),
+            margin=dict(l=30, r=20, t=80, b=35), # Увеличенный отступ сверху, чтобы заголовок не налезал на легенду
             xaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
             yaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color=text_color))
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                font=dict(color=text_color, size=10)
+            )
         )
     }
 
@@ -89,10 +102,20 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
             fig_scatter = px.scatter(
                 df, x="yield_t_ha", y="co2_emission_kg", color="crop",
-                size="emission_coeff_e", hover_data=["technology", "operation"],
+                size="emission_coeff_e",
+                size_max=18,
+                hover_data=["technology", "operation"],
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
                 color_discrete_sequence=agro_palette
+            )
+            # Добавляем четкие контуры и полупрозрачность для пузырьков
+            border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
+            fig_scatter.update_traces(
+                marker=dict(
+                    opacity=0.7,
+                    line=dict(width=1.2, color=border_color)
+                )
             )
             fig_scatter.update_layout(get_plot_theme(theme)["layout"])
             st.plotly_chart(fig_scatter, use_container_width=True)
