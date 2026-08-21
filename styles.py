@@ -4,64 +4,64 @@ def apply_custom_styles(theme="dark"):
     is_dark = theme == "dark"
     
     if is_dark:
-        # ТЁМНАЯ ТЕМА (Deep Forest Obsidian)
+        # ТЁМНАЯ ТЕМА (Мягкий глубокий изумрудно-серый, БЕЗ резкого черного)
         theme_vars = """
-        --bg-main: #0B1612;
-        --surface: #13251E;
-        --surface-elevated: #182E25;
-        --surface-header-band: #0A1913;
-        --kpi-title-color: #A7D7BD;
-        --text-primary: #F0F6F2;
-        --text-secondary: #95AA9E;
-        --border-subtle: #234436;
+        --bg-main: #0E1A15;
+        --surface: #14241E;
+        --surface-elevated: #1B2F27;
+        --surface-header-band: #102019;
+        --kpi-title-color: #A3CBB5;
+        --text-primary: #EEF4F0;
+        --text-secondary: #8FA699;
+        --border-subtle: #243E33;
         --border-accent: #52B788;
         --brand-primary: #52B788;
-        --hero-bg: linear-gradient(135deg, #07170F 0%, #122E22 50%, #1E4D36 100%);
+        --hero-bg: linear-gradient(135deg, #10241B 0%, #173628 50%, #204B38 100%);
         --hero-text: #FFFFFF;
-        --hero-sub: #D8F3DC;
-        --calc-bg: #11231C;
-        --calc-res-bg: #182E25;
-        --table-badge-bg: #1B382B;
+        --hero-sub: #D0EBE0;
+        --calc-bg: #14241E;
+        --calc-res-bg: #1B2F27;
+        --table-badge-bg: #1E372D;
         --table-badge-text: #74C69D;
-        --input-bg: #182E25;
-        --tag-bg: #1F3E30;
-        --tag-text: #95D5B2;
-        --tag-border: #2D6A4F;
-        --btn-inactive-bg: #182E25;
-        --btn-inactive-text: #E8F5E9;
+        --input-bg: #172C23;
+        --tag-bg: #213D30;
+        --tag-text: #A8D8BF;
+        --tag-border: #2D5442;
+        --btn-inactive-bg: #172C23;
+        --btn-inactive-text: #D5E5DC;
         --btn-active-bg: #2D6A4F;
         --btn-active-text: #FFFFFF;
-        --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+        --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.25);
         """
     else:
-        # СВЕТЛАЯ ТЕМА (Precision Botanical Light)
+        # СВЕТЛАЯ ТЕМА (Спокойная, естественная, нейтральная)
         theme_vars = """
         --bg-main: #F4F7F4;
         --surface: #FFFFFF;
-        --surface-elevated: #F8FAF8;
-        --surface-header-band: #E3EDE6;
-        --kpi-title-color: #1B4332;
-        --text-primary: #0F2419;
-        --text-secondary: #4A6355;
-        --border-subtle: #D2DDD5;
+        --surface-elevated: #F7F9F7;
+        --surface-header-band: #E2ECE5;
+        --kpi-title-color: #1E3C2B;
+        --text-primary: #12241A;
+        --text-secondary: #53685C;
+        --border-subtle: #CFDCD3;
         --border-accent: #2D6A4F;
         --brand-primary: #2D6A4F;
         --hero-bg: linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);
         --hero-text: #FFFFFF;
         --hero-sub: #E8F5E9;
         --calc-bg: #FFFFFF;
-        --calc-res-bg: #F4F8F5;
-        --table-badge-bg: #E8F2EC;
-        --table-badge-text: #1B4332;
+        --calc-res-bg: #F2F7F4;
+        --table-badge-bg: #E5EFE8;
+        --table-badge-text: #1E3C2B;
         --input-bg: #FFFFFF;
-        --tag-bg: #E8F5E9;
-        --tag-text: #1B4332;
-        --tag-border: #B7E4C7;
+        --tag-bg: #E3EDE6;
+        --tag-text: #1E3C2B;
+        --tag-border: #C4D7CB;
         --btn-inactive-bg: #FFFFFF;
-        --btn-inactive-text: #1B4332;
+        --btn-inactive-text: #1E3C2B;
         --btn-active-bg: #2D6A4F;
         --btn-active-text: #FFFFFF;
-        --shadow-card: 0 2px 12px rgba(27, 67, 50, 0.06);
+        --shadow-card: 0 2px 10px rgba(27, 67, 50, 0.05);
         """
 
     custom_css = f"""
@@ -72,7 +72,7 @@ def apply_custom_styles(theme="dark"):
         {theme_vars}
     }}
 
-    /* 1. Глобальный фон приложения и системная шапка Streamlit (ВЕРХНЯЯ ЗОНА) */
+    /* 1. Глобальный фон приложения и шапка Streamlit */
     html, body, [class*="css"], .stApp, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"],
@@ -83,7 +83,6 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-primary) !important;
     }}
 
-    /* Системная панель Streamlit сверху */
     [data-testid="stHeader"] {{
         background-color: var(--bg-main) !important;
         border-bottom: 1px solid var(--border-subtle) !important;
@@ -94,7 +93,6 @@ def apply_custom_styles(theme="dark"):
 
     /* 2. Сайдбар */
     [data-testid="stSidebar"], 
-    [data-testid="stSidebar"] > div:first-child,
     [data-testid="stSidebarContent"] {{
         background-color: var(--surface) !important;
         border-right: 1px solid var(--border-subtle) !important;
@@ -115,7 +113,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-secondary) !important;
     }}
 
-    /* 3. Кнопки навигации (верхние табы) */
+    /* 3. Кнопки навигации */
     .stButton > button {{
         background-color: var(--btn-inactive-bg) !important;
         border: 1px solid var(--border-subtle) !important;
@@ -127,7 +125,7 @@ def apply_custom_styles(theme="dark"):
     .stButton > button span,
     .stButton > button div {{
         color: var(--btn-inactive-text) !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
     }}
     .stButton > button[kind="primary"],
     .stButton > button[data-testid="baseButton-primary"] {{
@@ -136,18 +134,13 @@ def apply_custom_styles(theme="dark"):
     }}
     .stButton > button[kind="primary"] p,
     .stButton > button[kind="primary"] span,
-    .stButton > button[kind="primary"] div,
     .stButton > button[data-testid="baseButton-primary"] p,
     .stButton > button[data-testid="baseButton-primary"] span {{
         color: var(--btn-active-text) !important;
         font-weight: 700 !important;
     }}
-    .stButton > button:hover {{
-        border-color: var(--border-accent) !important;
-        transform: translateY(-1px);
-    }}
 
-    /* 4. ФИЛЬТРЫ МУЛЬТИСЕЛЕКТА (НИЖНЯЯ ЛЕВАЯ ЗОНА) */
+    /* 4. СПОКОЙНЫЙ НЕЙТРАЛЬНЫЙ МУЛЬТИСЕЛЕКТ (БЕЗ ЧЕРНОГО И КРАСНОГО) */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
     div[data-testid="stMultiSelect"] > div,
@@ -156,21 +149,20 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--border-subtle) !important;
         border-radius: 8px !important;
     }}
-    div[data-baseweb="select"] * {{
-        color: var(--text-primary) !important;
-    }}
 
-    /* Теги внутри мультиселекта (Горох, Кукуруза, No-Till...) */
+    /* Нейтральные шалфейные теги */
     div[data-baseweb="tag"],
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
         background-color: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
+        padding: 2px 6px !important;
     }}
     div[data-baseweb="tag"] span,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
         color: var(--tag-text) !important;
         font-weight: 600 !important;
+        font-size: 0.82rem !important;
     }}
     div[data-baseweb="tag"] svg,
     div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {{
@@ -178,7 +170,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--tag-text) !important;
     }}
 
-    /* Выпадающий список мультиселекта */
+    /* Выпадающий список */
     div[data-baseweb="popover"],
     ul[role="listbox"] {{
         background-color: var(--surface) !important;
@@ -192,7 +184,7 @@ def apply_custom_styles(theme="dark"):
         background-color: var(--surface-elevated) !important;
     }}
 
-    /* 5. Загрузчик файлов (File Uploader) */
+    /* 5. Загрузчик файлов */
     [data-testid="stFileUploader"] section {{
         background-color: var(--input-bg) !important;
         border: 1px dashed var(--border-subtle) !important;
@@ -201,65 +193,14 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stFileUploader"] section * {{
         color: var(--text-primary) !important;
     }}
-    [data-testid="stFileUploader"] section button {{
-        background-color: var(--surface-elevated) !important;
-        border: 1px solid var(--border-subtle) !important;
-    }}
-    [data-testid="stFileUploader"] section button * {{
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-    }}
 
-    /* 6. Главный баннер */
-    .hero-banner {{
-        background: var(--hero-bg);
-        border-radius: 16px;
-        padding: 28px 32px;
-        color: var(--hero-text) !important;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-card);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-    }}
-    .hero-badge {{
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(8px);
-        color: #E8F8EE;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        padding: 4px 12px;
-        border-radius: 30px;
-        margin-bottom: 10px;
-    }}
-    .hero-title {{
-        font-size: 2.0rem;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        color: var(--hero-text) !important;
-        margin: 0 0 6px 0;
-    }}
-    .hero-subtitle {{
-        font-size: 0.98rem;
-        color: var(--hero-sub) !important;
-        font-weight: 400;
-        max-width: 800px;
-        margin: 0;
-        line-height: 1.5;
-    }}
-
-    /* 7. Карточки метрик */
+    /* 6. Карточки метрик */
     .kpi-card {{
         background: var(--surface);
         border-radius: 14px;
         border: 1px solid var(--border-subtle);
         box-shadow: var(--shadow-card);
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
     }}
     .kpi-card-header {{
         background: var(--surface-header-band);
@@ -276,10 +217,6 @@ def apply_custom_styles(theme="dark"):
         text-transform: uppercase;
         letter-spacing: 0.8px;
     }}
-    .kpi-icon {{
-        font-size: 1.05rem;
-        line-height: 1;
-    }}
     .kpi-card-body {{
         padding: 16px;
         background: var(--surface);
@@ -289,56 +226,31 @@ def apply_custom_styles(theme="dark"):
         font-size: 1.85rem;
         font-weight: 700;
         color: var(--text-primary) !important;
-        letter-spacing: -0.5px;
     }}
     .kpi-unit {{
         font-size: 0.88rem;
-        font-weight: 500;
         color: var(--text-secondary) !important;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        margin-left: 4px;
     }}
     .kpi-sub-badge {{
         margin-top: 8px;
         display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.73rem;
-        font-weight: 600;
         padding: 3px 8px;
         border-radius: 6px;
         background: var(--surface-elevated);
         color: var(--text-secondary) !important;
         border: 1px solid var(--border-subtle);
+        font-size: 0.73rem;
+        font-weight: 600;
     }}
 
-    /* 8. Калькулятор и Plotly */
-    .calc-container {{
-        background: var(--calc-bg);
-        border: 1px solid var(--border-subtle);
+    /* 7. Баннер, Графики и Таблица */
+    .hero-banner {{
+        background: var(--hero-bg);
         border-radius: 16px;
-        padding: 24px;
+        padding: 28px 32px;
+        color: var(--hero-text) !important;
+        margin-bottom: 24px;
         box-shadow: var(--shadow-card);
-        margin-top: 24px;
-    }}
-    .calc-result-card {{
-        background: var(--calc-res-bg);
-        border-radius: 12px;
-        padding: 18px;
-        border: 1px solid var(--border-subtle);
-    }}
-    .calc-res-title {{
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.6px;
-        color: var(--text-secondary) !important;
-    }}
-    .calc-res-val {{
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: var(--text-primary) !important;
     }}
     .stPlotlyChart {{
         background: var(--surface);
@@ -347,6 +259,14 @@ def apply_custom_styles(theme="dark"):
         padding: 10px;
         box-shadow: var(--shadow-card);
     }}
+    .stDataFrame {{
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 4px;
+        box-shadow: var(--shadow-card);
+    }}
+
     footer {{visibility: hidden;}}
     </style>
     """
