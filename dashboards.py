@@ -4,9 +4,11 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Отключаем всплывающее меню с масштабом, лупой и инструментами, чтобы не засорять график
+# Конфигурация панели инструментов: видна при наведении, только полезные инструменты
 CHART_CONFIG = {
-    'displayModeBar': False,
+    'displayModeBar': 'hover',
+    'displaylogo': False,
+    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
     'responsive': True
 }
 
@@ -17,6 +19,11 @@ def get_plot_theme(theme="dark"):
     sub_color = "#9BB3A6" if is_dark else "#526B5C"
     grid_color = "#274435" if is_dark else "#EAEFEA"
     line_color = "#3A5C4A" if is_dark else "#D0DCD4"
+
+    # Контрастные цвета для кнопок всплывающего меню масштаба
+    modebar_bg = "rgba(20, 36, 28, 0.9)" if is_dark else "rgba(235, 243, 238, 0.95)"
+    modebar_color = "#A8CDB8" if is_dark else "#2D5A40"
+    modebar_active = "#52B788" if is_dark else "#1B4332"
 
     return {
         "layout": go.Layout(
@@ -29,7 +36,14 @@ def get_plot_theme(theme="dark"):
                 x=0.01,
                 xanchor="left"
             ),
-            margin=dict(l=35, r=135, t=55, b=45),
+            # Стилизация и четкая видимость всплывающего меню масштаба
+            modebar=dict(
+                bgcolor=modebar_bg,
+                color=modebar_color,
+                activecolor=modebar_active,
+                orientation="h"
+            ),
+            margin=dict(l=35, r=135, t=65, b=45), # Достаточный отступ сверху, чтобы меню не наезжало на заголовок
             xaxis=dict(
                 gridcolor=grid_color,
                 linecolor=line_color,
