@@ -5,7 +5,6 @@ def apply_custom_styles(theme="dark"):
 
     if is_dark:
         theme_vars = """
-        --browser-scheme: dark;
         --bg-main: #0E1A14;
         --sidebar-bg: #14241C;
         --card-bg: #1A2E24;
@@ -23,7 +22,6 @@ def apply_custom_styles(theme="dark"):
         """
     else:
         theme_vars = """
-        --browser-scheme: light;
         --bg-main: #F4F7F4;
         --sidebar-bg: #F4F9F4;
         --card-bg: #FFFFFF;
@@ -47,7 +45,6 @@ def apply_custom_styles(theme="dark"):
     }
 
     html, body, .stApp, [data-testid="stAppViewContainer"] {
-        color-scheme: var(--browser-scheme) !important;
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -128,14 +125,6 @@ def apply_custom_styles(theme="dark"):
     .stDataFrame {
         border: 1px solid var(--table-border) !important;
         border-radius: 6px;
-    }
-    .stPlotlyChart {
-        border-radius: 8px;
-    }
-
-    /* Отодвигаем панель левее от правого края */
-    .modebar-container {
-        right: 25px !important;
     }
 
     footer {visibility: hidden;}
