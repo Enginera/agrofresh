@@ -43,7 +43,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
             st.plotly_chart(fig_tech, use_container_width=True)
 
-    # === БЛОК С БУБЛИКОМ (ПАНЕЛЬ СДВИНУТА ЛЕВЕЕ) ===
+    # === БЛОК С БУБЛИКОМ: ВСЕ 8 КНОПОК КАК НА ОБРАЗЦЕ ===
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
@@ -53,9 +53,8 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 template=plot_template
             )
-            # r=45 сдвигает панель глубже влево от края карточки
             fig_donut.update_layout(
-                margin=dict(t=50, r=45, l=20, b=20)
+                margin=dict(t=50, r=50, l=20, b=20)
             )
             donut_toolbar_config = {
                 'displayModeBar': True,
@@ -67,7 +66,8 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                     'zoomIn2d',
                     'zoomOut2d',
                     'autoScale2d',
-                    'resetScale2d'
+                    'resetScale2d',
+                    'toggleHover'
                 ]],
                 'responsive': True
             }
