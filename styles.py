@@ -47,6 +47,7 @@ def apply_custom_styles(theme="dark"):
     }
 
     html, body, .stApp, [data-testid="stAppViewContainer"] {
+        color-scheme: var(--browser-scheme) !important;
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -130,28 +131,6 @@ def apply_custom_styles(theme="dark"):
     }
     .stPlotlyChart {
         border-radius: 8px;
-        position: relative;
-    }
-
-    /* 🎯 ПАНЕЛЬ ПОЛНОСТЬЮ СКРЫТА В ПОКОЕ И ПОЯВЛЯЕТСЯ ТОЛЬКО ПРИ НАВЕДЕНИИ МЫШИ НА ГРАФИК */
-    .modebar-container,
-    div[data-testid="stPlotlyChart"] .modebar-container,
-    .js-plotly-plot .plotly .modebar-container {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transition: opacity 0.2s ease, visibility 0.2s ease !important;
-        top: 6px !important;
-        right: 20px !important;
-    }
-
-    /* Срабатывает ТОЛЬКО при наведении курсора на конкретный график */
-    .stPlotlyChart:hover .modebar-container,
-    div[data-testid="stPlotlyChart"]:hover .modebar-container,
-    .js-plotly-plot:hover .modebar-container {
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
     }
 
     footer {visibility: hidden;}
