@@ -4,64 +4,74 @@ def apply_custom_styles(theme="dark"):
     is_dark = theme == "dark"
     
     if is_dark:
+        # === 🌙 ТЁМНАЯ ТЕМА ===
         theme_vars = """
-        --bg-main: #18241E;
-        --sidebar-bg: #1F2D26;
-        --surface: #24332B;
-        --surface-elevated: #2B3D34;
-        --surface-header-band: #33443A;
-        --kpi-title-color: #D3E4DA;
-        --text-primary: #EEF4F0;
-        --text-secondary: #A3B8AD;
-        --border-subtle: #3A4E42;
+        --bg-main: #142019;
+        --sidebar-bg: #1B2921;
+        --surface: #203027;
+        --surface-elevated: #283C31;
+        --surface-header-band: #2D4438;
+        --kpi-title-color: #BEE3CD;
+        --text-primary: #EEF6F1;
+        --text-secondary: #9DB4A7;
+        --border-subtle: #385042;
         --border-accent: #52B788;
         --brand-primary: #52B788;
-        --hero-bg: linear-gradient(135deg, #1F2D26 0%, #2A3B32 50%, #364A3F 100%);
+        --hero-bg: linear-gradient(135deg, #1B2921 0%, #24382D 50%, #2F4A3B 100%);
         --hero-text: #FFFFFF;
-        --hero-sub: #D5E5DC;
-        --calc-bg: #24332B;
-        --calc-res-bg: #2B3D34;
-        --table-badge-bg: #33443A;
-        --table-badge-text: #BCE0CD;
-        --input-bg: #2B3D34;
-        --tag-bg: #3B5245;
-        --tag-text: #EEF4F0;
-        --tag-border: #4D6959;
-        --btn-inactive-bg: #2B3D34;
-        --btn-inactive-text: #EEF4F0;
-        --btn-active-bg: #385645;
+        --hero-sub: #D5EBDD;
+        --hero-badge-bg: rgba(255, 255, 255, 0.15);
+        --hero-badge-text: #BEE3CD;
+        --calc-bg: #203027;
+        --calc-res-bg: #283C31;
+        --table-badge-bg: #2D4438;
+        --table-badge-text: #BEE3CD;
+        --input-bg: #283C31;
+        --tag-bg: #354E40;
+        --tag-text: #EEF6F1;
+        --tag-border: #4D6D5B;
+        --btn-inactive-bg: #283C31;
+        --btn-inactive-text: #EEF6F1;
+        --btn-active-bg: #3B614B;
         --btn-active-text: #FFFFFF;
-        --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.25);
+        --upload-bg: #283C31;
+        --upload-btn-bg: #354E40;
+        --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.3);
         """
     else:
+        # === ☀️ СВЕТЛАЯ ТЕМА (Мягкая, светлая, без черных пятен) ===
         theme_vars = """
         --bg-main: #F4F7F4;
         --sidebar-bg: #FFFFFF;
         --surface: #FFFFFF;
-        --surface-elevated: #F6FAF7;
-        --surface-header-band: #3A4D41;
-        --kpi-title-color: #FFFFFF;
-        --text-primary: #12241A;
-        --text-secondary: #4F6357;
-        --border-subtle: #CFDCD3;
-        --border-accent: #3A4D41;
-        --brand-primary: #3A4D41;
-        --hero-bg: linear-gradient(135deg, #2A3C32 0%, #3A4F43 60%, #4D6456 100%);
-        --hero-text: #FFFFFF;
-        --hero-sub: #E2ECE5;
+        --surface-elevated: #F6F9F7;
+        --surface-header-band: #EBF2ED;      /* Светлая шалфейная плашка в шапках метрик */
+        --kpi-title-color: #1B3F2B;          /* Четкий хвойный текст */
+        --text-primary: #12281C;
+        --text-secondary: #526B5C;
+        --border-subtle: #D5E2D9;
+        --border-accent: #2D6A4F;
+        --brand-primary: #2D6A4F;
+        --hero-bg: linear-gradient(135deg, #E2EFE7 0%, #D4E8DC 50%, #C7E0D1 100%); /* Светлый баннер */
+        --hero-text: #0E291C;                /* Темный текст на светлом баннере */
+        --hero-sub: #2B4E3A;
+        --hero-badge-bg: #C7E2D0;
+        --hero-badge-text: #0E291C;
         --calc-bg: #FFFFFF;
-        --calc-res-bg: #F2F7F4;
-        --table-badge-bg: #E1EDE5;
-        --table-badge-text: #223B2D;
-        --input-bg: #F2F6F3;
-        --tag-bg: #44594C;
-        --tag-text: #FFFFFF;
-        --tag-border: #566F60;
+        --calc-res-bg: #F4F8F5;
+        --table-badge-bg: #E3EDE6;
+        --table-badge-text: #1B3F2B;
+        --input-bg: #FFFFFF;                 /* Белый чистый фон селектов */
+        --tag-bg: #E2EDE6;                   /* Светлые мягкие плашки культур */
+        --tag-text: #1B3F2B;
+        --tag-border: #BCD1C3;
         --btn-inactive-bg: #FFFFFF;
-        --btn-inactive-text: #223B2D;
-        --btn-active-bg: #3A4D41;
+        --btn-inactive-text: #1E3B2C;
+        --btn-active-bg: #2D6A4F;            /* Аккуратная акцентная кнопка */
         --btn-active-text: #FFFFFF;
-        --shadow-card: 0 2px 10px rgba(45, 62, 52, 0.06);
+        --upload-bg: #F8FAF8;
+        --upload-btn-bg: #EAEFEA;
+        --shadow-card: 0 2px 10px rgba(45, 62, 52, 0.05);
         """
 
     css_template = """
@@ -72,7 +82,7 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* 1. Глобальный фон приложения и шапка */
+    /* 1. Глобальный фон и шапка */
     html, body, [class*="css"], .stApp, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"],
@@ -142,7 +152,7 @@ def apply_custom_styles(theme="dark"):
         font-weight: 700 !important;
     }
 
-    /* 4. Мультиселект */
+    /* 4. Мультиселект (фильтры выборки) */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
     div[data-testid="stMultiSelect"] > div,
@@ -173,15 +183,23 @@ def apply_custom_styles(theme="dark"):
 
     /* 5. Загрузчик файлов */
     [data-testid="stFileUploader"] section {
-        background-color: var(--input-bg) !important;
+        background-color: var(--upload-bg) !important;
         border: 1px dashed var(--border-subtle) !important;
         border-radius: 12px !important;
     }
     [data-testid="stFileUploader"] section * {
         color: var(--text-primary) !important;
     }
+    [data-testid="stFileUploader"] section button {
+        background-color: var(--upload-btn-bg) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }
+    [data-testid="stFileUploader"] section button * {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
 
-    /* 6. Карточки метрик */
+    /* 6. Карточки метрик (KPI) */
     .kpi-card {
         background: var(--surface);
         border-radius: 14px;
@@ -232,7 +250,7 @@ def apply_custom_styles(theme="dark"):
         font-weight: 600;
     }
 
-    /* 7. Баннер, Графики и Калькулятор */
+    /* 7. Главный баннер */
     .hero-banner {
         background: var(--hero-bg);
         border-radius: 16px;
@@ -240,14 +258,14 @@ def apply_custom_styles(theme="dark"):
         color: var(--hero-text) !important;
         margin-bottom: 24px;
         box-shadow: var(--shadow-card);
+        border: 1px solid var(--border-subtle);
     }
     .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(8px);
-        color: #E8F8EE;
+        background: var(--hero-badge-bg);
+        color: var(--hero-badge-text);
         font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -266,11 +284,13 @@ def apply_custom_styles(theme="dark"):
     .hero-subtitle {
         font-size: 0.98rem;
         color: var(--hero-sub) !important;
-        font-weight: 400;
+        font-weight: 500;
         max-width: 800px;
         margin: 0;
         line-height: 1.5;
     }
+
+    /* 8. Графики и Калькулятор */
     .stPlotlyChart {
         background: var(--surface);
         border-radius: 14px;
@@ -306,7 +326,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-primary) !important;
     }
 
-    /* 8. Справочник формул */
+    /* 9. Справочник формул */
     .formula-card {
         background: var(--surface);
         border-radius: 14px;

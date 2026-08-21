@@ -5,11 +5,11 @@ import plotly.graph_objects as go
 
 def get_plot_theme(theme="dark"):
     is_dark = theme == "dark"
-    bg_color = "#24332B" if is_dark else "#FFFFFF"
-    text_color = "#EEF4F0" if is_dark else "#12241A"
-    sub_color = "#A6BCB0" if is_dark else "#4F6357"
-    grid_color = "#33443A" if is_dark else "#E5ECE7"
-    line_color = "#3D5246" if is_dark else "#C8D6CD"
+    bg_color = "#203027" if is_dark else "#FFFFFF"
+    text_color = "#EEF6F1" if is_dark else "#12281C"
+    sub_color = "#9DB4A7" if is_dark else "#526B5C"
+    grid_color = "#2D4438" if is_dark else "#EEF4F0"
+    line_color = "#385042" if is_dark else "#D5E2D9"
 
     return {
         "layout": go.Layout(
@@ -52,7 +52,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. KPI Cards
+    # 1. Карточки метрик (KPI)
     total_co2_ton = (df["co2_emission_kg"].sum() / 1000) if "co2_emission_kg" in df.columns else 0.0
     avg_per_ton = df["co2_per_ton"].mean() if "co2_per_ton" in df.columns else 0.0
     avg_f_razl = df["f_razl"].mean() if "f_razl" in df.columns else 0.0
@@ -125,8 +125,15 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
 
     st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-    tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#335341", "Классическая": "#C75D38"}
-    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else ["#33443A", "#44574C", "#C75D38", "#3D5A80", "#E07A5F", "#81B29A"]
+    # Адаптивная палитра графиков под выбранную тему
+    if theme == "dark":
+        tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"}
+        agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"]
+        pie_border = "#203027"
+    else:
+        tech_colors = {"No-Till": "#2D6A4F", "Классическая": "#D95D39"}
+        agro_palette = ["#2D6A4F", "#52B788", "#74C69D", "#3D5A80", "#E07A5F", "#E9C46A"]
+        pie_border = "#FFFFFF"
 
     # 2. Графики Ряд 1
     g1, g2 = st.columns(2)
@@ -152,7 +159,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_donut.update_traces(
                 textposition='inside',
                 textinfo='percent+label',
-                marker=dict(line=dict(color='#24332B' if theme=="dark" else '#FFFFFF', width=2))
+                marker=dict(line=dict(color=pie_border, width=2))
             )
             fig_donut.update_layout(get_plot_theme(theme)["layout"])
             st.plotly_chart(fig_donut, use_container_width=True)
@@ -222,13 +229,3 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         """, unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
-
-def render_kpi_metrics(df):
-    c1, c2 = st.columns(2)
-    with c1:
-        st.metric("Температура", "4.2 °C")
-    with c2:
-        st.metric("Влажность", "91.5 %")
-
-def render_storage_climate(df):
-    render_kpi_metrics(df)
