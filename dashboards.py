@@ -8,7 +8,7 @@ def get_plot_theme(theme="dark"):
     is_dark = theme == "dark"
     bg_color = "#1A2E24" if is_dark else "#FFFFFF"
     text_color = "#EEF6F1" if is_dark else "#1B3826"
-    sub_color = "#9BB3A6" if is_dark else "#616161"
+    sub_color = "#9BB3A6" if is_dark else "#526B5C"
     grid_color = "#274435" if is_dark else "#EAEFEA"
     line_color = "#3A5C4A" if is_dark else "#D0DCD4"
 
@@ -16,23 +16,33 @@ def get_plot_theme(theme="dark"):
         "layout": go.Layout(
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
-            font=dict(color=text_color, size=12),
+            font=dict(family="Plus Jakarta Sans, sans-serif", color=text_color, size=12),
             title=dict(
                 font=dict(color=text_color, size=13),
                 y=0.98,
                 x=0.01,
                 xanchor="left"
             ),
-            margin=dict(l=30, r=20, t=80, b=35), # Увеличенный отступ сверху, чтобы заголовок не налезал на легенду
-            xaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
-            yaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
+            margin=dict(l=35, r=25, t=55, b=45),
+            xaxis=dict(
+                gridcolor=grid_color,
+                linecolor=line_color,
+                tickfont=dict(color=sub_color, size=11),
+                automargin=True
+            ),
+            yaxis=dict(
+                gridcolor=grid_color,
+                linecolor=line_color,
+                tickfont=dict(color=sub_color, size=11),
+                automargin=True
+            ),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
                 y=1.02,
                 xanchor="right",
                 x=1,
-                font=dict(color=text_color, size=10)
+                font=dict(color=text_color, size=11)
             )
         )
     }
@@ -71,6 +81,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors
             )
             fig_tech.update_layout(get_plot_theme(theme)["layout"])
+            fig_tech.update_xaxes(tickangle=-15, automargin=True)
             st.plotly_chart(fig_tech, use_container_width=True)
 
     with g2:
@@ -96,20 +107,23 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors
             )
             fig_ops.update_layout(get_plot_theme(theme)["layout"])
+            fig_ops.update_xaxes(tickangle=-15, automargin=True)
             st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
+            text_color = "#EEF6F1" if theme == "dark" else "#1B3826"
             fig_scatter = px.scatter(
                 df, x="yield_t_ha", y="co2_emission_kg", color="crop",
                 size="emission_coeff_e",
-                size_max=18,
+                size_max=16,
                 hover_data=["technology", "operation"],
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
                 color_discrete_sequence=agro_palette
             )
-            # Добавляем четкие контуры и полупрозрачность для пузырьков
+            
+            # Контуры и прозрачность пузырьков
             border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
             fig_scatter.update_traces(
                 marker=dict(
@@ -117,7 +131,24 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                     line=dict(width=1.2, color=border_color)
                 )
             )
-            fig_scatter.update_layout(get_plot_theme(theme)["layout"])
+            
+            # Применяем базовую тему
+            plot_layout = get_plot_theme(theme)["layout"]
+            fig_scatter.update_layout(plot_layout)
+            
+            # ЧИТАЕМАЯ ВЕРТИКАЛЬНАЯ ЛЕГЕНДА СПРАВА ДЛЯ 6 КУЛЬТУР
+            fig_scatter.update_layout(
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=0.98,
+                    xanchor="left",
+                    x=1.02,
+                    title=dict(text="<b>Культура</b>", font=dict(size=11, color=text_color)),
+                    font=dict(size=11, color=text_color)
+                ),
+                margin=dict(l=35, r=130, t=55, b=45) # Достаточно места справа для аккуратного списка культур
+            )
             st.plotly_chart(fig_scatter, use_container_width=True)
 
     st.markdown("### 🧮 Калькулятор эффекта внедрения No-Till")
