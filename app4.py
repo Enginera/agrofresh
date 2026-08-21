@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-
 from styles import apply_custom_styles
 from parser import advanced_multi_field_parser, get_mock_data
 from navigation import render_button_navigation
@@ -13,12 +12,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-apply_custom_styles()
-
+# Сайдбар: выбор темы, загрузка и фильтры
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
     st.title("AgroFresh Control")
-    st.caption("Анализ углеродного следа")
+    st.caption("Система расчета углеродного следа")
+    
+    theme_choice = st.radio("🎨 Тема оформления", ["🌙 Тёмная", "☀️ Светлая"], horizontal=True)
+    active_theme = "dark" if "🌙" in theme_choice else "light"
     st.markdown("---")
 
     st.subheader("📁 Источник данных")
@@ -27,7 +28,6 @@ with st.sidebar:
         type=["xlsx", "xls", "csv"],
         help="Загрузите таблицу расчетов полевых эмиссий CO2"
     )
-
     df_carbon = advanced_multi_field_parser(uploaded_file)
 
     st.subheader("🔍 Фильтры выборки")
@@ -43,15 +43,19 @@ with st.sidebar:
         if selected_tech:
             df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
 
+# Применяем изолированные стили темы
+apply_custom_styles(theme=active_theme)
+
+# Верхняя навигация
 page = render_button_navigation()
 
 if page == "Углеродный след (Эмиссия CO₂)":
-    render_carbon_dashboard(df_carbon)
+    render_carbon_dashboard(df_carbon, theme=active_theme)
 
 elif page == "Таблица данных и Экспорт":
     st.markdown('<div class="main-header">📋 Исходные данные (Excel / CSV)</div>', unsafe_allow_html=True)
     st.markdown(f"Всего строк в выборке: **{len(df_carbon)}**")
-    st.dataframe(df_carbon)
+    st.dataframe(df_carbon, use_container_width=True, height=520)
 
     csv_data = df_carbon.to_csv(index=False).encode("utf-8-sig")
     st.download_button(

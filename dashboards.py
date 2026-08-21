@@ -4,8 +4,27 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-def render_carbon_dashboard(df: pd.DataFrame):
-    """Отрисовка дашборда углеродного следа и агроэкологических графиков."""
+def get_plot_theme(theme="dark"):
+    is_dark = theme == "dark"
+    bg_color = "#1A2E24" if is_dark else "#FFFFFF"
+    text_color = "#EEF6F1" if is_dark else "#1B3826"
+    sub_color = "#9BB3A6" if is_dark else "#616161"
+    grid_color = "#274435" if is_dark else "#EAEFEA"
+    line_color = "#3A5C4A" if is_dark else "#D0DCD4"
+
+    return {
+        "layout": go.Layout(
+            paper_bgcolor=bg_color,
+            plot_bgcolor=bg_color,
+            font=dict(color=text_color, size=12),
+            margin=dict(l=30, r=20, t=50, b=30),
+            xaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
+            yaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color)),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color=text_color))
+        )
+    }
+
+def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     st.markdown('<div class="main-header">🌍 Углеродный след в растениеводстве</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Оценка эмиссий CO₂-эквивалента по культурам, агротехнологиям и операциям</div>', unsafe_allow_html=True)
 
@@ -16,99 +35,67 @@ def render_carbon_dashboard(df: pd.DataFrame):
     avg_yield = df["yield_t_ha"].mean() if "yield_t_ha" in df.columns else 0
 
     with c1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Суммарные выбросы</div>
-            <div class="metric-value">{total_co2_ton:,.1f} т CO₂</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Суммарные выбросы</div><div class="metric-value">{total_co2_ton:,.1f} т CO₂</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Удельный след (ср.)</div>
-            <div class="metric-value">{avg_per_ton:.1f} кг/т</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Удельный след (ср.)</div><div class="metric-value">{avg_per_ton:.1f} кг/т</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Фактор разложения Fразл</div>
-            <div class="metric-value">{avg_f_razl:.2f}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Фактор разложения Fразл</div><div class="metric-value">{avg_f_razl:.2f}</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Ср. Урожайность</div>
-            <div class="metric-value">{avg_yield:.2f} т/га</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Ср. Урожайность</div><div class="metric-value">{avg_yield:.2f} т/га</div></div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
-    g1, g2 = st.columns(2)
+    tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#2E7D32", "Классическая": "#C62828"}
+    agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else px.colors.qualitative.Safe
 
+    g1, g2 = st.columns(2)
     with g1:
         if "technology" in df.columns and "co2_per_ton" in df.columns:
             fig_tech = px.box(
-                df,
-                x="crop",
-                y="co2_per_ton",
-                color="technology",
+                df, x="crop", y="co2_per_ton", color="technology",
                 title="🌱 Удельный след (кг CO₂/т): No-Till vs Классическая",
                 labels={"co2_per_ton": "кг CO₂ на 1 т продукции", "crop": "Культура", "technology": "Технология"},
-                color_discrete_map={"No-Till": "#2E7D32", "Классическая": "#C62828"},
-                template="plotly_white"
+                color_discrete_map=tech_colors
             )
-            fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-            st.plotly_chart(fig_tech)
+            fig_tech.update_layout(get_plot_theme(theme)["layout"])
+            st.plotly_chart(fig_tech, use_container_width=True)
 
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
             fig_donut = px.pie(
-                df_src,
-                names="emission_type",
-                values="co2_emission_kg",
-                hole=0.45,
+                df_src, names="emission_type", values="co2_emission_kg", hole=0.45,
                 title="⚡ Структура выбросов по энергоносителям и ресурсам",
-                color_discrete_sequence=px.colors.qualitative.Safe,
-                template="plotly_white"
+                color_discrete_sequence=agro_palette
             )
-            st.plotly_chart(fig_donut)
+            fig_donut.update_traces(marker=dict(line=dict(color='#1A2E24' if theme == "dark" else '#FFFFFF', width=2)))
+            fig_donut.update_layout(get_plot_theme(theme)["layout"])
+            st.plotly_chart(fig_donut, use_container_width=True)
 
     g3, g4 = st.columns(2)
-
     with g3:
         if "operation" in df.columns and "co2_emission_kg" in df.columns:
             df_ops = df.groupby(["operation", "technology"])["co2_emission_kg"].sum().reset_index()
             fig_ops = px.bar(
-                df_ops,
-                x="operation",
-                y="co2_emission_kg",
-                color="technology",
-                barmode="group",
+                df_ops, x="operation", y="co2_emission_kg", color="technology", barmode="group",
                 title="🚜 Выбросы CO₂ по полевым операциям (кг)",
-                labels={"co2_emission_kg": "Выбросы CO₂ (кг)", "operation": "Операция"},
-                template="plotly_white",
-                color_discrete_map={"No-Till": "#388E3C", "Классическая": "#E57373"}
+                labels={"co2_emission_kg": "Выбросы CO₂ (кг)", "operation": "Операция", "technology": "Технология"},
+                color_discrete_map=tech_colors
             )
-            st.plotly_chart(fig_ops)
+            fig_ops.update_layout(get_plot_theme(theme)["layout"])
+            st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
         if "yield_t_ha" in df.columns and "co2_emission_kg" in df.columns:
             fig_scatter = px.scatter(
-                df,
-                x="yield_t_ha",
-                y="co2_emission_kg",
-                color="crop",
-                size="emission_coeff_e",
-                hover_data=["technology", "operation"],
+                df, x="yield_t_ha", y="co2_emission_kg", color="crop",
+                size="emission_coeff_e", hover_data=["technology", "operation"],
                 title="🌾 Зависимость объема выбросов от урожайности",
-                labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)"},
-                template="plotly_white"
+                labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
+                color_discrete_sequence=agro_palette
             )
-            st.plotly_chart(fig_scatter)
+            fig_scatter.update_layout(get_plot_theme(theme)["layout"])
+            st.plotly_chart(fig_scatter, use_container_width=True)
 
     st.markdown("### 🧮 Калькулятор эффекта внедрения No-Till")
     with st.expander("Расчет сокращения углеродного следа и экономии топлива", expanded=True):
@@ -116,7 +103,8 @@ def render_carbon_dashboard(df: pd.DataFrame):
         with c_calc1:
             area_ha = st.number_input("Площадь угодий (га)", min_value=10.0, value=1000.0, step=50.0)
         with c_calc2:
-            calc_crop = st.selectbox("Культура", sorted(list(df["crop"].unique())))
+            crops_list = sorted(list(df["crop"].unique())) if "crop" in df.columns else ["Все"]
+            calc_crop = st.selectbox("Культура", crops_list)
         with c_calc3:
             diesel_saved_per_ha = st.number_input("Экономия ДТ при No-Till (л/га)", min_value=0.0, value=32.0, step=2.0)
 
