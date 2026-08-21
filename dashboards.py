@@ -40,16 +40,16 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=tech_colors,
                 template=plot_template
             )
-            # t=65 и y=0.90 создают чистый зазор между панелью инструментов и текстом
+            # t=80 и y=0.85 — максимальный свободный запас сверху
             fig_tech.update_layout(
                 title=dict(
                     text="🌱 Удельный след (кг CO₂/т): No-Till vs Классическая",
                     font=dict(size=12.5),
-                    y=0.90,
+                    y=0.85,
                     x=0.01,
                     xanchor="left"
                 ),
-                margin=dict(t=65, l=30, r=20, b=40),
+                margin=dict(t=80, l=30, r=20, b=40),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             st.plotly_chart(fig_tech, use_container_width=True)
@@ -67,11 +67,11 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title=dict(
                     text="⚡ Структура выбросов по ресурсам",
                     font=dict(size=12.5),
-                    y=0.90,
+                    y=0.85,
                     x=0.01,
                     xanchor="left"
                 ),
-                margin=dict(t=65, r=20, l=20, b=20)
+                margin=dict(t=80, r=20, l=20, b=20)
             )
             st.plotly_chart(fig_donut, use_container_width=True, config={'displayModeBar': 'hover', 'displaylogo': False})
 
@@ -91,11 +91,11 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title=dict(
                     text="🚜 Выбросы CO₂ по полевым операциям (кг)",
                     font=dict(size=12.5),
-                    y=0.90,
+                    y=0.85,
                     x=0.01,
                     xanchor="left"
                 ),
-                margin=dict(t=65, l=30, r=20, b=40),
+                margin=dict(t=80, l=30, r=20, b=40),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             st.plotly_chart(fig_ops, use_container_width=True)
@@ -114,11 +114,11 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 title=dict(
                     text="🌾 Зависимость объема выбросов от урожайности",
                     font=dict(size=12.5),
-                    y=0.90,
+                    y=0.85,
                     x=0.01,
                     xanchor="left"
                 ),
-                margin=dict(t=65, l=30, r=20, b=40)
+                margin=dict(t=80, l=30, r=20, b=40)
             )
             st.plotly_chart(fig_scatter, use_container_width=True)
 
