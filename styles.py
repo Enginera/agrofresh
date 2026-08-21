@@ -27,8 +27,8 @@ def apply_custom_styles(theme="dark"):
         --table-badge-bg: #2D4438;
         --table-badge-text: #BEE3CD;
         
-        /* Инверсия мультиселекта под тёмную тему */
-        --input-bg: #24332B;
+        /* Мультиселект (тёмный) */
+        --input-bg: #283C31;
         --input-border: #385042;
         --tag-bg: #354E40;
         --tag-text: #EEF6F1;
@@ -44,7 +44,7 @@ def apply_custom_styles(theme="dark"):
         --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.3);
         """
     else:
-        # === ☀️ СВЕТЛАЯ ТЕМА (Полная инверсия в светлый) ===
+        # === ☀️ СВЕТЛАЯ ТЕМА (Полная инверсия) ===
         theme_vars = """
         --bg-main: #F4F7F4;
         --sidebar-bg: #FFFFFF;
@@ -67,7 +67,7 @@ def apply_custom_styles(theme="dark"):
         --table-badge-bg: #E3EDE6;
         --table-badge-text: #1B3F2B;
 
-        /* Инверсия мультиселекта под светлую тему */
+        /* Мультиселект (светлый, без красного и черного) */
         --input-bg: #FFFFFF;
         --input-border: #CFDCD3;
         --tag-bg: #E2EDE6;
@@ -92,7 +92,7 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* 1. Глобальный фон и шапка */
+    /* 1. Глобальный фон и шрифты */
     html, body, [class*="css"], .stApp, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"],
@@ -111,7 +111,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-primary) !important;
     }
 
-    /* 2. Сайдбар */
+    /* 2. Боковая панель */
     [data-testid="stSidebar"], 
     [data-testid="stSidebar"] > div:first-child,
     [data-testid="stSidebarContent"],
@@ -135,7 +135,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-secondary) !important;
     }
 
-    /* 3. Кнопки верхней навигации */
+    /* 3. Верхняя навигация */
     .stButton > button {
         background-color: var(--btn-inactive-bg) !important;
         border: 1px solid var(--border-subtle) !important;
@@ -162,24 +162,29 @@ def apply_custom_styles(theme="dark"):
         font-weight: 700 !important;
     }
 
-    /* 4. ТОЧНАЯ ИНВЕРСИЯ МУЛЬТИСЕЛЕКТА (ФИЛЬТРЫ ВЫБОРКИ) */
+    /* 4. ЖЕСТКИЙ ПЕРЕХВАТ МУЛЬТИСЕЛЕКТА (УБИРАЕТ ЧЕРНЫЙ И КРАСНЫЙ) */
     [data-testid="stMultiSelect"],
     [data-testid="stMultiSelect"] > div,
     [data-testid="stMultiSelect"] [data-baseweb="select"],
     [data-testid="stMultiSelect"] [data-baseweb="select"] > div,
+    [data-testid="stMultiSelect"] [data-baseweb="base-input"],
+    [data-testid="stMultiSelect"] [role="combobox"],
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div {
         background-color: var(--input-bg) !important;
-        border: 1px solid var(--input-border) !important;
+        background: var(--input-bg) !important;
+        border-color: var(--input-border) !important;
         border-radius: 8px !important;
     }
 
-    /* Плашки (теги) культур и технологий */
+    /* Переопределение инлайнового красного цвета тегов */
     [data-testid="stMultiSelect"] [data-baseweb="tag"],
     [data-testid="stMultiSelect"] span[data-baseweb="tag"],
+    [data-testid="stMultiSelect"] div[data-baseweb="tag"],
     div[data-baseweb="tag"],
     span[data-baseweb="tag"] {
         background-color: var(--tag-bg) !important;
+        background: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
         padding: 3px 8px !important;
@@ -187,6 +192,7 @@ def apply_custom_styles(theme="dark"):
 
     /* Текст внутри плашек */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] span,
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] div,
     [data-testid="stMultiSelect"] span[data-baseweb="tag"] span,
     div[data-baseweb="tag"] span,
     span[data-baseweb="tag"] span {
@@ -195,17 +201,18 @@ def apply_custom_styles(theme="dark"):
         font-size: 0.85rem !important;
     }
 
-    /* Крестики (x), стрелки и иконки мультиселекта */
+    /* Иконки удаления и стрелки */
     [data-testid="stMultiSelect"] svg,
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] svg,
     div[data-baseweb="select"] svg,
-    div[data-baseweb="tag"] svg,
-    span[data-baseweb="tag"] svg {
+    div[data-baseweb="tag"] svg {
         fill: var(--icon-color) !important;
         color: var(--icon-color) !important;
     }
 
     /* Выпадающий список мультиселекта */
-    div[data-baseweb="popover"],
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
     ul[role="listbox"] {
         background-color: var(--surface) !important;
         border: 1px solid var(--border-subtle) !important;

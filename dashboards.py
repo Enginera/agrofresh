@@ -125,7 +125,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
 
     st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-    # Адаптивная палитра графиков под выбранную тему
     if theme == "dark":
         tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"}
         agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"]
@@ -229,3 +228,13 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
         """, unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+def render_kpi_metrics(df):
+    c1, c2 = st.columns(2)
+    with c1:
+        st.metric("Температура", "4.2 °C")
+    with c2:
+        st.metric("Влажность", "91.5 %")
+
+def render_storage_climate(df):
+    render_kpi_metrics(df)

@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Переключатель темы
+# Сайдбар: тема, загрузка и фильтры
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
     st.markdown("### **AgroFresh Control**")
@@ -22,10 +22,6 @@ with st.sidebar:
     active_theme = "dark" if "🌙" in theme_choice else "light"
     st.markdown("---")
 
-# Применяем стили
-apply_custom_styles(theme=active_theme)
-
-with st.sidebar:
     st.markdown("##### 📁 **Источник данных**")
     uploaded_file = st.file_uploader(
         "Загрузить отчет",
@@ -52,7 +48,10 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Навигация
+# Применяем кастомные стили после выбора темы
+apply_custom_styles(theme=active_theme)
+
+# Верхняя навигация
 page = render_button_navigation()
 
 if page == "Углеродный след (Эмиссия CO₂)":
