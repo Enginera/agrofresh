@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from styles import apply_custom_styles
-from parser import advanced_multi_field_parser, get_mock_data
+from parser import advanced_multi_field_parser
 from navigation import render_button_navigation
 from dashboards import render_carbon_dashboard
 
@@ -12,38 +12,74 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Сайдбар: выбор темы, загрузка и фильтры
+# Значки для культур и технологий
+CROP_ICONS = {
+    "Кукуруза": "🔵 Кукуруза",
+    "Горох": "🟢 Горох",
+    "Озимая пшеница": "🟠 Озимая пшеница",
+    "Лён": "🟤 Лён",
+    "Многолетние травы": "🔷 Многолетние травы",
+    "Подсолнечник": "🟣 Подсолнечник"
+}
+ICON_TO_CROP = {v: k for k, v in CROP_ICONS.items()}
+
+TECH_ICONS = {
+    "No-Till": "🌱 No-Till",
+    "Классическая": "🚜 Классическая"
+}
+ICON_TO_TECH = {v: k for k, v in TECH_ICONS.items()}
+
+# Сайдбар: тема, загрузка и цветные фильтры
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=65)
-    st.title("AgroFresh Control")
+    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=60)
+    st.markdown("### **AgroFresh Control**")
     st.caption("Система расчета углеродного следа")
     
     theme_choice = st.radio("🎨 Тема оформления", ["🌙 Тёмная", "☀️ Светлая"], horizontal=True)
     active_theme = "dark" if "🌙" in theme_choice else "light"
     st.markdown("---")
 
-    st.subheader("📁 Источник данных")
+    st.markdown("##### 📁 **Источник данных**")
     uploaded_file = st.file_uploader(
-        "Загрузить Excel файл (.xlsx, .xls)",
+        "Загрузить файл замеров",
         type=["xlsx", "xls", "csv"],
         help="Загрузите таблицу расчетов полевых эмиссий CO2"
     )
     df_carbon = advanced_multi_field_parser(uploaded_file)
 
-    st.subheader("🔍 Фильтры выборки")
+    st.markdown("---")
+    st.markdown("##### 🔍 **Фильтры выборки**")
+
+    # Фильтр по культурам с цветными маркерами графика
     if "crop" in df_carbon.columns:
-        all_crops = sorted(list(df_carbon["crop"].unique()))
-        selected_crops = st.multiselect("Культура", options=all_crops, default=all_crops)
+        all_crops_raw = sorted(list(df_carbon["crop"].unique()))
+        crop_options = [CROP_ICONS.get(c, c) for c in all_crops_raw]
+        selected_crop_icons = st.multiselect(
+            "Культуры (цвета графика):",
+            options=crop_options,
+            default=crop_options
+        )
+        selected_crops = [ICON_TO_CROP.get(icon, icon) for icon in selected_crop_icons]
         if selected_crops:
             df_carbon = df_carbon[df_carbon["crop"].isin(selected_crops)]
 
+    # Фильтр по технологиям
     if "technology" in df_carbon.columns:
-        all_techs = sorted(list(df_carbon["technology"].unique()))
-        selected_tech = st.multiselect("Технология", options=all_techs, default=all_techs)
-        if selected_tech:
-            df_carbon = df_carbon[df_carbon["technology"].isin(selected_tech)]
+        all_techs_raw = sorted(list(df_carbon["technology"].unique()))
+        tech_options = [TECH_ICONS.get(t, t) for t in all_techs_raw]
+        selected_tech_icons = st.multiselect(
+            "Агротехнология:",
+            options=tech_options,
+            default=tech_options
+        )
+        selected_techs = [ICON_TO_TECH.get(icon, icon) for icon in selected_tech_icons]
+        if selected_techs:
+            df_carbon = df_carbon[df_carbon["technology"].isin(selected_techs)]
 
-# Применяем изолированные стили темы
+    st.markdown("---")
+    st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
+
+# Применяем стили
 apply_custom_styles(theme=active_theme)
 
 # Верхняя навигация
@@ -59,10 +95,11 @@ elif page == "Таблица данных и Экспорт":
 
     csv_data = df_carbon.to_csv(index=False).encode("utf-8-sig")
     st.download_button(
-        "📥 Скачать обработанную выборку (CSV)",
+        "📥 Скачать выборку (CSV)",
         data=csv_data,
-        file_name="agro_carbon_export.csv",
-        mime="text/csv"
+        file_name="agrofresh_carbon_export.csv",
+        mime="text/csv",
+        type="primary"
     )
 
 elif page == "Справочник агротехнологий":
