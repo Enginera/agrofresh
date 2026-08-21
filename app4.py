@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Значки для культур и технологий
+# Цветные бейджи культур
 CROP_ICONS = {
     "Кукуруза": "🔵 Кукуруза",
     "Горох": "🟢 Горох",
@@ -29,9 +29,9 @@ TECH_ICONS = {
 }
 ICON_TO_TECH = {v: k for k, v in TECH_ICONS.items()}
 
-# Сайдбар: тема, загрузка и цветные фильтры
+# Сайдбар
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=60)
+    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
     st.markdown("### **AgroFresh Control**")
     st.caption("Система расчета углеродного следа")
     
@@ -41,21 +41,20 @@ with st.sidebar:
 
     st.markdown("##### 📁 **Источник данных**")
     uploaded_file = st.file_uploader(
-        "Загрузить файл замеров",
+        "Загрузить отчет",
         type=["xlsx", "xls", "csv"],
-        help="Загрузите таблицу расчетов полевых эмиссий CO2"
+        help="Загрузите таблицу расчетов полевых замеров"
     )
     df_carbon = advanced_multi_field_parser(uploaded_file)
 
     st.markdown("---")
     st.markdown("##### 🔍 **Фильтры выборки**")
 
-    # Фильтр по культурам с цветными маркерами графика
     if "crop" in df_carbon.columns:
         all_crops_raw = sorted(list(df_carbon["crop"].unique()))
         crop_options = [CROP_ICONS.get(c, c) for c in all_crops_raw]
         selected_crop_icons = st.multiselect(
-            "Культуры (цвета графика):",
+            "Культуры:",
             options=crop_options,
             default=crop_options
         )
@@ -63,7 +62,6 @@ with st.sidebar:
         if selected_crops:
             df_carbon = df_carbon[df_carbon["crop"].isin(selected_crops)]
 
-    # Фильтр по технологиям
     if "technology" in df_carbon.columns:
         all_techs_raw = sorted(list(df_carbon["technology"].unique()))
         tech_options = [TECH_ICONS.get(t, t) for t in all_techs_raw]
@@ -79,7 +77,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Применяем стили
+# Применяем адаптивные стили
 apply_custom_styles(theme=active_theme)
 
 # Верхняя навигация
@@ -104,22 +102,37 @@ elif page == "Таблица данных и Экспорт":
 
 elif page == "Справочник агротехнологий":
     st.markdown('<div class="main-header">📖 Справочник коэффициентов и формул</div>', unsafe_allow_html=True)
-    st.markdown(r"""
-    ### 1. Фактор разложения гумуса ($F_{разл}$)
-    Коэффициент устойчивости органического вещества почвы к минерализации:
-    - **Лён:** Классическая — `0.48`, No-Till — `0.70`
-    - **Озимая пшеница:** Классическая — `0.65`, No-Till — `0.82`
-    - **Горох:** Классическая — `0.55`, No-Till — `0.80`
-    - **Многолетние травы:** Классическая — `0.55`, No-Till — `0.70`
-    - **Кукуруза:** Классическая — `0.65`, No-Till — `0.85`
-    - **Подсолнечник:** Классическая — `0.68`, No-Till — `0.75`
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="formula-box">
+            <h4 style="margin-top:0;">1. Фактор разложения гумуса ($F_{разл}$)</h4>
+            <p style="color:var(--text-muted);font-size:0.88rem;">Коэффициент устойчивости органического вещества почвы к минерализации:</p>
+            <ul>
+                <li><b>Лён:</b> Классическая — <code>0.48</code>, No-Till — <code>0.70</code></li>
+                <li><b>Озимая пшеница:</b> Классическая — <code>0.65</code>, No-Till — <code>0.82</code></li>
+                <li><b>Горох:</b> Классическая — <code>0.55</code>, No-Till — <code>0.80</code></li>
+                <li><b>Многолетние травы:</b> Классическая — <code>0.55</code>, No-Till — <code>0.70</code></li>
+                <li><b>Кукуруза:</b> Классическая — <code>0.65</code>, No-Till — <code>0.85</code></li>
+                <li><b>Подсолнечник:</b> Классическая — <code>0.68</code>, No-Till — <code>0.75</code></li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
-    ### 2. Базовый потенциал секвестрации орудий ($\Delta C_{баз}$):
-    - **Плуг:** `525` кг CO₂/га
-    - **Борона:** `400` кг CO₂/га
-    - **Чизель:** `350` кг CO₂/га
-
-    ### 3. Нормы и коэффициенты эмиссий СЗР:
-    - **Гербициды:** Доза $1.5$ кг/га, $EF = 25$ кг CO₂-экв/кг д.в.
-    - **Фунгициды:** Доза $0.5$ кг/га, $EF = 20$ кг CO₂-экв/кг д.в.
-    """)
+    with col2:
+        st.markdown("""
+        <div class="formula-box">
+            <h4 style="margin-top:0;">2. Базовый потенциал секвестрации орудий ($\Delta C_{баз}$)</h4>
+            <ul>
+                <li><b>Плуг:</b> <code>525</code> кг CO₂/га</li>
+                <li><b>Борона:</b> <code>400</code> кг CO₂/га</li>
+                <li><b>Чизель:</b> <code>350</code> кг CO₂/га</li>
+            </ul>
+            <h4>3. Нормы и коэффициенты эмиссий СЗР</h4>
+            <ul>
+                <li><b>Гербициды:</b> Доза 1.5 кг/га, $EF = 25$ кг CO₂-экв/кг д.в.</li>
+                <li><b>Фунгициды:</b> Доза 0.5 кг/га, $EF = 20$ кг CO₂-экв/кг д.в.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
