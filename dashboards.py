@@ -43,7 +43,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_tech.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
             st.plotly_chart(fig_tech, use_container_width=True)
 
-    # === БЛОК С БУБЛИКОМ: ТОЧНЫЙ 8-Й ЗНАЧОК И СДВИГ ВЛЕВО ===
+    # === БЛОК С БУБЛИКОМ (7 КНОПОК PLOTLY + РОДНАЯ КНОПКА ФУЛСКРИНА STREAMLIT) ===
     with g2:
         if "emission_type" in df.columns and "co2_emission_kg" in df.columns:
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
@@ -53,11 +53,9 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 template=plot_template
             )
-            # r=65 отодвигает 8-ю иконку дальше от края
             fig_donut.update_layout(
-                margin=dict(t=50, r=65, l=20, b=20)
+                margin=dict(t=50, r=20, l=20, b=20)
             )
-            # select2d — дает именно иконку с 4 уголками [ ]
             donut_toolbar_config = {
                 'displayModeBar': True,
                 'displaylogo': False,
@@ -68,8 +66,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                     'zoomIn2d',
                     'zoomOut2d',
                     'autoScale2d',
-                    'resetScale2d',
-                    'select2d'
+                    'resetScale2d'
                 ]],
                 'responsive': True
             }
