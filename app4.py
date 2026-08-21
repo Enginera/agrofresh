@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Единый блок сайдбара
+# Переключатель темы
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
     st.markdown("### **AgroFresh Control**")
@@ -48,7 +48,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Применяем оптимизированные стили
+# Применяем принудительные стили темы (с блокировкой темы ОС)
 apply_custom_styles(theme=active_theme)
 
 # Верхняя навигация

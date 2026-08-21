@@ -4,7 +4,9 @@ def apply_custom_styles(theme="dark"):
     is_dark = theme == "dark"
     
     if is_dark:
+        # === 🌙 ТЁМНАЯ ТЕМА ===
         theme_vars = """
+        --browser-scheme: dark;
         --bg-main: #0E1A14;
         --sidebar-bg: #122019;
         --surface: #15261E;
@@ -12,7 +14,6 @@ def apply_custom_styles(theme="dark"):
         --surface-band: #1F382C;
         --text-primary: #EEF6F1;
         --text-secondary: #97B2A3;
-        --text-muted: #6B8576;
         --border-subtle: #244031;
         --border-accent: #52B788;
         --brand-accent: #52B788;
@@ -36,7 +37,9 @@ def apply_custom_styles(theme="dark"):
         --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
         """
     else:
+        # === ☀️ СВЕТЛАЯ ТЕМА (Полный запрет системной темной темы) ===
         theme_vars = """
+        --browser-scheme: light;
         --bg-main: #F5F8F6;
         --sidebar-bg: #FFFFFF;
         --surface: #FFFFFF;
@@ -44,7 +47,6 @@ def apply_custom_styles(theme="dark"):
         --surface-band: #EBF3EE;
         --text-primary: #122B1E;
         --text-secondary: #4D6B5A;
-        --text-muted: #7E9789;
         --border-subtle: #DFE8E2;
         --border-accent: #2D6A4F;
         --brand-accent: #2D6A4F;
@@ -63,7 +65,7 @@ def apply_custom_styles(theme="dark"):
         --input-bg: #FFFFFF;
         --input-border: #D5E2DA;
         --tag-bg: #EAF2EC;
-        --tag-text: #1B4332;
+        --tag-text: #1B3F2B;
         --tag-border: #C4D9CC;
         --shadow-card: 0 2px 12px rgba(18, 43, 30, 0.05);
         """
@@ -76,13 +78,10 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* 1. Глобальный сброс */
-    html, body, [class*="css"], .stApp, 
-    [data-testid="stAppViewContainer"], 
-    [data-testid="stHeader"],
-    section.main,
-    .main .block-container {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    /* 1. БЛОКИРУЕМ СИСТЕМНУЮ ТЕМУ БРАУЗЕРА / ОС */
+    :root, html, body, .stApp, [data-testid="stAppViewContainer"] {
+        color-scheme: var(--browser-scheme) !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
         background-color: var(--bg-main) !important;
         color: var(--text-primary) !important;
     }
@@ -95,11 +94,13 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-primary) !important;
     }
 
-    /* 2. Сайдбар */
+    /* 2. БОКОВАЯ ПАНЕЛЬ */
     [data-testid="stSidebar"], 
     [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"] {
+    [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebar"] > div:first-child {
         background-color: var(--sidebar-bg) !important;
+        background: var(--sidebar-bg) !important;
         border-right: 1px solid var(--border-subtle) !important;
     }
     [data-testid="stSidebar"] p, 
@@ -115,7 +116,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-secondary) !important;
     }
 
-    /* 3. Верхние кнопки навигации */
+    /* 3. ВЕРХНИЕ КНОПКИ НАВИГАЦИИ */
     .stButton > button {
         background-color: var(--btn-inactive-bg) !important;
         border: 1px solid var(--border-subtle) !important;
@@ -147,22 +148,31 @@ def apply_custom_styles(theme="dark"):
         transform: translateY(-1px);
     }
 
-    /* 4. Инпуты и мультиселекты */
+    /* 4. ПЕРЕОПРЕДЕЛЕНИЕ МУЛЬТИСЕЛЕКТА (ПОЛНЫЙ СБРОС СИСТЕМНОГО ЧЕРНОГО И КРАСНОГО) */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
-    [data-testid="stMultiSelect"] > div {
+    [data-testid="stMultiSelect"] > div,
+    [data-testid="stMultiSelect"] [data-baseweb="select"] > div,
+    [data-testid="stMultiSelect"] [role="combobox"] {
         background-color: var(--input-bg) !important;
+        background: var(--input-bg) !important;
         border: 1px solid var(--input-border) !important;
         border-radius: 10px !important;
     }
+
+    /* Плашки (теги) */
     div[data-baseweb="tag"],
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+    span[data-baseweb="tag"],
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"],
+    [data-testid="stMultiSelect"] div[data-baseweb="tag"] {
         background-color: var(--tag-bg) !important;
+        background: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
         padding: 2px 8px !important;
     }
     div[data-baseweb="tag"] span,
+    div[data-baseweb="tag"] div,
     [data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
         color: var(--tag-text) !important;
         font-weight: 600 !important;
@@ -170,11 +180,26 @@ def apply_custom_styles(theme="dark"):
     }
     div[data-baseweb="tag"] svg,
     [data-testid="stMultiSelect"] svg {
-        fill: var(--text-secondary) !important;
-        color: var(--text-secondary) !important;
+        fill: var(--tag-text) !important;
+        color: var(--tag-text) !important;
     }
 
-    /* 5. Карточки метрик (KPI) */
+    /* Выпадающее меню мультиселекта */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
+    ul[role="listbox"] {
+        background-color: var(--surface) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }
+    li[role="option"] {
+        background-color: var(--surface) !important;
+        color: var(--text-primary) !important;
+    }
+    li[role="option"]:hover {
+        background-color: var(--surface-elevated) !important;
+    }
+
+    /* 5. КАРТОЧКИ МЕТРИК (KPI) */
     .kpi-card {
         background: var(--surface);
         border-radius: 16px;
@@ -233,7 +258,7 @@ def apply_custom_styles(theme="dark"):
         font-weight: 600;
     }
 
-    /* 6. Главный баннер */
+    /* 6. ГЛАВНЫЙ БАННЕР */
     .hero-banner {
         background: var(--hero-bg);
         border-radius: 18px;
@@ -274,7 +299,7 @@ def apply_custom_styles(theme="dark"):
         line-height: 1.5;
     }
 
-    /* 7. Графики и Калькулятор */
+    /* 7. ГРАФИКИ И КАЛЬКУЛЯТОР */
     .stPlotlyChart {
         background: var(--surface);
         border-radius: 16px;
@@ -312,7 +337,7 @@ def apply_custom_styles(theme="dark"):
         margin-top: 6px;
     }
 
-    /* 8. Справочник */
+    /* 8. СПРАВОЧНИК И ЗАГРУЗЧИК */
     .formula-card {
         background: var(--surface);
         border-radius: 16px;
@@ -338,7 +363,6 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--border-subtle);
     }
 
-    /* Загрузчик файлов */
     [data-testid="stFileUploader"] section {
         background-color: var(--surface-elevated) !important;
         border: 1px dashed var(--border-subtle) !important;
