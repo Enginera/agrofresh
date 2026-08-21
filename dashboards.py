@@ -1,36 +1,30 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-def get_plot_theme(theme="dark"):
-    is_dark = theme == "dark"
-    bg_color = "#15261E" if is_dark else "#FFFFFF"
-    text_color = "#EEF6F1" if is_dark else "#122B1E"
-    sub_color = "#97B2A3" if is_dark else "#4D6B5A"
-    grid_color = "#1F382C" if is_dark else "#EEF4F0"
-    line_color = "#244031" if is_dark else "#DFE8E2"
+AGRO_PALETTE = ["#2D6A4F", "#52B788", "#E07A5F", "#3D5A80", "#F4A261", "#81B29A"]
+TECH_COLORS = {"No-Till": "#2D6A4F", "Классическая": "#E07A5F"}
 
+def get_plot_theme():
     return {
         "layout": go.Layout(
-            paper_bgcolor=bg_color,
-            plot_bgcolor=bg_color,
-            font=dict(family="Plus Jakarta Sans, sans-serif", color=text_color, size=12),
-            title=dict(font=dict(color=text_color, size=14)),
+            paper_bgcolor="#FFFFFF",
+            plot_bgcolor="#FFFFFF",
+            font=dict(family="Plus Jakarta Sans, sans-serif", color="#121F17", size=12),
             margin=dict(l=30, r=20, t=50, b=30),
             xaxis=dict(
-                gridcolor=grid_color,
+                gridcolor="#EEF2EF",
                 showline=True,
-                linecolor=line_color,
-                title=dict(font=dict(color=sub_color)),
-                tickfont=dict(size=11, color=sub_color)
+                linecolor="#DDE5DF",
+                tickfont=dict(size=11, color="#586B60")
             ),
             yaxis=dict(
-                gridcolor=grid_color,
+                gridcolor="#EEF2EF",
                 showline=True,
-                linecolor=line_color,
-                title=dict(font=dict(color=sub_color)),
-                tickfont=dict(size=11, color=sub_color)
+                linecolor="#DDE5DF",
+                tickfont=dict(size=11, color="#586B60")
             ),
             legend=dict(
                 orientation="h",
@@ -38,21 +32,21 @@ def get_plot_theme(theme="dark"):
                 y=1.02,
                 xanchor="right",
                 x=1,
-                font=dict(size=11, color=text_color)
+                font=dict(size=11)
             )
         )
     }
 
-def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
+def render_carbon_dashboard(df: pd.DataFrame):
     st.markdown("""
     <div class="hero-banner">
-        <div class="hero-badge">🌱 Carbon Telemetry & AgTech Intelligence</div>
+        <div class="hero-badge">🌱 Carbon Telemetry & Yield Intelligence</div>
         <div class="hero-title">Углеродный след в растениеводстве</div>
         <div class="hero-subtitle">Мониторинг удельных и валовых эмиссий CO₂-эквивалента по агротехнологиям, полевым операциям и расходу энергоносителей.</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. Метрические карточки (KPI)
+    # 1. KPI Cards
     total_co2_ton = (df["co2_emission_kg"].sum() / 1000) if "co2_emission_kg" in df.columns else 0.0
     avg_per_ton = df["co2_per_ton"].mean() if "co2_per_ton" in df.columns else 0.0
     avg_f_razl = df["f_razl"].mean() if "f_razl" in df.columns else 0.0
@@ -61,81 +55,67 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-card-header">
-                <span class="kpi-title">Суммарные выбросы</span>
-                <span style="font-size: 1.1rem;">☁️</span>
+        <div class="metric-grid-card">
+            <div class="metric-label-row">
+                <span class="metric-label">Суммарный выброс</span>
+                <span class="metric-icon-badge">☁️</span>
             </div>
-            <div class="kpi-card-body">
-                <span class="kpi-value">{total_co2_ton:,.1f}</span>
-                <span class="kpi-unit">т CO₂</span>
-                <br>
-                <span class="kpi-sub-badge">Валовая эмиссия</span>
+            <div>
+                <span class="metric-value-num">{total_co2_ton:,.1f}</span>
+                <span class="metric-unit">т CO₂</span>
             </div>
+            <div class="metric-pill pill-orange">Валовая эмиссия</div>
         </div>
         """, unsafe_allow_html=True)
 
     with c2:
         st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-card-header">
-                <span class="kpi-title">Удельный след (ср.)</span>
-                <span style="font-size: 1.1rem;">🎯</span>
+        <div class="metric-grid-card">
+            <div class="metric-label-row">
+                <span class="metric-label">Удельный след</span>
+                <span class="metric-icon-badge">🎯</span>
             </div>
-            <div class="kpi-card-body">
-                <span class="kpi-value">{avg_per_ton:.1f}</span>
-                <span class="kpi-unit">кг/т</span>
-                <br>
-                <span class="kpi-sub-badge">Эмиссия на тонну</span>
+            <div>
+                <span class="metric-value-num">{avg_per_ton:.1f}</span>
+                <span class="metric-unit">кг/т</span>
             </div>
+            <div class="metric-pill pill-green">Среднее по выборке</div>
         </div>
         """, unsafe_allow_html=True)
 
     with c3:
         st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-card-header">
-                <span class="kpi-title">Фактор разложения Fразл</span>
-                <span style="font-size: 1.1rem;">🍂</span>
+        <div class="metric-grid-card">
+            <div class="metric-label-row">
+                <span class="metric-label">Фактор разложения Fразл</span>
+                <span class="metric-icon-badge">🍂</span>
             </div>
-            <div class="kpi-card-body">
-                <span class="kpi-value">{avg_f_razl:.2f}</span>
-                <span class="kpi-unit">гумус</span>
-                <br>
-                <span class="kpi-sub-badge">Индекс минерализации</span>
+            <div>
+                <span class="metric-value-num">{avg_f_razl:.2f}</span>
+                <span class="metric-unit">гумус</span>
             </div>
+            <div class="metric-pill pill-green">Индекс минерализации</div>
         </div>
         """, unsafe_allow_html=True)
 
     with c4:
         st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-card-header">
-                <span class="kpi-title">Ср. Урожайность</span>
-                <span style="font-size: 1.1rem;">🌾</span>
+        <div class="metric-grid-card">
+            <div class="metric-label-row">
+                <span class="metric-label">Ср. Урожайность</span>
+                <span class="metric-icon-badge">🌾</span>
             </div>
-            <div class="kpi-card-body">
-                <span class="kpi-value">{avg_yield:.2f}</span>
-                <span class="kpi-unit">т/га</span>
-                <br>
-                <span class="kpi-sub-badge">Продуктивность угодий</span>
+            <div>
+                <span class="metric-value-num">{avg_yield:.2f}</span>
+                <span class="metric-unit">т/га</span>
             </div>
+            <div class="metric-pill pill-green">Продуктивность угодий</div>
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
-    # Гармоничная палитра графиков
-    if theme == "dark":
-        tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"}
-        agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"]
-        pie_border = "#15261E"
-    else:
-        tech_colors = {"No-Till": "#2D6A4F", "Классическая": "#D95D39"}
-        agro_palette = ["#2D6A4F", "#52B788", "#74C69D", "#3D5A80", "#E07A5F", "#E9C46A"]
-        pie_border = "#FFFFFF"
-
-    # 2. Графики Ряд 1
+    # 2. Charts Row 1
     g1, g2 = st.columns(2)
     with g1:
         if "technology" in df.columns and "co2_per_ton" in df.columns:
@@ -143,9 +123,9 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 df, x="crop", y="co2_per_ton", color="technology",
                 title="<b>Сравнение следа (кг CO₂/т):</b> No-Till vs Классическая",
                 labels={"co2_per_ton": "кг CO₂/т", "crop": "Культура", "technology": "Технология"},
-                color_discrete_map=tech_colors
+                color_discrete_map=TECH_COLORS
             )
-            fig_tech.update_layout(get_plot_theme(theme)["layout"])
+            fig_tech.update_layout(get_plot_theme()["layout"])
             st.plotly_chart(fig_tech, use_container_width=True)
 
     with g2:
@@ -153,18 +133,14 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             df_src = df.groupby("emission_type")["co2_emission_kg"].sum().reset_index()
             fig_donut = px.pie(
                 df_src, names="emission_type", values="co2_emission_kg", hole=0.55,
-                title="<b>Структура выбросов по энергоносителям и ресурсам</b>",
-                color_discrete_sequence=agro_palette
+                title="<b>Структура выбросов по ресурсам и энергоносителям</b>",
+                color_discrete_sequence=AGRO_PALETTE
             )
-            fig_donut.update_traces(
-                textposition='inside',
-                textinfo='percent+label',
-                marker=dict(line=dict(color=pie_border, width=2))
-            )
-            fig_donut.update_layout(get_plot_theme(theme)["layout"])
+            fig_donut.update_traces(textposition='inside', textinfo='percent+label', marker=dict(line=dict(color='#FFFFFF', width=2)))
+            fig_donut.update_layout(get_plot_theme()["layout"])
             st.plotly_chart(fig_donut, use_container_width=True)
 
-    # 3. Графики Ряд 2
+    # 3. Charts Row 2
     g3, g4 = st.columns(2)
     with g3:
         if "operation" in df.columns and "co2_emission_kg" in df.columns:
@@ -173,9 +149,9 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 df_ops, x="operation", y="co2_emission_kg", color="technology", barmode="group",
                 title="<b>Эмиссия CO₂ по полевым операциям (кг)</b>",
                 labels={"co2_emission_kg": "Выбросы CO₂ (кг)", "operation": "Операция", "technology": "Технология"},
-                color_discrete_map=tech_colors
+                color_discrete_map=TECH_COLORS
             )
-            fig_ops.update_layout(get_plot_theme(theme)["layout"])
+            fig_ops.update_layout(get_plot_theme()["layout"])
             st.plotly_chart(fig_ops, use_container_width=True)
 
     with g4:
@@ -185,16 +161,16 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 size="emission_coeff_e", hover_data=["technology", "operation"],
                 title="<b>Корреляция:</b> Урожайность vs Выбросы CO₂",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
-                color_discrete_sequence=agro_palette
+                color_discrete_sequence=AGRO_PALETTE
             )
-            fig_scatter.update_layout(get_plot_theme(theme)["layout"])
+            fig_scatter.update_layout(get_plot_theme()["layout"])
             st.plotly_chart(fig_scatter, use_container_width=True)
 
-    # 4. Калькулятор No-Till
+    # 4. Interactive No-Till Calculator
     st.markdown("""
     <div class="calc-container">
-        <div style="font-weight: 700; font-size: 1.25rem; margin-bottom: 4px;">⚡ Интерактивный калькулятор эффекта No-Till</div>
-        <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Расчет потенциала сокращения карбонового следа за счет исключения вспашки и экономии топлива.</div>
+        <div class="calc-header">⚡ Интерактивный калькулятор эффекта No-Till</div>
+        <div class="calc-desc">Рассчитайте потенциал сокращения карбонового следа за счет исключения пахоты и экономии дизельного топлива.</div>
     """, unsafe_allow_html=True)
 
     c_calc1, c_calc2, c_calc3 = st.columns(3)
@@ -212,19 +188,19 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     r1, r2 = st.columns(2)
     with r1:
         st.markdown(f"""
-        <div class="calc-result-card">
+        <div class="calc-result-card accent-emerald">
             <div class="calc-res-title">Сокращение прямых выбросов топлива</div>
             <div class="calc-res-val">-{co2_saved_fuel:,.2f} <span style="font-size: 0.9rem; font-weight: 500;">т CO₂-экв/год</span></div>
-            <div style="font-size: 0.8rem; color: var(--border-accent); margin-top: 8px;">Фактор эмиссии ДТ: 2.68 кг CO₂/л</div>
+            <div style="font-size: 0.8rem; color: #2D6A4F; margin-top: 6px;">Фактор эмиссии ДТ: 2.68 кг CO₂/литр</div>
         </div>
         """, unsafe_allow_html=True)
 
     with r2:
         st.markdown(f"""
-        <div class="calc-result-card">
+        <div class="calc-result-card accent-blue">
             <div class="calc-res-title">Депонирование углерода в почве</div>
             <div class="calc-res-val">+{humus_carbon_saved:,.2f} <span style="font-size: 0.9rem; font-weight: 500;">т C/год</span></div>
-            <div style="font-size: 0.8rem; color: var(--border-accent); margin-top: 8px;">Сохранение гумуса почвы</div>
+            <div style="font-size: 0.8rem; color: #0E7490; margin-top: 6px;">Сохранение органического вещества почвы</div>
         </div>
         """, unsafe_allow_html=True)
 

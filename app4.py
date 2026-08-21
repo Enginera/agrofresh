@@ -12,21 +12,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Переключатель темы
+# Apply high-end aesthetic stylesheet
+apply_custom_styles()
+
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=55)
+    st.image("https://img.icons8.com/color/96/plant-under-sun.png", width=60)
     st.markdown("### **AgroFresh Control**")
-    st.caption("Система анализа углеродного следа")
-    
-    theme_choice = st.radio("🎨 Тема оформления", ["🌙 Тёмная", "☀️ Светлая"], horizontal=True)
-    active_theme = "dark" if "🌙" in theme_choice else "light"
+    st.caption("Аналитическая платформа углеродного следа")
     st.markdown("---")
 
     st.markdown("##### 📁 **Источник данных**")
     uploaded_file = st.file_uploader(
-        "Загрузить отчет",
+        "Загрузить полевой отчет",
         type=["xlsx", "xls", "csv"],
-        help="Поддерживаются отчеты полевых замеров"
+        help="Поддерживаются сырые отчеты полевых работ и агрономических замеров"
     )
     df_carbon = advanced_multi_field_parser(uploaded_file)
 
@@ -48,19 +47,16 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Строк в выборке: **{len(df_carbon):,}**")
 
-# Применяем принудительные стили темы (с блокировкой темы ОС)
-apply_custom_styles(theme=active_theme)
-
-# Верхняя навигация
+# Top Navigation Tabs
 page = render_button_navigation()
 
 if page == "Углеродный след (Эмиссия CO₂)":
-    render_carbon_dashboard(df_carbon, theme=active_theme)
+    render_carbon_dashboard(df_carbon)
 
 elif page == "Таблица данных и Экспорт":
     st.markdown("""
     <div class="hero-banner">
-        <div class="hero-badge">📊 Data Warehouse</div>
+        <div class="hero-badge">📊 Data Warehouse & Integration</div>
         <div class="hero-title">Нормализованные данные</div>
         <div class="hero-subtitle">Выборка после автоматического парсинга, валидации числовых полей и маппинга справочников.</div>
     </div>
@@ -70,7 +66,7 @@ elif page == "Таблица данных и Экспорт":
 
     csv_data = df_carbon.to_csv(index=False).encode("utf-8-sig")
     st.download_button(
-        "📥 Скачать выборку (CSV)",
+        "📥 Скачать обработанную выборку (CSV)",
         data=csv_data,
         file_name="agrofresh_carbon_export.csv",
         mime="text/csv",
@@ -80,7 +76,7 @@ elif page == "Таблица данных и Экспорт":
 elif page == "Справочник агротехнологий":
     st.markdown("""
     <div class="hero-banner">
-        <div class="hero-badge">📖 Reference & Methodology</div>
+        <div class="hero-badge">📖 AgroTech Reference & Methodology</div>
         <div class="hero-title">Методические коэффициенты и формулы</div>
         <div class="hero-subtitle">Параметры минерализации, секвестрации и удельных выбросов для оценки климатического баланса.</div>
     </div>
@@ -92,7 +88,7 @@ elif page == "Справочник агротехнологий":
         st.markdown("""
         <div class="formula-card">
             <h3>1. Фактор разложения гумуса ($F_{разл}$)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Характеризует устойчивость органического вещества почвы к деградации при различных технологиях обработки:</p>
+            <p style="color: #586B60; font-size: 0.9rem;">Характеризует устойчивость органического вещества почвы к деградации при различных технологиях обработки:</p>
             <ul>
                 <li><b>Лён:</b> Классическая — <span class="data-table-badge">0.48</span>, No-Till — <span class="data-table-badge">0.70</span></li>
                 <li><b>Озимая пшеница:</b> Классическая — <span class="data-table-badge">0.65</span>, No-Till — <span class="data-table-badge">0.82</span></li>
@@ -108,7 +104,7 @@ elif page == "Справочник агротехнологий":
         st.markdown("""
         <div class="formula-card">
             <h3>2. Базовый потенциал орудий ($\Delta C_{баз}$)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Прямые механические потери углерода почвы за проход орудия:</p>
+            <p style="color: #586B60; font-size: 0.9rem;">Прямые механические потери углерода почвы за проход орудия:</p>
             <ul>
                 <li><b>Плуг:</b> <span class="data-table-badge">525 кг CO₂/га</span></li>
                 <li><b>Борона:</b> <span class="data-table-badge">400 кг CO₂/га</span></li>

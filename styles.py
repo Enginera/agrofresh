@@ -1,279 +1,69 @@
 import streamlit as st
 
-def apply_custom_styles(theme="dark"):
-    is_dark = theme == "dark"
-    
-    if is_dark:
-        # === 🌙 ТЁМНАЯ ТЕМА ===
-        theme_vars = """
-        --browser-scheme: dark;
-        --bg-main: #0E1A14;
-        --sidebar-bg: #122019;
-        --surface: #15261E;
-        --surface-elevated: #1C3328;
-        --surface-band: #1F382C;
-        --text-primary: #EEF6F1;
-        --text-secondary: #97B2A3;
-        --border-subtle: #244031;
-        --border-accent: #52B788;
-        --brand-accent: #52B788;
-        --brand-mint: #74C69D;
-        --hero-bg: linear-gradient(135deg, #112219 0%, #1A3527 50%, #234734 100%);
-        --hero-text: #FFFFFF;
-        --hero-sub: #D0E8DC;
-        --hero-badge-bg: rgba(82, 183, 136, 0.2);
-        --hero-badge-text: #74C69D;
-        --kpi-title: #A8CEBA;
-        --kpi-value: #74C69D;
-        --btn-active-bg: #2D6A4F;
-        --btn-active-text: #FFFFFF;
-        --btn-inactive-bg: #15261E;
-        --btn-inactive-text: #EEF6F1;
-        --input-bg: #1C3328;
-        --input-border: #2B4C3A;
-        --tag-bg: #234032;
-        --tag-text: #CDE6D8;
-        --tag-border: #355E49;
-        --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
-        """
-    else:
-        # === ☀️ СВЕТЛАЯ ТЕМА (Полный запрет системной темной темы) ===
-        theme_vars = """
-        --browser-scheme: light;
-        --bg-main: #F5F8F6;
-        --sidebar-bg: #FFFFFF;
-        --surface: #FFFFFF;
-        --surface-elevated: #F7FAF8;
-        --surface-band: #EBF3EE;
-        --text-primary: #122B1E;
-        --text-secondary: #4D6B5A;
-        --border-subtle: #DFE8E2;
-        --border-accent: #2D6A4F;
-        --brand-accent: #2D6A4F;
-        --brand-mint: #1B4332;
-        --hero-bg: linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);
-        --hero-text: #FFFFFF;
-        --hero-sub: #E2EFE7;
-        --hero-badge-bg: rgba(255, 255, 255, 0.2);
-        --hero-badge-text: #FFFFFF;
-        --kpi-title: #1B4332;
-        --kpi-value: #122B1E;
-        --btn-active-bg: #2D6A4F;
-        --btn-active-text: #FFFFFF;
-        --btn-inactive-bg: #FFFFFF;
-        --btn-inactive-text: #122B1E;
-        --input-bg: #FFFFFF;
-        --input-border: #D5E2DA;
-        --tag-bg: #EAF2EC;
-        --tag-text: #1B3F2B;
-        --tag-border: #C4D9CC;
-        --shadow-card: 0 2px 12px rgba(18, 43, 30, 0.05);
-        """
-
-    css_template = """
+def apply_custom_styles():
+    custom_css = """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
     :root {
-        __THEME_VARS__
+        --bg-main: #F4F7F4;
+        --surface: #FFFFFF;
+        --surface-glass: rgba(255, 255, 255, 0.85);
+        --brand-dark: #0A2518;
+        --brand-forest: #1B4332;
+        --brand-primary: #2D6A4F;
+        --brand-sage: #52B788;
+        --brand-lime: #74C69D;
+        --accent-sand: #EFEFE9;
+        --accent-terracotta: #D95D39;
+        --text-primary: #121F17;
+        --text-secondary: #586B60;
+        --border-subtle: #DDE5DF;
+        --border-focus: #52B788;
+        --shadow-sm: 0 2px 8px rgba(10, 37, 24, 0.04);
+        --shadow-md: 0 8px 24px rgba(10, 37, 24, 0.07);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
     }
 
-    /* 1. БЛОКИРУЕМ СИСТЕМНУЮ ТЕМУ БРАУЗЕРА / ОС */
-    :root, html, body, .stApp, [data-testid="stAppViewContainer"] {
-        color-scheme: var(--browser-scheme) !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    /* Global typography */
+    html, body, [class*="css"], .stApp {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
         background-color: var(--bg-main) !important;
         color: var(--text-primary) !important;
     }
 
-    [data-testid="stHeader"] {
-        background-color: var(--bg-main) !important;
-        border-bottom: 1px solid var(--border-subtle) !important;
-    }
-    [data-testid="stHeader"] * {
-        color: var(--text-primary) !important;
-    }
-
-    /* 2. БОКОВАЯ ПАНЕЛЬ */
-    [data-testid="stSidebar"], 
-    [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"],
-    [data-testid="stSidebar"] > div:first-child {
-        background-color: var(--sidebar-bg) !important;
-        background: var(--sidebar-bg) !important;
-        border-right: 1px solid var(--border-subtle) !important;
-    }
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] span, 
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] div {
-        color: var(--text-primary) !important;
-    }
-    [data-testid="stSidebar"] .stCaption {
-        color: var(--text-secondary) !important;
-    }
-
-    /* 3. ВЕРХНИЕ КНОПКИ НАВИГАЦИИ */
-    .stButton > button {
-        background-color: var(--btn-inactive-bg) !important;
-        border: 1px solid var(--border-subtle) !important;
-        border-radius: 12px !important;
-        box-shadow: var(--shadow-card) !important;
-        padding: 10px 16px !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton > button p,
-    .stButton > button span,
-    .stButton > button div {
-        color: var(--btn-inactive-text) !important;
-        font-weight: 600 !important;
-    }
-    .stButton > button[kind="primary"],
-    .stButton > button[data-testid="baseButton-primary"] {
-        background-color: var(--btn-active-bg) !important;
-        border: 1px solid var(--btn-active-bg) !important;
-    }
-    .stButton > button[kind="primary"] p,
-    .stButton > button[kind="primary"] span,
-    .stButton > button[data-testid="baseButton-primary"] p,
-    .stButton > button[data-testid="baseButton-primary"] span {
-        color: var(--btn-active-text) !important;
-        font-weight: 700 !important;
-    }
-    .stButton > button:hover {
-        border-color: var(--border-accent) !important;
-        transform: translateY(-1px);
-    }
-
-    /* 4. ПЕРЕОПРЕДЕЛЕНИЕ МУЛЬТИСЕЛЕКТА (ПОЛНЫЙ СБРОС СИСТЕМНОГО ЧЕРНОГО И КРАСНОГО) */
-    div[data-baseweb="select"],
-    div[data-baseweb="select"] > div,
-    [data-testid="stMultiSelect"] > div,
-    [data-testid="stMultiSelect"] [data-baseweb="select"] > div,
-    [data-testid="stMultiSelect"] [role="combobox"] {
-        background-color: var(--input-bg) !important;
-        background: var(--input-bg) !important;
-        border: 1px solid var(--input-border) !important;
-        border-radius: 10px !important;
-    }
-
-    /* Плашки (теги) */
-    div[data-baseweb="tag"],
-    span[data-baseweb="tag"],
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"],
-    [data-testid="stMultiSelect"] div[data-baseweb="tag"] {
-        background-color: var(--tag-bg) !important;
-        background: var(--tag-bg) !important;
-        border: 1px solid var(--tag-border) !important;
-        border-radius: 6px !important;
-        padding: 2px 8px !important;
-    }
-    div[data-baseweb="tag"] span,
-    div[data-baseweb="tag"] div,
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
-        color: var(--tag-text) !important;
-        font-weight: 600 !important;
-        font-size: 0.82rem !important;
-    }
-    div[data-baseweb="tag"] svg,
-    [data-testid="stMultiSelect"] svg {
-        fill: var(--tag-text) !important;
-        color: var(--tag-text) !important;
-    }
-
-    /* Выпадающее меню мультиселекта */
-    [data-baseweb="popover"],
-    [data-baseweb="popover"] > div,
-    ul[role="listbox"] {
-        background-color: var(--surface) !important;
-        border: 1px solid var(--border-subtle) !important;
-    }
-    li[role="option"] {
-        background-color: var(--surface) !important;
-        color: var(--text-primary) !important;
-    }
-    li[role="option"]:hover {
-        background-color: var(--surface-elevated) !important;
-    }
-
-    /* 5. КАРТОЧКИ МЕТРИК (KPI) */
-    .kpi-card {
-        background: var(--surface);
-        border-radius: 16px;
-        border: 1px solid var(--border-subtle);
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .kpi-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--border-accent);
-    }
-    .kpi-card-header {
-        background: var(--surface-band);
-        padding: 12px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid var(--border-subtle);
-    }
-    .kpi-title {
-        font-size: 0.76rem;
-        font-weight: 700;
-        color: var(--kpi-title) !important;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-    }
-    .kpi-card-body {
-        padding: 18px;
-        background: var(--surface);
-    }
-    .kpi-value {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.95rem;
-        font-weight: 700;
-        color: var(--kpi-value) !important;
-        letter-spacing: -0.5px;
-    }
-    .kpi-unit {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--text-secondary) !important;
-        margin-left: 4px;
-    }
-    .kpi-sub-badge {
-        margin-top: 10px;
-        display: inline-flex;
-        padding: 4px 10px;
-        border-radius: 20px;
-        background: var(--surface-elevated);
-        color: var(--text-secondary) !important;
-        border: 1px solid var(--border-subtle);
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
-
-    /* 6. ГЛАВНЫЙ БАННЕР */
+    /* Hero Header */
     .hero-banner {
-        background: var(--hero-bg);
-        border-radius: 18px;
-        padding: 30px 36px;
-        color: var(--hero-text) !important;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-card);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: linear-gradient(135deg, #0A2518 0%, #1B4332 50%, #2D6A4F 100%);
+        border-radius: var(--radius-lg);
+        padding: 32px 36px;
+        color: #FFFFFF !important;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hero-banner::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(116, 198, 157, 0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
     }
     .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: var(--hero-badge-bg);
-        color: var(--hero-badge-text);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        color: #B7E4C7;
         font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -281,100 +71,215 @@ def apply_custom_styles(theme="dark"):
         padding: 5px 12px;
         border-radius: 30px;
         margin-bottom: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .hero-title {
-        font-size: 2.1rem;
+        font-size: 2.2rem;
         font-weight: 800;
         letter-spacing: -0.5px;
-        color: var(--hero-text) !important;
+        color: #FFFFFF;
         margin: 0 0 8px 0;
+        line-height: 1.2;
     }
     .hero-subtitle {
-        font-size: 1.0rem;
-        color: var(--hero-sub) !important;
+        font-size: 1.05rem;
+        color: #D8F3DC;
         font-weight: 400;
-        max-width: 820px;
+        max-width: 750px;
         margin: 0;
         line-height: 1.5;
     }
 
-    /* 7. ГРАФИКИ И КАЛЬКУЛЯТОР */
-    .stPlotlyChart {
+    /* Metric Cards */
+    .metric-grid-card {
         background: var(--surface);
-        border-radius: 16px;
+        border-radius: var(--radius-md);
+        padding: 22px 20px;
         border: 1px solid var(--border-subtle);
-        padding: 10px;
-        box-shadow: var(--shadow-card);
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        position: relative;
+        overflow: hidden;
     }
+    .metric-grid-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--brand-sage);
+    }
+    .metric-grid-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--brand-primary), var(--brand-sage));
+    }
+    .metric-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .metric-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+    .metric-icon-badge {
+        font-size: 1.1rem;
+        background: var(--bg-main);
+        padding: 6px;
+        border-radius: 8px;
+        line-height: 1;
+    }
+    .metric-value-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: var(--brand-dark);
+        letter-spacing: -0.8px;
+        line-height: 1.1;
+    }
+    .metric-unit {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin-left: 4px;
+    }
+    .metric-pill {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 12px;
+    }
+    .pill-green {
+        background-color: #E8F5E9;
+        color: #1B5E20;
+    }
+    .pill-orange {
+        background-color: #FBE9E7;
+        color: #D84315;
+    }
+
+    /* Calculator Box */
     .calc-container {
-        background: var(--surface);
+        background: linear-gradient(145deg, #FFFFFF 0%, #F9FAF8 100%);
         border: 1px solid var(--border-subtle);
-        border-radius: 18px;
-        padding: 26px;
-        box-shadow: var(--shadow-card);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        box-shadow: var(--shadow-sm);
         margin-top: 24px;
+        margin-bottom: 24px;
+    }
+    .calc-header {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--brand-dark);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .calc-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
     }
     .calc-result-card {
-        background: var(--surface-elevated);
-        border-radius: 14px;
+        background: #FFFFFF;
+        border-radius: var(--radius-md);
         padding: 20px;
         border: 1px solid var(--border-subtle);
+        box-shadow: var(--shadow-sm);
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .calc-result-card.accent-emerald {
+        background: linear-gradient(145deg, #F0FDF4 0%, #E8F7ED 100%);
+        border: 1px solid #A7F3D0;
+    }
+    .calc-result-card.accent-blue {
+        background: linear-gradient(145deg, #F0FDFB 0%, #E6F8F6 100%);
+        border: 1px solid #99F6E4;
     }
     .calc-res-title {
-        font-size: 0.76rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
         font-weight: 700;
         letter-spacing: 0.7px;
-        color: var(--text-secondary) !important;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
     }
     .calc-res-val {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 1.7rem;
+        font-size: 1.65rem;
         font-weight: 700;
-        color: var(--text-primary) !important;
-        margin-top: 6px;
+        color: var(--brand-dark);
+        margin-top: 4px;
     }
 
-    /* 8. СПРАВОЧНИК И ЗАГРУЗЧИК */
+    /* Reference & Formula Cards */
     .formula-card {
-        background: var(--surface);
-        border-radius: 16px;
+        background: #FFFFFF;
+        border-radius: var(--radius-md);
         border: 1px solid var(--border-subtle);
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: var(--shadow-card);
+        box-shadow: var(--shadow-sm);
     }
     .formula-card h3 {
-        color: var(--brand-mint);
+        color: var(--brand-forest);
         font-size: 1.15rem;
         font-weight: 700;
         margin-top: 0;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }
     .data-table-badge {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 600;
-        background: var(--surface-band);
-        color: var(--text-primary);
-        padding: 2px 8px;
+        background: #EDF5F0;
+        color: #1B4332;
+        padding: 2px 7px;
         border-radius: 6px;
+        border: 1px solid #D4E8DC;
+    }
+
+    /* Sidebar Refinement */
+    [data-testid="stSidebar"] {
+        background-color: #FAFBF9 !important;
+        border-right: 1px solid var(--border-subtle) !important;
+    }
+    [data-testid="stSidebar"] hr {
+        border-color: var(--border-subtle) !important;
+    }
+
+    /* Plotly container clean */
+    .stPlotlyChart {
+        background: #FFFFFF;
+        border-radius: var(--radius-md);
         border: 1px solid var(--border-subtle);
+        padding: 8px;
+        box-shadow: var(--shadow-sm);
     }
 
-    [data-testid="stFileUploader"] section {
-        background-color: var(--surface-elevated) !important;
-        border: 1px dashed var(--border-subtle) !important;
-        border-radius: 12px !important;
+    /* Streamlit overrides */
+    div[data-testid="stExpander"] {
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-md) !important;
+        background: #FFFFFF !important;
+        box-shadow: var(--shadow-sm) !important;
     }
-    [data-testid="stFileUploader"] section * {
-        color: var(--text-primary) !important;
-    }
-
     footer {visibility: hidden;}
     </style>
     """
-    
-    custom_css = css_template.replace("__THEME_VARS__", theme_vars)
     st.markdown(custom_css, unsafe_allow_html=True)
