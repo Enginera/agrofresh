@@ -45,10 +45,19 @@ def get_plot_theme(theme="dark"):
             font=dict(family="Plus Jakarta Sans, sans-serif", color=text_color, size=12),
             title=dict(font=dict(color=text_color, size=13), y=0.98, x=0.01, xanchor="left"),
             modebar=dict(bgcolor=modebar_bg, color=modebar_color, activecolor=modebar_active, orientation="h"),
-            margin=dict(l=35, r=140, t=65, b=45),
-            xaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color, size=11), automargin=True),
-            yaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color, size=11), automargin=True),
-            legend=dict(orientation="v", yanchor="top", y=0.98, xanchor="left", x=1.02, font=dict(color=text_color, size=11))
+            # Адаптивные отступы: графики занимают 100% ширины на телефонах и ПК
+            margin=dict(l=25, r=20, t=45, b=45),
+            xaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color, size=10), automargin=True),
+            yaxis=dict(gridcolor=grid_color, linecolor=line_color, tickfont=dict(color=sub_color, size=10), automargin=True),
+            # Нижняя горизонтальная легенда для мобильной адаптивности
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.25,
+                xanchor="center",
+                x=0.5,
+                font=dict(color=text_color, size=11)
+            )
         )
     }
 
@@ -89,8 +98,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=TECH_COLOR_MAP
             )
             fig_tech.update_layout(get_plot_theme(theme)["layout"])
-            fig_tech.update_layout(legend=dict(title=dict(text="<b>Технология</b>", font=dict(size=11, color=text_color))))
-            fig_tech.update_xaxes(tickangle=-15, automargin=True)
+            fig_tech.update_xaxes(tickangle=-20, automargin=True)
             st.plotly_chart(fig_tech, use_container_width=True, config=CHART_CONFIG)
 
     with g2:
@@ -103,7 +111,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             )
             fig_donut.update_traces(textposition='inside', textinfo='percent', marker=dict(line=dict(color=pie_border, width=2)))
             fig_donut.update_layout(get_plot_theme(theme)["layout"])
-            fig_donut.update_layout(legend=dict(title=dict(text="<b>Ресурс / Энергия</b>", font=dict(size=11, color=text_color))))
             st.plotly_chart(fig_donut, use_container_width=True, config=CHART_CONFIG)
 
     # 3. Графики Ряд 2
@@ -118,8 +125,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 color_discrete_map=TECH_COLOR_MAP
             )
             fig_ops.update_layout(get_plot_theme(theme)["layout"])
-            fig_ops.update_layout(legend=dict(title=dict(text="<b>Технология</b>", font=dict(size=11, color=text_color))))
-            fig_ops.update_xaxes(tickangle=-15, automargin=True)
+            fig_ops.update_xaxes(tickangle=-20, automargin=True)
             st.plotly_chart(fig_ops, use_container_width=True, config=CHART_CONFIG)
 
     with g4:
@@ -127,7 +133,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             fig_scatter = px.scatter(
                 df, x="yield_t_ha", y="co2_emission_kg", color="crop",
                 size="emission_coeff_e",
-                size_max=16,
+                size_max=15,
                 hover_data=["technology", "operation"],
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
@@ -136,8 +142,21 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             
             border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
             fig_scatter.update_traces(marker=dict(opacity=0.75, line=dict(width=1.2, color=border_color)))
-            fig_scatter.update_layout(get_plot_theme(theme)["layout"])
-            fig_scatter.update_layout(legend=dict(title=dict(text="<b>Культура</b>", font=dict(size=11, color=text_color))))
+            
+            scatter_layout = get_plot_theme(theme)["layout"]
+            fig_scatter.update_layout(scatter_layout)
+            # Отдельный отступ снизу под горизонтальный перечень 6 культур
+            fig_scatter.update_layout(
+                margin=dict(l=25, r=20, t=45, b=65),
+                legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-0.28,
+                    xanchor="center",
+                    x=0.5,
+                    font=dict(color=text_color, size=10)
+                )
+            )
             st.plotly_chart(fig_scatter, use_container_width=True, config=CHART_CONFIG)
 
     # 4. Калькулятор No-Till
