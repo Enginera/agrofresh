@@ -4,8 +4,9 @@ def apply_custom_styles(theme="dark"):
     is_dark = theme == "dark"
 
     if is_dark:
+        # === 🌙 ТЁМНАЯ ТЕМА ===
         theme_vars = """
-        --color-scheme: dark;
+        --browser-scheme: dark;
         --bg-main: #0F1D16;
         --sidebar-bg: #15261E;
         --card-bg: #1A2E24;
@@ -22,8 +23,9 @@ def apply_custom_styles(theme="dark"):
         --btn-active-bg: #2D6A4F;
         """
     else:
+        # === ☀️ СВЕТЛАЯ ТЕМА ===
         theme_vars = """
-        --color-scheme: light;
+        --browser-scheme: light;
         --bg-main: #F4F7F4;
         --sidebar-bg: #F4F9F4;
         --card-bg: #FFFFFF;
@@ -46,11 +48,16 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* 1. Блокировка системной темы */
-    :root, html, body, .stApp, [data-testid="stAppViewContainer"] {
-        color-scheme: var(--color-scheme) !important;
+    /* 1. ПРИНУДИТЕЛЬНАЯ БЛОКИРОВКА СИСТЕМНОЙ ТЕМЫ ОС/БРАУЗЕРА */
+    :root, html, body, .stApp, 
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"],
+    section.main,
+    .main .block-container {
+        color-scheme: var(--browser-scheme) !important;
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
     .main-header {
@@ -95,6 +102,7 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stSidebarUserContent"],
     [data-testid="stSidebar"] > div:first-child {
         background-color: var(--sidebar-bg) !important;
+        background: var(--sidebar-bg) !important;
         border-right: 1px solid var(--card-border) !important;
     }
     [data-testid="stSidebar"] p, 
@@ -106,7 +114,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-main) !important;
     }
 
-    /* 4. Кнопки навигации */
+    /* 4. Кнопки верхней навигации */
     .stButton > button {
         background-color: var(--btn-bg) !important;
         color: var(--btn-text) !important;
@@ -120,94 +128,128 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--btn-active-bg) !important;
     }
 
-    /* 5. Мультиселект */
+    /* 5. Мультиселект (Контейнер и поле ввода) */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
-    [data-testid="stMultiSelect"] > div {
+    [data-testid="stMultiSelect"] > div,
+    [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
         background-color: var(--input-bg) !important;
+        background: var(--input-bg) !important;
         border: 1px solid var(--input-border) !important;
         border-radius: 6px !important;
     }
 
-    /* 6. Цвета плашек по культурам и технологиям */
+    /* Базовые стили для всех плашек тегов */
     div[data-baseweb="tag"],
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+    span[data-baseweb="tag"],
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"],
+    [data-testid="stMultiSelect"] div[data-baseweb="tag"] {
         border-radius: 4px !important;
         padding: 3px 8px !important;
     }
     div[data-baseweb="tag"] span,
     div[data-baseweb="tag"] div,
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
+    span[data-baseweb="tag"] span {
         color: #FFFFFF !important;
         font-weight: 600 !important;
     }
     div[data-baseweb="tag"] svg,
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
+    span[data-baseweb="tag"] svg {
         fill: #FFFFFF !important;
         color: #FFFFFF !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
-    span[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Кукуруза"]) {
+    /* 6. ТОЧНАЯ ПРИВЯЗКА ЦВЕТОВ КУЛЬТУР ПО ARIA-LABEL И TITLE */
+    /* 🌽 Кукуруза -> Голубой (#4EA8DE) */
+    [data-baseweb="tag"][aria-label*="Кукуруза"],
+    [data-baseweb="tag"]:has(span[title*="Кукуруза"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Кукуруза"] {
         background-color: #4EA8DE !important;
+        background: #4EA8DE !important;
         border: 1px solid #3A8EC0 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Горох"]),
-    span[data-baseweb="tag"]:has(span[title*="Горох"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Горох"]) {
+    /* 🟢 Горох -> Мятно-зеленый (#52B788) */
+    [data-baseweb="tag"][aria-label*="Горох"],
+    [data-baseweb="tag"]:has(span[title*="Горох"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Горох"] {
         background-color: #52B788 !important;
+        background: #52B788 !important;
         border: 1px solid #3F9A70 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Озимая"]),
-    div[data-baseweb="tag"]:has(span[title*="пшеница"]),
-    span[data-baseweb="tag"]:has(span[title*="Озимая"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Озимая"]) {
+    /* 🌾 Озимая пшеница -> Янтарно-оранжевый (#F4A261) */
+    [data-baseweb="tag"][aria-label*="Озимая"],
+    [data-baseweb="tag"][aria-label*="пшеница"],
+    [data-baseweb="tag"]:has(span[title*="Озимая"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Озимая"] {
         background-color: #F4A261 !important;
+        background: #F4A261 !important;
         border: 1px solid #D98848 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Лён"]),
-    div[data-baseweb="tag"]:has(span[title*="лен"]),
-    span[data-baseweb="tag"]:has(span[title*="Лён"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Лён"]) {
+    /* 🌺 Лён -> Кораллово-терракотовый (#E07A5F) */
+    [data-baseweb="tag"][aria-label*="Лён"],
+    [data-baseweb="tag"][aria-label*="лен"],
+    [data-baseweb="tag"][aria-label*="Лен"],
+    [data-baseweb="tag"]:has(span[title*="Лён"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Лён"] {
         background-color: #E07A5F !important;
+        background: #E07A5F !important;
         border: 1px solid #C46247 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Многолет"]),
-    div[data-baseweb="tag"]:has(span[title*="травы"]),
-    span[data-baseweb="tag"]:has(span[title*="Многолет"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Многолет"]) {
+    /* 🌿 Многолетние травы -> Глубокий индиго (#3D5A80) */
+    [data-baseweb="tag"][aria-label*="Многолет"],
+    [data-baseweb="tag"][aria-label*="травы"],
+    [data-baseweb="tag"]:has(span[title*="Многолет"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Многолет"] {
         background-color: #3D5A80 !important;
+        background: #3D5A80 !important;
         border: 1px solid #2B4360 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Подсолне"]),
-    span[data-baseweb="tag"]:has(span[title*="Подсолне"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Подсолне"]) {
+    /* 🌻 Подсолнечник -> Фиолетовый (#9D4EDD) */
+    [data-baseweb="tag"][aria-label*="Подсолне"],
+    [data-baseweb="tag"]:has(span[title*="Подсолне"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Подсолне"] {
         background-color: #9D4EDD !important;
+        background: #9D4EDD !important;
         border: 1px solid #7F35BF !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="No-Till"]),
-    div[data-baseweb="tag"]:has(span[title*="notill"]),
-    span[data-baseweb="tag"]:has(span[title*="No-Till"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="No-Till"]) {
+    /* 🌱 No-Till -> Зеленый (#2E7D32) */
+    [data-baseweb="tag"][aria-label*="No-Till"],
+    [data-baseweb="tag"][aria-label*="notill"],
+    [data-baseweb="tag"]:has(span[title*="No-Till"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="No-Till"] {
         background-color: #2E7D32 !important;
+        background: #2E7D32 !important;
         border: 1px solid #1B5E20 !important;
     }
 
-    div[data-baseweb="tag"]:has(span[title*="Классиче"]),
-    span[data-baseweb="tag"]:has(span[title*="Классиче"]),
-    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Классиче"]) {
+    /* 🚜 Классическая -> Красный (#C62828) */
+    [data-baseweb="tag"][aria-label*="Классиче"],
+    [data-baseweb="tag"]:has(span[title*="Классиче"]),
+    [data-testid="stMultiSelect"] [data-baseweb="tag"][aria-label*="Классиче"] {
         background-color: #C62828 !important;
+        background: #C62828 !important;
         border: 1px solid #8E0000 !important;
     }
 
-    /* 7. Таблица и Графики */
+    /* 7. Выпадающий список мультиселекта */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
+    ul[role="listbox"] {
+        background-color: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+    }
+    li[role="option"] {
+        background-color: var(--card-bg) !important;
+        color: var(--text-main) !important;
+    }
+
+    /* 8. Таблица и Графики */
     .stDataFrame {
         border: 1px solid var(--table-border) !important;
         border-radius: 6px;
