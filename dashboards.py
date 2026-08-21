@@ -4,7 +4,23 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Конфигурация панели инструментов: видна при наведении, только полезные инструменты
+# Единая точная карта цветов для культур (синхронизирована с сайдбаром)
+CROP_COLOR_MAP = {
+    "Кукуруза": "#4EA8DE",          # Голубой
+    "Горох": "#52B788",             # Мятно-зеленый
+    "Озимая пшеница": "#F4A261",    # Янтарно-оранжевый
+    "Лён": "#E07A5F",               # Кораллово-терракотовый
+    "Многолетние травы": "#3D5A80",  # Глубокий индиго
+    "Подсолнечник": "#9D4EDD"       # Фиолетовый
+}
+
+# Единая карта цветов для технологий
+TECH_COLOR_MAP = {
+    "No-Till": "#2E7D32",
+    "Классическая": "#C62828"
+}
+
+# Конфигурация панели инструментов
 CHART_CONFIG = {
     'displayModeBar': 'hover',
     'displaylogo': False,
@@ -20,7 +36,6 @@ def get_plot_theme(theme="dark"):
     grid_color = "#274435" if is_dark else "#EAEFEA"
     line_color = "#3A5C4A" if is_dark else "#D0DCD4"
 
-    # Контрастные цвета для кнопок всплывающего меню масштаба
     modebar_bg = "rgba(20, 36, 28, 0.9)" if is_dark else "rgba(235, 243, 238, 0.95)"
     modebar_color = "#A8CDB8" if is_dark else "#2D5A40"
     modebar_active = "#52B788" if is_dark else "#1B4332"
@@ -36,14 +51,13 @@ def get_plot_theme(theme="dark"):
                 x=0.01,
                 xanchor="left"
             ),
-            # Стилизация и четкая видимость всплывающего меню масштаба
             modebar=dict(
                 bgcolor=modebar_bg,
                 color=modebar_color,
                 activecolor=modebar_active,
                 orientation="h"
             ),
-            margin=dict(l=35, r=135, t=65, b=45), # Достаточный отступ сверху, чтобы меню не наезжало на заголовок
+            margin=dict(l=35, r=140, t=65, b=45),
             xaxis=dict(
                 gridcolor=grid_color,
                 linecolor=line_color,
@@ -89,7 +103,6 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
 
     st.markdown("---")
 
-    tech_colors = {"No-Till": "#52B788", "Классическая": "#E07A5F"} if theme == "dark" else {"No-Till": "#2E7D32", "Классическая": "#C62828"}
     agro_palette = ["#52B788", "#74C69D", "#E07A5F", "#81B29A", "#F4A261", "#4EA8DE"] if theme == "dark" else px.colors.qualitative.Safe
     text_color = "#EEF6F1" if theme == "dark" else "#1B3826"
     pie_border = "#1A2E24" if theme == "dark" else "#FFFFFF"
@@ -102,7 +115,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 df, x="crop", y="co2_per_ton", color="technology",
                 title="🌱 Удельный след (кг CO₂/т): No-Till vs Классическая",
                 labels={"co2_per_ton": "кг CO₂ на 1 т продукции", "crop": "Культура", "technology": "Технология"},
-                color_discrete_map=tech_colors
+                color_discrete_map=TECH_COLOR_MAP
             )
             fig_tech.update_layout(get_plot_theme(theme)["layout"])
             fig_tech.update_layout(
@@ -143,7 +156,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 df_ops, x="operation", y="co2_emission_kg", color="technology", barmode="group",
                 title="🚜 Выбросы CO₂ по полевым операциям (кг)",
                 labels={"co2_emission_kg": "Выбросы CO₂ (кг)", "operation": "Операция", "technology": "Технология"},
-                color_discrete_map=tech_colors
+                color_discrete_map=TECH_COLOR_MAP
             )
             fig_ops.update_layout(get_plot_theme(theme)["layout"])
             fig_ops.update_layout(
@@ -163,13 +176,13 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
                 hover_data=["technology", "operation"],
                 title="🌾 Зависимость объема выбросов от урожайности",
                 labels={"yield_t_ha": "Урожайность (т/га)", "co2_emission_kg": "Эмиссия CO₂ (кг/га)", "crop": "Культура"},
-                color_discrete_sequence=agro_palette
+                color_discrete_map=CROP_COLOR_MAP # ТОЧНАЯ СИНХРОНИЗАЦИЯ ЦВЕТОВ С САЙДБАРОМ
             )
             
             border_color = "rgba(255, 255, 255, 0.8)" if theme == "dark" else "rgba(0, 0, 0, 0.4)"
             fig_scatter.update_traces(
                 marker=dict(
-                    opacity=0.7,
+                    opacity=0.75,
                     line=dict(width=1.2, color=border_color)
                 )
             )

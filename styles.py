@@ -17,8 +17,6 @@ def apply_custom_styles(theme="dark"):
         --table-border: #274435;
         --input-bg: #1A2E24;
         --input-border: #2B4D3C;
-        --tag-bg: #274435;
-        --tag-text: #EEF6F1;
         --btn-bg: #1A2E24;
         --btn-text: #EEF6F1;
         --btn-active-bg: #2D6A4F;
@@ -37,8 +35,6 @@ def apply_custom_styles(theme="dark"):
         --table-border: #E0E0E0;
         --input-bg: #FFFFFF;
         --input-border: #D0DCD4;
-        --tag-bg: #E8F2EC;
-        --tag-text: #1B5E20;
         --btn-bg: #FFFFFF;
         --btn-text: #1B3826;
         --btn-active-bg: #2E7D32;
@@ -50,7 +46,7 @@ def apply_custom_styles(theme="dark"):
         __THEME_VARS__
     }
 
-    /* Блокировка системной темы браузера */
+    /* 1. Блокировка системной темы браузера */
     :root, html, body, .stApp, [data-testid="stAppViewContainer"] {
         color-scheme: var(--color-scheme) !important;
         background-color: var(--bg-main) !important;
@@ -69,7 +65,7 @@ def apply_custom_styles(theme="dark"):
         margin-bottom: 1.5rem;
     }
 
-    /* Карточки метрик (исходная геометрия) */
+    /* 2. Карточки метрик */
     .metric-card {
         background-color: var(--card-bg) !important;
         border: 1px solid var(--card-border) !important;
@@ -93,7 +89,7 @@ def apply_custom_styles(theme="dark"):
         margin-top: 4px;
     }
 
-    /* Сайдбар */
+    /* 3. Сайдбар */
     [data-testid="stSidebar"], 
     [data-testid="stSidebarContent"],
     [data-testid="stSidebarUserContent"],
@@ -110,7 +106,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-main) !important;
     }
 
-    /* Кнопки верхней навигации */
+    /* 4. Кнопки верхней навигации */
     .stButton > button {
         background-color: var(--btn-bg) !important;
         color: var(--btn-text) !important;
@@ -124,7 +120,7 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--btn-active-bg) !important;
     }
 
-    /* Мультиселект */
+    /* 5. Мультиселект (Контейнер) */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
     [data-testid="stMultiSelect"] > div {
@@ -132,23 +128,95 @@ def apply_custom_styles(theme="dark"):
         border: 1px solid var(--input-border) !important;
         border-radius: 6px !important;
     }
+
+    /* 6. ИНДИВИДУАЛЬНЫЕ ЦВЕТА ПЛАШЕК В САЙДБАРЕ ПО КУЛЬТУРАМ И ТЕХНОЛОГИЯМ */
+    /* Базовый текст для всех плашек */
     div[data-baseweb="tag"],
     [data-testid="stMultiSelect"] span[data-baseweb="tag"] {
-        background-color: var(--tag-bg) !important;
-        border: 1px solid var(--card-border) !important;
         border-radius: 4px !important;
+        padding: 3px 8px !important;
     }
     div[data-baseweb="tag"] span,
+    div[data-baseweb="tag"] div,
     [data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
-        color: var(--tag-text) !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
     }
     div[data-baseweb="tag"] svg,
-    [data-testid="stMultiSelect"] svg {
-        fill: var(--tag-text) !important;
-        color: var(--tag-text) !important;
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
     }
 
-    /* Таблица и Графики */
+    /* Кукуруза -> Голубой (#4EA8DE) */
+    div[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
+    span[data-baseweb="tag"]:has(span[title*="Кукуруза"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Кукуруза"]) {
+        background-color: #4EA8DE !important;
+        border: 1px solid #3A8EC0 !important;
+    }
+
+    /* Горох -> Мятно-зеленый (#52B788) */
+    div[data-baseweb="tag"]:has(span[title*="Горох"]),
+    span[data-baseweb="tag"]:has(span[title*="Горох"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Горох"]) {
+        background-color: #52B788 !important;
+        border: 1px solid #3F9A70 !important;
+    }
+
+    /* Озимая пшеница -> Янтарно-оранжевый (#F4A261) */
+    div[data-baseweb="tag"]:has(span[title*="Озимая"]),
+    div[data-baseweb="tag"]:has(span[title*="пшеница"]),
+    span[data-baseweb="tag"]:has(span[title*="Озимая"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Озимая"]) {
+        background-color: #F4A261 !important;
+        border: 1px solid #D98848 !important;
+    }
+
+    /* Лён -> Кораллово-терракотовый (#E07A5F) */
+    div[data-baseweb="tag"]:has(span[title*="Лён"]),
+    div[data-baseweb="tag"]:has(span[title*="лен"]),
+    span[data-baseweb="tag"]:has(span[title*="Лён"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Лён"]) {
+        background-color: #E07A5F !important;
+        border: 1px solid #C46247 !important;
+    }
+
+    /* Многолетние травы -> Глубокий индиго (#3D5A80) */
+    div[data-baseweb="tag"]:has(span[title*="Многолет"]),
+    div[data-baseweb="tag"]:has(span[title*="травы"]),
+    span[data-baseweb="tag"]:has(span[title*="Многолет"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Многолет"]) {
+        background-color: #3D5A80 !important;
+        border: 1px solid #2B4360 !important;
+    }
+
+    /* Подсолнечник -> Фиолетовый (#9D4EDD) */
+    div[data-baseweb="tag"]:has(span[title*="Подсолне"]),
+    span[data-baseweb="tag"]:has(span[title*="Подсолне"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Подсолне"]) {
+        background-color: #9D4EDD !important;
+        border: 1px solid #7F35BF !important;
+    }
+
+    /* No-Till -> Зеленый (#2E7D32) */
+    div[data-baseweb="tag"]:has(span[title*="No-Till"]),
+    div[data-baseweb="tag"]:has(span[title*="notill"]),
+    span[data-baseweb="tag"]:has(span[title*="No-Till"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="No-Till"]) {
+        background-color: #2E7D32 !important;
+        border: 1px solid #1B5E20 !important;
+    }
+
+    /* Классическая -> Терракотово-красный (#C62828) */
+    div[data-baseweb="tag"]:has(span[title*="Классиче"]),
+    span[data-baseweb="tag"]:has(span[title*="Классиче"]),
+    [data-testid="stMultiSelect"] span[data-baseweb="tag"]:has(span[title*="Классиче"]) {
+        background-color: #C62828 !important;
+        border: 1px solid #8E0000 !important;
+    }
+
+    /* 7. Таблица и Графики */
     .stDataFrame {
         border: 1px solid var(--table-border) !important;
         border-radius: 6px;
