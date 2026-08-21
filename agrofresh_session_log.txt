@@ -1,0 +1,1 @@
+﻿Get-Clipboard | Out-File -FilePath "agrofresh_session_log.txt" -Encoding utf8
