@@ -4,44 +4,70 @@ import numpy as np
 import streamlit as st
 
 CROP_MAPPING = {
-    "лён": "Лён", "лен": "Лён", "озимая": "Озимая пшеница", "пшеница": "Озимая пшеница",
-    "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы",
-    "травы": "Многолетние травы", "подсолне": "Подсолнечник", "подсолнечник": "Подсолнечник"
+    "лён": "Лён",
+    "лен": "Лён",
+    "озимая": "Озимая пшеница",
+    "пшеница": "Озимая пшеница",
+    "горох": "Горох",
+    "кукуруза": "Кукуруза",
+    "многолет": "Многолетние травы",
+    "травы": "Многолетние травы",
+    "подсолне": "Подсолнечник",
+    "подсолнечник": "Подсолнечник"
 }
 
 TECH_MAPPING = {
-    "no-till": "No-Till", "notill": "No-Till", "но-тилл": "No-Till",
-    "классичес": "Классическая", "классиче": "Классическая",
-    "классическая": "Классическая", "традиционная": "Классическая"
+    "no-till": "No-Till",
+    "notill": "No-Till",
+    "но-тилл": "No-Till",
+    "классичес": "Классическая",
+    "классиче": "Классическая",
+    "классическая": "Классическая",
+    "традиционная": "Классическая"
 }
 
 OPERATION_MAPPING = {
-    "предпосев": "Предпосевная обработка", "обработка": "Предпосевная обработка",
-    "внесение": "Внесение удобрений/СЗР", "удобрен": "Внесение удобрений/СЗР",
+    "предпосев": "Предпосевная обработка",
+    "обработка": "Предпосевная обработка",
+    "внесение": "Внесение удобрений/СЗР",
+    "удобрен": "Внесение удобрений/СЗР",
     "уборка": "Уборка урожая"
 }
 
 RESOURCE_MAPPING = {
-    "минеральн": "Минеральные удобрения", "удобрен": "Минеральные удобрения",
-    "бензин": "Бензин", "дизель": "Дизельное топливо", "дизельное": "Дизельное топливо",
-    "дт": "Дизельное топливо", "пестицид": "Пестициды", "сзр": "Пестициды",
-    "электроэн": "Электроэнергия", "электричество": "Электроэнергия"
+    "минеральн": "Минеральные удобрения",
+    "удобрен": "Минеральные удобрения",
+    "бензин": "Бензин",
+    "дизель": "Дизельное топливо",
+    "дизельное": "Дизельное топливо",
+    "дт": "Дизельное топливо",
+    "пестицид": "Пестициды",
+    "сзр": "Пестициды",
+    "электроэн": "Электроэнергия",
+    "электричество": "Электроэнергия"
 }
 
 def safe_convert_to_float(series: pd.Series) -> pd.Series:
-    cleaned = series.astype(str).str.replace(",", ".", regex=False).str.strip()
+    """Безопасная конвертация ячеек с запятыми и мусорными символами в float."""
+    cleaned = (
+        series.astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.strip()
+    )
+    # Извлекаем только валидные числа (обязательно содержащие цифры)
     extracted = cleaned.str.extract(r"(\d+(?:\.\d+)?)", expand=False)
     return pd.to_numeric(extracted, errors="coerce").fillna(0.0)
 
 @st.cache_data
 def get_mock_data() -> pd.DataFrame:
+    """Генерация реалистичного датасета на 1000 строк по структуре документа."""
     np.random.seed(42)
     n = 1000
     crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
     techs = ["No-Till", "Классическая"]
     ops = ["Предпосевная обработка", "Внесение удобрений/СЗР", "Уборка урожая"]
     resources = ["Минеральные удобрения", "Бензин", "Дизельное топливо", "Пестициды", "Электроэнергия"]
-    
+
     f_map = {
         ("Лён", "Классическая"): 0.48, ("Лён", "No-Till"): 0.70,
         ("Озимая пшеница", "Классическая"): 0.65, ("Озимая пшеница", "No-Till"): 0.82,
@@ -65,7 +91,9 @@ def get_mock_data() -> pd.DataFrame:
         e_val = np.random.choice([0.5, 0.89, 2.3, 2.6, 4.93])
         op = np.random.choice(ops)
         res = np.random.choice(resources)
+        
         emission = 1893.00 if op == "Уборка урожая" else float(np.random.choice([54, 86, 94, 219, 248, 342, 418, 480]))
+
         data.append({
             "id": i,
             "crop": c,
@@ -78,11 +106,14 @@ def get_mock_data() -> pd.DataFrame:
             "co2_emission_kg": emission,
             "co2_per_ton": np.round(emission / y_val, 2)
         })
+
     return pd.DataFrame(data)
 
 def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
+    """Парсер для загружаемых Excel (.xlsx, .xls) и CSV файлов."""
     if uploaded_file is None:
         return get_mock_data()
+
     try:
         filename = uploaded_file.name.lower()
         if filename.endswith(".csv"):
@@ -101,18 +132,30 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
                 break
 
         df = df_raw.iloc[start_row:].copy().reset_index(drop=True)
-        column_names = ["id", "crop", "technology", "f_razl", "yield_t_ha", "emission_coeff_e", "operation", "emission_type", "co2_emission_kg"]
+
+        column_names = [
+            "id", "crop", "technology", "f_razl", 
+            "yield_t_ha", "emission_coeff_e", "operation", 
+            "emission_type", "co2_emission_kg"
+        ]
+
         num_cols = min(len(df.columns), len(column_names))
         df = df.iloc[:, :num_cols]
         df.columns = column_names[:num_cols]
+
+        # 1. Безопасная очистка и фильтрация строк
         df = df.dropna(subset=["crop", "technology"], how="all")
+        
+        # Отсекаем итоговые строки вроде "Среднее значение" и "Стандартное отклонение"
         df = df[~df["crop"].astype(str).str.lower().str.contains("среднее|стандарт|отклонен|дисперси", regex=True)]
 
+        # 2. Безопасная конвертация числовых полей в float
         numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
         for col in numeric_fields:
             if col in df.columns:
                 df[col] = safe_convert_to_float(df[col])
 
+        # 3. Нормализация текста
         crop_aliases = {"лен": "Лён", "озимая": "Озимая пшеница", "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы", "подсолне": "Подсолнечник"}
         tech_aliases = {"no-till": "No-Till", "но-тилл": "No-Till", "классиче": "Классическая"}
         op_aliases = {"предпосев": "Предпосевная обработка", "внесение": "Внесение удобрений/СЗР", "уборка": "Уборка урожая"}
@@ -127,12 +170,18 @@ def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
         if "emission_type" in df.columns:
             df["emission_type"] = df["emission_type"].astype(str).str.strip().map(lambda x: next((v for k, v in res_aliases.items() if k in x.lower()), x.capitalize()))
 
+        # 4. Расчет удельного следа (кг CO2 на тонну урожая)
         if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
-            df["co2_per_ton"] = np.where(df["yield_t_ha"] > 0, np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2), 0.0)
+            df["co2_per_ton"] = np.where(
+                df["yield_t_ha"] > 0,
+                np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2),
+                0.0
+            )
 
         return df
+
     except Exception as e:
-        st.error(f"Ошибка при чтении файла: {e}")
+        st.error(f"Ошибка при чтении Excel файла: {e}")
         return get_mock_data()
 
 parse_carbon_excel = advanced_multi_field_parser
