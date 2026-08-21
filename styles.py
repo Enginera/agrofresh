@@ -59,7 +59,7 @@ def apply_custom_styles(theme="dark"):
         -webkit-font-smoothing: antialiased;
     }
 
-    /* 2. Адаптивная типографика заголовков */
+    /* 2. Типографика */
     .main-header {
         font-size: clamp(1.35rem, 3.5vw, 2.1rem) !important;
         font-weight: 800;
@@ -75,7 +75,7 @@ def apply_custom_styles(theme="dark"):
         line-height: 1.4;
     }
 
-    /* 3. Карточки метрик (KPI) - Адаптивные и четкие */
+    /* 3. Карточки метрик (KPI) */
     .metric-card {
         background-color: var(--card-bg) !important;
         border: 1px solid var(--card-border) !important;
@@ -123,7 +123,7 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-main) !important;
     }
 
-    /* 5. Кнопки верхней навигации */
+    /* 5. Кнопки навигации */
     .stButton > button {
         background-color: var(--btn-bg) !important;
         color: var(--btn-text) !important;
@@ -158,9 +158,36 @@ def apply_custom_styles(theme="dark"):
         border-radius: 14px;
         padding: 6px;
         width: 100% !important;
+        position: relative;
     }
 
-    /* 8. Калькулятор No-Till */
+    /* 🛠 8. КОМПАКТНАЯ И НЕБРОСКАЯ ПАНЕЛЬ МАСШТАБА (MODEBAR) НАД ТЕКСТОМ */
+    .modebar-container {
+        top: 4px !important;
+        right: 8px !important;
+        background: transparent !important;
+    }
+    .modebar-group {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+    .modebar-btn {
+        opacity: 0.60 !important;
+        transform: scale(0.82) !important;
+        padding: 2px !important;
+        margin: 0 1px !important;
+        transition: opacity 0.2s ease, transform 0.2s ease !important;
+    }
+    .modebar-btn:hover {
+        opacity: 1.0 !important;
+        transform: scale(0.95) !important;
+    }
+    .modebar-btn svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* 9. Калькулятор No-Till */
     .calc-card {
         background-color: var(--calc-res-bg);
         border: 1px solid var(--card-border);
@@ -183,7 +210,7 @@ def apply_custom_styles(theme="dark"):
         margin-top: 4px;
     }
 
-    /* 9. Таблица и Справочник */
+    /* 10. Таблица и Справочник */
     .stDataFrame {
         border: 1px solid var(--table-border) !important;
         border-radius: 8px;
@@ -197,7 +224,7 @@ def apply_custom_styles(theme="dark"):
         margin-bottom: 14px;
     }
 
-    /* 10. Мобильная адаптация экрана (до 768px) */
+    /* 📱 11. Мобильная адаптация экрана (до 768px) */
     @media (max-width: 768px) {
         .main .block-container {
             padding-left: 0.7rem !important;
@@ -206,6 +233,10 @@ def apply_custom_styles(theme="dark"):
         }
         .stButton > button {
             padding: 6px 10px !important;
+        }
+        .modebar-btn {
+            transform: scale(0.75) !important;
+            margin: 0 !important;
         }
     }
 

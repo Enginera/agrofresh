@@ -19,7 +19,7 @@ TECH_COLOR_MAP = {
     "Классическая": "#C62828"       # 🚜 Красный
 }
 
-# Компактный режим панели инструментов (виден, стилизован, не мешает)
+# Все инструменты доступны, компактны и не перекрывают текст
 CHART_CONFIG = {
     'displayModeBar': True,
     'displaylogo': False,
@@ -35,30 +35,30 @@ def get_plot_theme(theme="dark"):
     grid_color = "#244233" if is_dark else "#EAF1EC"
     line_color = "#2F5441" if is_dark else "#CFDDD3"
 
-    # Аккуратный полупрозрачный pill-виджет панели инструментов
-    modebar_bg = "rgba(24, 44, 34, 0.85)" if is_dark else "rgba(240, 246, 242, 0.9)"
-    modebar_color = "#9EC7B0" if is_dark else "#2E5E42"
-    modebar_active = "#52B788" if is_dark else "#1B4332"
+    # Неброские, приглушенные оттенки кнопок масштаба
+    modebar_color = "rgba(155, 179, 166, 0.65)" if is_dark else "rgba(90, 117, 101, 0.65)"
+    modebar_active = "#52B788" if is_dark else "#1B5E20"
 
     return {
         "layout": go.Layout(
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
             font=dict(family="Plus Jakarta Sans, sans-serif", color=text_color, size=11),
+            # Заголовок расположен на y=0.86, а панель масштаба строго над ним на верхнем ярусе
             title=dict(
                 font=dict(color=text_color, size=12.5),
-                y=0.96,
+                y=0.86,
                 x=0.01,
                 xanchor="left"
             ),
             modebar=dict(
-                bgcolor=modebar_bg,
+                bgcolor="rgba(0,0,0,0)",
                 color=modebar_color,
                 activecolor=modebar_active,
                 orientation="h"
             ),
-            # Эргономичные отступы под 100% ширины
-            margin=dict(l=25, r=20, t=48, b=45),
+            # 70px сверху дают чистый 2-уровневый заголовок без наложений
+            margin=dict(l=25, r=20, t=70, b=45),
             xaxis=dict(
                 gridcolor=grid_color,
                 linecolor=line_color,
@@ -94,13 +94,13 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
     avg_yield = df["yield_t_ha"].mean() if "yield_t_ha" in df.columns else 0
 
     with c1:
-        st.markdown(f'<div class="metric-card"><div class="metric-title">Суммарные выбросы</div><div class="metric-value">{total_co2_ton:,.1f} <span style="font-size:0.9rem;font-weight:500;">т CO₂</span></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Суммарные выбросы</div><div class="metric-value">{total_co2_ton:,.1f} <span style="font-size:0.85rem;font-weight:500;">т CO₂</span></div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card"><div class="metric-title">Удельный след (ср.)</div><div class="metric-value">{avg_per_ton:.1f} <span style="font-size:0.9rem;font-weight:500;">кг/т</span></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Удельный след (ср.)</div><div class="metric-value">{avg_per_ton:.1f} <span style="font-size:0.85rem;font-weight:500;">кг/т</span></div></div>', unsafe_allow_html=True)
     with c3:
         st.markdown(f'<div class="metric-card"><div class="metric-title">Фактор разложения Fразл</div><div class="metric-value">{avg_f_razl:.2f}</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card"><div class="metric-title">Ср. Урожайность</div><div class="metric-value">{avg_yield:.2f} <span style="font-size:0.9rem;font-weight:500;">т/га</span></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-title">Ср. Урожайность</div><div class="metric-value">{avg_yield:.2f} <span style="font-size:0.85rem;font-weight:500;">т/га</span></div></div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
@@ -166,7 +166,7 @@ def render_carbon_dashboard(df: pd.DataFrame, theme="dark"):
             scatter_layout = get_plot_theme(theme)["layout"]
             fig_scatter.update_layout(scatter_layout)
             fig_scatter.update_layout(
-                margin=dict(l=25, r=20, t=48, b=60),
+                margin=dict(l=25, r=20, t=70, b=60),
                 legend=dict(
                     orientation="h",
                     yanchor="top",
