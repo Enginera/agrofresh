@@ -26,8 +26,9 @@ def apply_custom_styles(theme="dark"):
         --input-bg: #182E25;
         --tag-bg: #1F3E30;
         --tag-text: #95D5B2;
+        --tag-border: #2D6A4F;
         --btn-inactive-bg: #182E25;
-        --btn-inactive-text: #C3D9CC;
+        --btn-inactive-text: #E8F5E9;
         --btn-active-bg: #2D6A4F;
         --btn-active-text: #FFFFFF;
         --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
@@ -55,8 +56,9 @@ def apply_custom_styles(theme="dark"):
         --input-bg: #FFFFFF;
         --tag-bg: #E8F5E9;
         --tag-text: #1B4332;
+        --tag-border: #B7E4C7;
         --btn-inactive-bg: #FFFFFF;
-        --btn-inactive-text: #2D4A3A;
+        --btn-inactive-text: #1B4332;
         --btn-active-bg: #2D6A4F;
         --btn-active-text: #FFFFFF;
         --shadow-card: 0 2px 12px rgba(27, 67, 50, 0.06);
@@ -70,19 +72,30 @@ def apply_custom_styles(theme="dark"):
         {theme_vars}
     }}
 
-    /* 1. Глобальный сброс цветов и фонов */
-    html, body, [class*="css"], .stApp {{
+    /* 1. Глобальный фон приложения и системная шапка Streamlit (ВЕРХНЯЯ ЗОНА) */
+    html, body, [class*="css"], .stApp, 
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"],
+    section.main,
+    .main .block-container {{
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
         background-color: var(--bg-main) !important;
         color: var(--text-primary) !important;
     }}
 
-    h1, h2, h3, h4, h5, h6, p, span, label, div {{
-        color: var(--text-primary);
+    /* Системная панель Streamlit сверху */
+    [data-testid="stHeader"] {{
+        background-color: var(--bg-main) !important;
+        border-bottom: 1px solid var(--border-subtle) !important;
+    }}
+    [data-testid="stHeader"] * {{
+        color: var(--text-primary) !important;
     }}
 
-    /* 2. Сайдбар и все текстовые элементы внутри него */
-    [data-testid="stSidebar"] {{
+    /* 2. Сайдбар */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebarContent"] {{
         background-color: var(--surface) !important;
         border-right: 1px solid var(--border-subtle) !important;
     }}
@@ -93,7 +106,8 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3,
     [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] h5 {{
+    [data-testid="stSidebar"] h5,
+    [data-testid="stSidebar"] div {{
         color: var(--text-primary) !important;
     }}
     [data-testid="stSidebar"] .stCaption, 
@@ -101,42 +115,81 @@ def apply_custom_styles(theme="dark"):
         color: var(--text-secondary) !important;
     }}
 
-    /* 3. Кнопки навигации (верхние вкладки) */
+    /* 3. Кнопки навигации (верхние табы) */
     .stButton > button {{
         background-color: var(--btn-inactive-bg) !important;
-        color: var(--btn-inactive-text) !important;
         border: 1px solid var(--border-subtle) !important;
         border-radius: 10px !important;
-        font-weight: 600 !important;
         box-shadow: var(--shadow-card) !important;
         transition: all 0.2s ease !important;
     }}
-    .stButton > button[kind="primary"] {{
+    .stButton > button p,
+    .stButton > button span,
+    .stButton > button div {{
+        color: var(--btn-inactive-text) !important;
+        font-weight: 700 !important;
+    }}
+    .stButton > button[kind="primary"],
+    .stButton > button[data-testid="baseButton-primary"] {{
         background-color: var(--btn-active-bg) !important;
-        color: var(--btn-active-text) !important;
         border: 1px solid var(--btn-active-bg) !important;
+    }}
+    .stButton > button[kind="primary"] p,
+    .stButton > button[kind="primary"] span,
+    .stButton > button[kind="primary"] div,
+    .stButton > button[data-testid="baseButton-primary"] p,
+    .stButton > button[data-testid="baseButton-primary"] span {{
+        color: var(--btn-active-text) !important;
+        font-weight: 700 !important;
     }}
     .stButton > button:hover {{
         border-color: var(--border-accent) !important;
         transform: translateY(-1px);
     }}
 
-    /* 4. Мультиселекты и выпадающие списки */
-    div[data-baseweb="select"] > div {{
+    /* 4. ФИЛЬТРЫ МУЛЬТИСЕЛЕКТА (НИЖНЯЯ ЛЕВАЯ ЗОНА) */
+    div[data-baseweb="select"],
+    div[data-baseweb="select"] > div,
+    div[data-testid="stMultiSelect"] > div,
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
         background-color: var(--input-bg) !important;
         border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+    }}
+    div[data-baseweb="select"] * {{
         color: var(--text-primary) !important;
     }}
-    div[data-baseweb="select"] span {{
-        color: var(--text-primary) !important;
-    }}
-    div[data-baseweb="tag"] {{
+
+    /* Теги внутри мультиселекта (Горох, Кукуруза, No-Till...) */
+    div[data-baseweb="tag"],
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
         background-color: var(--tag-bg) !important;
-        border: 1px solid var(--border-subtle) !important;
+        border: 1px solid var(--tag-border) !important;
+        border-radius: 6px !important;
     }}
-    div[data-baseweb="tag"] span {{
+    div[data-baseweb="tag"] span,
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
         color: var(--tag-text) !important;
         font-weight: 600 !important;
+    }}
+    div[data-baseweb="tag"] svg,
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {{
+        fill: var(--tag-text) !important;
+        color: var(--tag-text) !important;
+    }}
+
+    /* Выпадающий список мультиселекта */
+    div[data-baseweb="popover"],
+    ul[role="listbox"] {{
+        background-color: var(--surface) !important;
+        border: 1px solid var(--border-subtle) !important;
+    }}
+    li[role="option"] {{
+        background-color: var(--surface) !important;
+        color: var(--text-primary) !important;
+    }}
+    li[role="option"]:hover {{
+        background-color: var(--surface-elevated) !important;
     }}
 
     /* 5. Загрузчик файлов (File Uploader) */
@@ -144,15 +197,17 @@ def apply_custom_styles(theme="dark"):
         background-color: var(--input-bg) !important;
         border: 1px dashed var(--border-subtle) !important;
         border-radius: 12px !important;
-        color: var(--text-primary) !important;
     }}
     [data-testid="stFileUploader"] section * {{
         color: var(--text-primary) !important;
     }}
     [data-testid="stFileUploader"] section button {{
         background-color: var(--surface-elevated) !important;
-        color: var(--text-primary) !important;
         border: 1px solid var(--border-subtle) !important;
+    }}
+    [data-testid="stFileUploader"] section button * {{
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
     }}
 
     /* 6. Главный баннер */
@@ -196,7 +251,7 @@ def apply_custom_styles(theme="dark"):
         line-height: 1.5;
     }}
 
-    /* 7. KPI-карточки */
+    /* 7. Карточки метрик */
     .kpi-card {{
         background: var(--surface);
         border-radius: 14px;
@@ -220,6 +275,10 @@ def apply_custom_styles(theme="dark"):
         color: var(--kpi-title-color) !important;
         text-transform: uppercase;
         letter-spacing: 0.8px;
+    }}
+    .kpi-icon {{
+        font-size: 1.05rem;
+        line-height: 1;
     }}
     .kpi-card-body {{
         padding: 16px;
