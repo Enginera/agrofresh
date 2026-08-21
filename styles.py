@@ -36,7 +36,7 @@ def apply_custom_styles(theme="dark"):
     else:
         theme_vars = """
         --bg-main: #F4F7F4;
-        --sidebar-bg: #FFFFFF;       /* ЧИСТЫЙ СВЕТЛЫЙ САЙДБАР */
+        --sidebar-bg: #FFFFFF;
         --surface: #FFFFFF;
         --surface-elevated: #F6FAF7;
         --surface-header-band: #3A4D41;
@@ -53,9 +53,9 @@ def apply_custom_styles(theme="dark"):
         --calc-res-bg: #F2F7F4;
         --table-badge-bg: #E1EDE5;
         --table-badge-text: #223B2D;
-        --input-bg: #F2F6F3;        /* Светлое поле выбора */
-        --tag-bg: #44594C;          /* Аккуратный серо-зеленый тег */
-        --tag-text: #FFFFFF;        /* Белый четкий текст */
+        --input-bg: #F2F6F3;
+        --tag-bg: #44594C;
+        --tag-text: #FFFFFF;
         --tag-border: #566F60;
         --btn-inactive-bg: #FFFFFF;
         --btn-inactive-text: #223B2D;
@@ -64,41 +64,41 @@ def apply_custom_styles(theme="dark"):
         --shadow-card: 0 2px 10px rgba(45, 62, 52, 0.06);
         """
 
-    custom_css = f"""
+    css_template = """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    :root {{
-        {theme_vars}
-    }}
+    :root {
+        __THEME_VARS__
+    }
 
     /* 1. Глобальный фон приложения и шапка */
     html, body, [class*="css"], .stApp, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"],
     section.main,
-    .main .block-container {{
+    .main .block-container {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         background-color: var(--bg-main) !important;
         color: var(--text-primary) !important;
-    }}
+    }
 
-    [data-testid="stHeader"] {{
+    [data-testid="stHeader"] {
         background-color: var(--bg-main) !important;
         border-bottom: 1px solid var(--border-subtle) !important;
-    }}
-    [data-testid="stHeader"] * {{
+    }
+    [data-testid="stHeader"] * {
         color: var(--text-primary) !important;
-    }}
+    }
 
-    /* 2. САЙДБАР (БЕЗ ЧЕРНОГО ФОНА В СВЕТЛОЙ ТЕМЕ) */
+    /* 2. Сайдбар */
     [data-testid="stSidebar"], 
     [data-testid="stSidebar"] > div:first-child,
     [data-testid="stSidebarContent"],
-    [data-testid="stSidebarUserContent"] {{
+    [data-testid="stSidebarUserContent"] {
         background-color: var(--sidebar-bg) !important;
         border-right: 1px solid var(--border-subtle) !important;
-    }}
+    }
     [data-testid="stSidebar"] p, 
     [data-testid="stSidebar"] span, 
     [data-testid="stSidebar"] label,
@@ -107,83 +107,82 @@ def apply_custom_styles(theme="dark"):
     [data-testid="stSidebar"] h3,
     [data-testid="stSidebar"] h4,
     [data-testid="stSidebar"] h5,
-    [data-testid="stSidebar"] div {{
+    [data-testid="stSidebar"] div {
         color: var(--text-primary) !important;
-    }}
+    }
     [data-testid="stSidebar"] .stCaption, 
-    [data-testid="stSidebar"] small {{
+    [data-testid="stSidebar"] small {
         color: var(--text-secondary) !important;
-    }}
+    }
 
     /* 3. Кнопки верхней навигации */
-    .stButton > button {{
+    .stButton > button {
         background-color: var(--btn-inactive-bg) !important;
         border: 1px solid var(--border-subtle) !important;
         border-radius: 10px !important;
         box-shadow: var(--shadow-card) !important;
         transition: all 0.2s ease !important;
-    }}
+    }
     .stButton > button p,
     .stButton > button span,
-    .stButton > button div {{
+    .stButton > button div {
         color: var(--btn-inactive-text) !important;
         font-weight: 600 !important;
-    }}
+    }
     .stButton > button[kind="primary"],
-    .stButton > button[data-testid="baseButton-primary"] {{
+    .stButton > button[data-testid="baseButton-primary"] {
         background-color: var(--btn-active-bg) !important;
         border: 1px solid var(--btn-active-bg) !important;
-    }}
+    }
     .stButton > button[kind="primary"] p,
     .stButton > button[kind="primary"] span,
     .stButton > button[data-testid="baseButton-primary"] p,
-    .stButton > button[data-testid="baseButton-primary"] span {{
+    .stButton > button[data-testid="baseButton-primary"] span {
         color: var(--btn-active-text) !important;
         font-weight: 700 !important;
-    }}
+    }
 
-    /* 4. МУЛЬТИСЕЛЕКТ */
+    /* 4. Мультиселект */
     div[data-baseweb="select"],
     div[data-baseweb="select"] > div,
     div[data-testid="stMultiSelect"] > div,
-    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
         background-color: var(--input-bg) !important;
         border: 1px solid var(--border-subtle) !important;
         border-radius: 8px !important;
-    }}
+    }
 
-    /* Плашки мультиселекта (Горох, Кукуруза...) */
     div[data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {{
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {
         background-color: var(--tag-bg) !important;
         border: 1px solid var(--tag-border) !important;
         border-radius: 6px !important;
         padding: 3px 8px !important;
-    }}
+    }
     div[data-baseweb="tag"] span,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {{
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] span {
         color: var(--tag-text) !important;
         font-weight: 600 !important;
         font-size: 0.85rem !important;
-    }}
+    }
     div[data-baseweb="tag"] svg,
-    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {{
+    div[data-testid="stMultiSelect"] span[data-baseweb="tag"] svg {
         fill: var(--tag-text) !important;
         color: var(--tag-text) !important;
-    }}
+    }
 
     /* 5. Загрузчик файлов */
-    [data-testid="stFileUploader"] section {{
+    [data-testid="stFileUploader"] section {
         background-color: var(--input-bg) !important;
         border: 1px dashed var(--border-subtle) !important;
         border-radius: 12px !important;
-    }}
-    [data-testid="stFileUploader"] section * {{
+    }
+    [data-testid="stFileUploader"] section * {
         color: var(--text-primary) !important;
-    }}
+    }
 
-    /* 6. Двухтоновые KPI карточки */
-    .kpi-card {{
+    /* 6. Карточки метрик */
+    .kpi-card {
         background: var(--surface);
         border-radius: 14px;
         border: 1px solid var(--border-subtle);
@@ -191,21 +190,150 @@ def apply_custom_styles(theme="dark"):
         overflow: hidden;
         display: flex;
         flex-direction: column;
-    }}
-    .kpi-card-header {{
+    }
+    .kpi-card-header {
         background: var(--surface-header-band);
         padding: 12px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         border-bottom: 1px solid var(--border-subtle);
-    }}
-    .kpi-title {{
+    }
+    .kpi-title {
         font-size: 0.78rem;
         font-weight: 700;
         color: var(--kpi-title-color) !important;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-    }}
-    .kpi-card-body {{
-        padding:
+    }
+    .kpi-card-body {
+        padding: 16px;
+        background: var(--surface);
+    }
+    .kpi-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: var(--text-primary) !important;
+    }
+    .kpi-unit {
+        font-size: 0.88rem;
+        color: var(--text-secondary) !important;
+    }
+    .kpi-sub-badge {
+        margin-top: 8px;
+        display: inline-flex;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: var(--surface-elevated);
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-subtle);
+        font-size: 0.73rem;
+        font-weight: 600;
+    }
+
+    /* 7. Баннер, Графики и Калькулятор */
+    .hero-banner {
+        background: var(--hero-bg);
+        border-radius: 16px;
+        padding: 28px 32px;
+        color: var(--hero-text) !important;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-card);
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        color: #E8F8EE;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        padding: 4px 12px;
+        border-radius: 30px;
+        margin-bottom: 10px;
+    }
+    .hero-title {
+        font-size: 2.0rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--hero-text) !important;
+        margin: 0 0 6px 0;
+    }
+    .hero-subtitle {
+        font-size: 0.98rem;
+        color: var(--hero-sub) !important;
+        font-weight: 400;
+        max-width: 800px;
+        margin: 0;
+        line-height: 1.5;
+    }
+    .stPlotlyChart {
+        background: var(--surface);
+        border-radius: 14px;
+        border: 1px solid var(--border-subtle);
+        padding: 10px;
+        box-shadow: var(--shadow-card);
+    }
+    .calc-container {
+        background: var(--calc-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-card);
+        margin-top: 24px;
+    }
+    .calc-result-card {
+        background: var(--calc-res-bg);
+        border-radius: 12px;
+        padding: 18px;
+        border: 1px solid var(--border-subtle);
+    }
+    .calc-res-title {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: var(--text-secondary) !important;
+    }
+    .calc-res-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary) !important;
+    }
+
+    /* 8. Справочник формул */
+    .formula-card {
+        background: var(--surface);
+        border-radius: 14px;
+        border: 1px solid var(--border-subtle);
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-card);
+    }
+    .formula-card h3 {
+        color: var(--brand-primary);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 0;
+    }
+    .data-table-badge {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        background: var(--table-badge-bg);
+        color: var(--table-badge-text);
+        padding: 2px 7px;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+    }
+
+    footer {visibility: hidden;}
+    </style>
+    """
+    
+    custom_css = css_template.replace("__THEME_VARS__", theme_vars)
+    st.markdown(custom_css, unsafe_allow_html=True)
