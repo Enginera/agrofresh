@@ -1,83 +1,72 @@
 ﻿import streamlit as st
 
 def apply_custom_styles():
-    """Применяет фирменный изумрудно-зеленый агро-дизайн AgroFresh."""
+    """Применяет чистый изумрудный дизайн с четким разделением блоков."""
     st.markdown("""
         <style>
-        /* Главный фон и отступы */
         .main .block-container {
             padding-top: 1.5rem;
-            padding-bottom: 2.5rem;
-            max-width: 96%;
+            padding-bottom: 3rem;
+            max-width: 95%;
         }
         
-        /* Карточки KPI с зеленым неоновым свечением */
+        /* Карточки KPI */
         .metric-card {
-            background: linear-gradient(145deg, #064e3b 0%, #022c22 100%);
-            border: 1px solid rgba(16, 185, 129, 0.35);
-            border-radius: 14px;
-            padding: 18px 22px;
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            border-radius: 12px;
+            padding: 16px 20px;
             color: #ffffff;
-            box-shadow: 0 8px 20px rgba(6, 78, 59, 0.3);
-            transition: all 0.3s ease;
-            margin-bottom: 12px;
-        }
-        .metric-card:hover {
-            transform: translateY(-3px);
-            border-color: #34d399;
-            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+            box-shadow: 0 4px 14px rgba(6, 78, 59, 0.25);
+            margin-bottom: 15px;
         }
         .metric-card h4 {
             margin: 0;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             color: #a7f3d0;
             font-weight: 600;
         }
         .metric-card .metric-value {
-            font-size: 2.0rem;
+            font-size: 1.85rem;
             font-weight: 800;
-            margin: 8px 0 4px 0;
+            margin: 6px 0 2px 0;
             color: #34d399;
-            text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+            text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
         }
         .metric-card .metric-sub {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: #94a3b8;
         }
         
-        /* Зеленые акценты заголовков */
-        .eco-header {
-            color: #ecfdf5;
-            border-left: 4px solid #10b981;
-            padding-left: 12px;
-            margin-top: 18px;
-            margin-bottom: 14px;
-            font-weight: 700;
+        /* Контейнеры под графики (безопасные отступы) */
+        .chart-box {
+            background: rgba(6, 78, 59, 0.08);
+            border: 1px solid rgba(52, 211, 153, 0.18);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
         }
-
-        /* Бейджи */
-        .badge-green {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            border: 1px solid #10b981;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        
+        .section-title {
+            color: #ecfdf5;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-left: 4px solid #10b981;
+            padding-left: 10px;
+            margin: 20px 0 15px 0;
         }
         
         /* Сайдбар */
         section[data-testid="stSidebar"] {
             background-color: #022c22 !important;
-            border-right: 1px solid rgba(16, 185, 129, 0.25);
+            border-right: 1px solid rgba(16, 185, 129, 0.2);
         }
         </style>
     """, unsafe_allow_html=True)
 
 def render_metric_card(title: str, value: str, subtitle: str = ""):
-    """Отрисовка зеленой карточки KPI."""
     st.markdown(f"""
         <div class="metric-card">
             <h4>{title}</h4>

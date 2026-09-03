@@ -40,7 +40,8 @@ def clean_numeric_value(val):
     except ValueError:
         return np.nan
 
-def parse_agro_excel(file_source) -> dict:
+def parse_agro_excel(file_source) -> tuple:
+    """Парсит Excel, очищает данные и считает статистику 95% CI."""
     df_raw = pd.read_excel(file_source, header=None)
     
     start_row_idx = None
@@ -73,9 +74,9 @@ def parse_agro_excel(file_source) -> dict:
     for col in df_main.columns:
         valid_vals = df_main[col].dropna()
         if len(valid_vals) > 1:
-            mean = np.mean(valid_vals)
-            std = np.std(valid_vals, ddof=1)
-            var = np.var(valid_vals, ddof=1)
+            mean = float(np.mean(valid_vals))
+            std = float(np.std(valid_vals, ddof=1))
+            var = float(np.var(valid_vals, ddof=1))
             se = std / np.sqrt(len(valid_vals))
             rel_err = (se / mean * 100) if mean != 0 else np.nan
             ci = se * stats.t.ppf((1 + 0.95) / 2, len(valid_vals) - 1)
@@ -85,27 +86,22 @@ def parse_agro_excel(file_source) -> dict:
                 "Дисперсия": var,
                 "Стандартная ошибка": se,
                 "Относительная ошибка (%)": rel_err,
-                "Ширина дов. интервала": ci,
-                "Верхняя граница (95%)": mean + ci,
-                "Нижняя граница (95%)": mean - ci
+                "Ширина дов. интервала (95%)": ci,
+                "Верхняя граница": mean + ci,
+                "Нижняя граница": mean - ci
             }
             
     df_stats = pd.DataFrame(stats_dict)
-    
-    return {
-        "data": df_main,
-        "stats": df_stats,
-        "total_rows": len(df_main),
-        "status": "success"
-    }
+    return df_main, df_stats, len(df_main)
 
-def generate_sample_dataset(rows: int = 1000) -> pd.DataFrame:
+def generate_sample_dataset(rows: int = 1000) -> tuple:
+    """Генератор демо-данных с подсчитанной статистикой."""
     np.random.seed(42)
     df = pd.DataFrame({
         "ID": np.arange(1, rows + 1),
         "F6_1_Efficiency": np.random.uniform(1.5, 25.0, rows).round(2),
-        "CF_Harvest": np.random.randint(-20, 120, rows),
-        "B_Carbon": np.random.uniform(1.0, 300.0, rows).round(2),
+        "CF_Harvest": np.random.randint(10, 120, rows),
+        "B_Carbon": np.random.uniform(2.0, 250.0, rows).round(2),
         "B_Econ": np.random.uniform(75000, 85000, rows).round(0),
         "P_Carbon": np.random.choice([400, 450, 500], rows),
         "Risk_1_R": np.random.choice([0.5, 0.6, 0.7, 0.8], rows),
@@ -122,9 +118,28 @@ def generate_sample_dataset(rows: int = 1000) -> pd.DataFrame:
         "F5_Yield_Forecast": np.random.uniform(4.3, 5.5, rows).round(2),
         "KPI_Field": np.random.uniform(0.4, 1.0, rows).round(4),
         "Carbon_Intensity_Unit": np.random.uniform(3.5, 8.0, rows).round(1),
-        "OP_Total_Losses": np.random.uniform(-1.0, 5.0, rows).round(2),
+        "OP_Total_Losses": np.random.uniform(0.1, 4.5, rows).round(2),
         "E_Rotation_Efficiency": np.random.uniform(0.3, 1.3, rows).round(3),
         "Cost_Price_Season": np.random.randint(40, 66, rows),
         "Fertilizer_Costs_Neutral": np.random.randint(15, 26, rows)
     })
-    return df
+    
+    # Расчет статистики для демо
+    stats_dict = {}
+    for col in df.columns:
+        vals = df[col].dropna()
+        if len(vals) > 1:
+            m = float(np.mean(vals))
+            s = float(np.std(vals, ddof=1))
+            stats_dict[col] = {
+                "Среднее": m,
+                "Стандартное отклонение": s,
+                "Дисперсия": float(np.var(vals, ddof=1)),
+                "Стандартная ошибка": s / np.sqrt(len(vals)),
+                "Относительная ошибка (%)": (s / np.sqrt(len(vals)) / m * 100) if m != 0 else 0,
+                "Ширина дов. интервала (95%)": 1.96 * s / np.sqrt(len(vals)),
+                "Верхняя граница": m + 1.96 * s / np.sqrt(len(vals)),
+                "Нижняя граница": m - 1.96 * s / np.sqrt(len(vals))
+            }
+    df_stats = pd.DataFrame(stats_dict)
+    return df, df_stats, len(df)
