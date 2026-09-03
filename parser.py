@@ -30,20 +30,17 @@ CANONICAL_COLUMNS = [
 ]
 
 def clean_numeric_value(val):
-    """Преобразует строковое число с запятой или пробелами в float."""
     if pd.isna(val):
         return np.nan
     if isinstance(val, (int, float)):
         return float(val)
-    val_str = str(val).strip().replace(" ", "").replace(",", ".")
-    val_str = val_str.replace("###", "")
+    val_str = str(val).strip().replace(" ", "").replace(",", ".").replace("###", "")
     try:
         return float(val_str)
     except ValueError:
         return np.nan
 
 def parse_agro_excel(file_source) -> dict:
-    """Парсит загруженный Excel-файл со структурой агро-углеродного анализа."""
     df_raw = pd.read_excel(file_source, header=None)
     
     start_row_idx = None
@@ -102,8 +99,7 @@ def parse_agro_excel(file_source) -> dict:
         "status": "success"
     }
 
-def generate_sample_dataset(rows: int = 100) -> pd.DataFrame:
-    """Генерирует тестовый набор данных."""
+def generate_sample_dataset(rows: int = 1000) -> pd.DataFrame:
     np.random.seed(42)
     df = pd.DataFrame({
         "ID": np.arange(1, rows + 1),
