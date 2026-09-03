@@ -1,141 +1,134 @@
-import io
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
-import streamlit as st
+from scipy import stats
 
-CROP_MAPPING = {
-    "лён": "Лён", "лен": "Лён", "озимая": "Озимая пшеница", "пшеница": "Озимая пшеница",
-    "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы",
-    "травы": "Многолетние травы", "подсолне": "Подсолнечник", "подсолнечник": "Подсолнечник"
-}
+CANONICAL_COLUMNS = [
+    "ID",
+    "F6_1_Efficiency",
+    "CF_Harvest",
+    "B_Carbon",
+    "B_Econ",
+    "P_Carbon",
+    "Risk_1_R",
+    "C_Total_Costs",
+    "F6_2_Efficiency_Coeff",
+    "PI_Priority_Index",
+    "C_Total_Agrosrok",
+    "Net_Carbon_Footprint",
+    "CF_Leaf_Operations",
+    "F6_3_Index",
+    "C_Abs_F6_4",
+    "Temp_Avg_Apr_Jun",
+    "Precipitation_P",
+    "F5_Yield_Forecast",
+    "KPI_Field",
+    "Carbon_Intensity_Unit",
+    "OP_Total_Losses",
+    "E_Rotation_Efficiency",
+    "Cost_Price_Season",
+    "Fertilizer_Costs_Neutral"
+]
 
-TECH_MAPPING = {
-    "no-till": "No-Till", "notill": "No-Till", "но-тилл": "No-Till",
-    "классичес": "Классическая", "классиче": "Классическая",
-    "классическая": "Классическая", "традиционная": "Классическая"
-}
-
-OPERATION_MAPPING = {
-    "предпосев": "Предпосевная обработка", "обработка": "Предпосевная обработка",
-    "внесение": "Внесение удобрений/СЗР", "удобрен": "Внесение удобрений/СЗР",
-    "уборка": "Уборка урожая"
-}
-
-RESOURCE_MAPPING = {
-    "минеральн": "Минеральные удобрения", "удобрен": "Минеральные удобрения",
-    "бензин": "Бензин", "дизель": "Дизельное топливо", "дизельное": "Дизельное топливо",
-    "дт": "Дизельное топливо", "пестицид": "Пестициды", "сзр": "Пестициды",
-    "электроэн": "Электроэнергия", "электричество": "Электроэнергия"
-}
-
-def safe_convert_to_float(series: pd.Series) -> pd.Series:
-    cleaned = series.astype(str).str.replace(",", ".", regex=False).str.strip()
-    extracted = cleaned.str.extract(r"(\d+(?:\.\d+)?)", expand=False)
-    return pd.to_numeric(extracted, errors="coerce").fillna(0.0)
-
-@st.cache_data
-def get_mock_data() -> pd.DataFrame:
-    np.random.seed(42)
-    n = 1000
-    crops = ["Лён", "Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник"]
-    techs = ["No-Till", "Классическая"]
-    ops = ["Предпосевная обработка", "Внесение удобрений/СЗР", "Уборка урожая"]
-    resources = ["Минеральные удобрения", "Бензин", "Дизельное топливо", "Пестициды", "Электроэнергия"]
-
-    f_map = {
-        ("Лён", "Классическая"): 0.48, ("Лён", "No-Till"): 0.70,
-        ("Озимая пшеница", "Классическая"): 0.65, ("Озимая пшеница", "No-Till"): 0.82,
-        ("Горох", "Классическая"): 0.55, ("Горох", "No-Till"): 0.80,
-        ("Многолетние травы", "Классическая"): 0.55, ("Многолетние травы", "No-Till"): 0.70,
-        ("Кукуруза", "Классическая"): 0.65, ("Кукуруза", "No-Till"): 0.85,
-        ("Подсолнечник", "Классическая"): 0.68, ("Подсолнечник", "No-Till"): 0.75,
-    }
-    yield_map = {
-        "Лён": (0.9, 1.4), "Озимая пшеница": (4.6, 7.1), "Горох": (1.5, 2.2),
-        "Многолетние травы": (4.6, 5.3), "Кукуруза": (3.1, 5.6), "Подсолнечник": (0.9, 1.8)
-    }
-
-    data = []
-    for i in range(1, n + 1):
-        c = np.random.choice(crops)
-        t = np.random.choice(techs)
-        f_val = f_map.get((c, t), 0.65)
-        y_min, y_max = yield_map[c]
-        y_val = np.round(np.random.uniform(y_min, y_max), 1)
-        e_val = np.random.choice([0.5, 0.89, 2.3, 2.6, 4.93])
-        op = np.random.choice(ops)
-        res = np.random.choice(resources)
-        emission = 1893.00 if op == "Уборка урожая" else float(np.random.choice([54, 86, 94, 219, 248, 342, 418, 480]))
-        data.append({
-            "id": i,
-            "crop": c,
-            "technology": t,
-            "f_razl": f_val,
-            "yield_t_ha": y_val,
-            "emission_coeff_e": e_val,
-            "operation": op,
-            "emission_type": res,
-            "co2_emission_kg": emission,
-            "co2_per_ton": np.round(emission / y_val, 2)
-        })
-    return pd.DataFrame(data)
-
-def advanced_multi_field_parser(uploaded_file=None) -> pd.DataFrame:
-    if uploaded_file is None:
-        return get_mock_data()
+def clean_numeric_value(val):
+    """Преобразует строковое число с запятой или пробелами в float."""
+    if pd.isna(val):
+        return np.nan
+    if isinstance(val, (int, float)):
+        return float(val)
+    val_str = str(val).strip().replace(" ", "").replace(",", ".")
+    val_str = val_str.replace("###", "")
     try:
-        filename = uploaded_file.name.lower()
-        if filename.endswith(".csv"):
-            df_raw = pd.read_csv(uploaded_file, header=None)
-        else:
-            df_raw = pd.read_excel(uploaded_file, header=None)
+        return float(val_str)
+    except ValueError:
+        return np.nan
 
-        start_row = 0
-        for idx, row in df_raw.iterrows():
-            row_str = " ".join([str(val).lower() for val in row.values if pd.notna(val)])
-            if any(k in row_str for k in ["культура", "технология", "урожайность", "выброс"]):
-                start_row = idx + 1
-                break
-            if len(row.values) > 0 and str(row.values[0]).strip() == "1":
-                start_row = idx
-                break
+def parse_agro_excel(file_source) -> dict:
+    """Парсит загруженный Excel-файл со структурой агро-углеродного анализа."""
+    df_raw = pd.read_excel(file_source, header=None)
+    
+    start_row_idx = None
+    for idx, row in df_raw.iterrows():
+        first_cell = str(row.iloc[0]).strip().replace(",", ".")
+        if first_cell in ["1", "1.0"]:
+            start_row_idx = idx
+            break
+            
+    if start_row_idx is None:
+        start_row_idx = 1
 
-        df = df_raw.iloc[start_row:].copy().reset_index(drop=True)
-        column_names = ["id", "crop", "technology", "f_razl", "yield_t_ha", "emission_coeff_e", "operation", "emission_type", "co2_emission_kg"]
-        num_cols = min(len(df.columns), len(column_names))
-        df = df.iloc[:, :num_cols]
-        df.columns = column_names[:num_cols]
-        df = df.dropna(subset=["crop", "technology"], how="all")
-        df = df[~df["crop"].astype(str).str.lower().str.contains("среднее|стандарт|отклонен|дисперси", regex=True)]
+    df_body = df_raw.iloc[start_row_idx:].copy()
+    df_body['temp_id'] = df_body.iloc[:, 0].astype(str).str.replace(',', '.').str.strip()
+    df_body['temp_id'] = pd.to_numeric(df_body['temp_id'], errors='coerce')
+    
+    df_main = df_body[df_body['temp_id'].notna() & (df_body['temp_id'] <= 1000)].copy()
+    df_main = df_main.drop(columns=['temp_id'])
+    
+    for col in df_main.columns:
+        df_main[col] = df_main[col].apply(clean_numeric_value)
+        
+    assigned_cols = CANONICAL_COLUMNS[:len(df_main.columns)]
+    if len(df_main.columns) > len(CANONICAL_COLUMNS):
+        assigned_cols += [f"Extra_Col_{i}" for i in range(len(CANONICAL_COLUMNS), len(df_main.columns))]
+    df_main.columns = assigned_cols
+    df_main.reset_index(drop=True, inplace=True)
+    
+    stats_dict = {}
+    for col in df_main.columns:
+        valid_vals = df_main[col].dropna()
+        if len(valid_vals) > 1:
+            mean = np.mean(valid_vals)
+            std = np.std(valid_vals, ddof=1)
+            var = np.var(valid_vals, ddof=1)
+            se = std / np.sqrt(len(valid_vals))
+            rel_err = (se / mean * 100) if mean != 0 else np.nan
+            ci = se * stats.t.ppf((1 + 0.95) / 2, len(valid_vals) - 1)
+            stats_dict[col] = {
+                "Среднее": mean,
+                "Стандартное отклонение": std,
+                "Дисперсия": var,
+                "Стандартная ошибка": se,
+                "Относительная ошибка (%)": rel_err,
+                "Ширина дов. интервала": ci,
+                "Верхняя граница (95%)": mean + ci,
+                "Нижняя граница (95%)": mean - ci
+            }
+            
+    df_stats = pd.DataFrame(stats_dict)
+    
+    return {
+        "data": df_main,
+        "stats": df_stats,
+        "total_rows": len(df_main),
+        "status": "success"
+    }
 
-        numeric_fields = ["f_razl", "yield_t_ha", "emission_coeff_e", "co2_emission_kg"]
-        for col in numeric_fields:
-            if col in df.columns:
-                df[col] = safe_convert_to_float(df[col])
-
-        crop_aliases = {"лен": "Лён", "озимая": "Озимая пшеница", "горох": "Горох", "кукуруза": "Кукуруза", "многолет": "Многолетние травы", "подсолне": "Подсолнечник"}
-        tech_aliases = {"no-till": "No-Till", "но-тилл": "No-Till", "классиче": "Классическая"}
-        op_aliases = {"предпосев": "Предпосевная обработка", "внесение": "Внесение удобрений/СЗР", "уборка": "Уборка урожая"}
-        res_aliases = {"минеральн": "Минеральные удобрения", "бензин": "Бензин", "дизель": "Дизельное топливо", "пестицид": "Пестициды", "электроэн": "Электроэнергия"}
-
-        if "crop" in df.columns:
-            df["crop"] = df["crop"].astype(str).str.strip().map(lambda x: next((v for k, v in crop_aliases.items() if k in x.lower()), x.capitalize()))
-        if "technology" in df.columns:
-            df["technology"] = df["technology"].astype(str).str.strip().map(lambda x: next((v for k, v in tech_aliases.items() if k in x.lower()), x.capitalize()))
-        if "operation" in df.columns:
-            df["operation"] = df["operation"].astype(str).str.strip().map(lambda x: next((v for k, v in op_aliases.items() if k in x.lower()), x.capitalize()))
-        if "emission_type" in df.columns:
-            df["emission_type"] = df["emission_type"].astype(str).str.strip().map(lambda x: next((v for k, v in res_aliases.items() if k in x.lower()), x.capitalize()))
-
-        if "co2_emission_kg" in df.columns and "yield_t_ha" in df.columns:
-            df["co2_per_ton"] = np.where(df["yield_t_ha"] > 0, np.round(df["co2_emission_kg"] / df["yield_t_ha"], 2), 0.0)
-
-        return df
-    except Exception as e:
-        st.error(f"Ошибка при чтении Excel файла: {e}")
-        return get_mock_data()
-
-parse_carbon_excel = advanced_multi_field_parser
-parse_uploaded_file = advanced_multi_field_parser
-load_demo_carbon_dataset = get_mock_data
-load_sample_data = get_mock_data
+def generate_sample_dataset(rows: int = 100) -> pd.DataFrame:
+    """Генерирует тестовый набор данных."""
+    np.random.seed(42)
+    df = pd.DataFrame({
+        "ID": np.arange(1, rows + 1),
+        "F6_1_Efficiency": np.random.uniform(1.5, 25.0, rows).round(2),
+        "CF_Harvest": np.random.randint(-20, 120, rows),
+        "B_Carbon": np.random.uniform(1.0, 300.0, rows).round(2),
+        "B_Econ": np.random.uniform(75000, 85000, rows).round(0),
+        "P_Carbon": np.random.choice([400, 450, 500], rows),
+        "Risk_1_R": np.random.choice([0.5, 0.6, 0.7, 0.8], rows),
+        "C_Total_Costs": np.random.uniform(40000, 65000, rows).round(0),
+        "F6_2_Efficiency_Coeff": np.random.uniform(0.5, 4.0, rows).round(2),
+        "PI_Priority_Index": np.random.uniform(0.01, 10.0, rows).round(4),
+        "C_Total_Agrosrok": np.random.uniform(100, 2500, rows).round(2),
+        "Net_Carbon_Footprint": np.full(rows, 0.65),
+        "CF_Leaf_Operations": np.random.choice([50, 100, 350, 1893], rows),
+        "F6_3_Index": np.random.uniform(200, 4000, rows).round(2),
+        "C_Abs_F6_4": np.random.choice([110, 115, 120, 125], rows),
+        "Temp_Avg_Apr_Jun": np.random.randint(16, 23, rows),
+        "Precipitation_P": np.random.randint(160, 201, rows),
+        "F5_Yield_Forecast": np.random.uniform(4.3, 5.5, rows).round(2),
+        "KPI_Field": np.random.uniform(0.4, 1.0, rows).round(4),
+        "Carbon_Intensity_Unit": np.random.uniform(3.5, 8.0, rows).round(1),
+        "OP_Total_Losses": np.random.uniform(-1.0, 5.0, rows).round(2),
+        "E_Rotation_Efficiency": np.random.uniform(0.3, 1.3, rows).round(3),
+        "Cost_Price_Season": np.random.randint(40, 66, rows),
+        "Fertilizer_Costs_Neutral": np.random.randint(15, 26, rows)
+    })
+    return df
