@@ -15,8 +15,6 @@ def fmt(val, precision=2, suffix=""):
         return f"{val:,.0f}{suffix}".replace(",", " ")
     return f"{val:,.{precision}f}{suffix}".replace(",", " ")
 
-# ======================= ЭКРАНЫ ФУНКЦИЙ F1 - F6 ======================= #
-
 def render_fn_menu():
     """Главная страница каталога F1–F6."""
     render_top_header()
@@ -122,13 +120,10 @@ def render_f6(df: pd.DataFrame):
         render_card("Себестоимость по заданным полям в агросезон (тыс руб/га)", fmt(df.get("Cost_Price_Season", pd.Series([54.0])).mean(), 0, " тыс.₽"))
         render_card("Затраты на удобрения по заданным полям с учетом углеродной нейтральности , (тыс руб/га) за агросезон, З уд.агросрок", fmt(df.get("Fertilizer_Costs_Neutral", pd.Series([19.5])).mean(), 0, " тыс.₽"))
 
-# ======================= ГРАФИЧЕСКИЕ ДАШБОРДЫ ======================= #
-
 def render_dashboard_visuals(df: pd.DataFrame):
     """Главный сводный дашборд с графиками."""
     render_top_header("Сводный аналитический дашборд")
     
-    # 4 верхние ключевые метрики
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         render_card("🌿 Выгода CO2 (Bcarbon)", fmt(df.get("B_Carbon", pd.Series([0])).mean(), 2, " т CO2/га"))
@@ -141,7 +136,6 @@ def render_dashboard_visuals(df: pd.DataFrame):
 
     st.markdown("---")
     
-    # Бублики
     col1, col2 = st.columns(2)
     with col1:
         if "Risk_1_R" in df.columns:
@@ -197,7 +191,6 @@ def render_dashboard_visuals(df: pd.DataFrame):
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-    # Scatter & Top-10
     c_scat, c_top = st.columns([1.2, 1])
     with c_scat:
         if "C_Total_Costs" in df.columns and "B_Carbon" in df.columns:

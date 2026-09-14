@@ -41,7 +41,6 @@ def render_sidebar(df: pd.DataFrame = None):
 
     st.sidebar.markdown("---")
     
-    # Фильтрация по выборке
     filtered_df = df
     if df is not None and not df.empty and "ID" in df.columns:
         min_id = int(df["ID"].min())

@@ -28,7 +28,6 @@ if "agro_data" not in st.session_state:
     st.session_state.agro_data = None
     st.session_state.agro_stats = None
 
-# Блок быстрой загрузки / генерации данных
 with st.expander("📂 Загрузка исходных данных F2.xlsx / Генерация 1000 полей", expanded=(st.session_state.agro_data is None)):
     col_upload, col_demo = st.columns([3, 1])
     with col_upload:

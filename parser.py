@@ -27,7 +27,6 @@ CANONICAL_COLUMNS = [
     "E_Rotation_Efficiency",      # Интегральный коэфф. севооборота E
     "Cost_Price_Season",          # Себестоимость агросезона
     "Fertilizer_Costs_Neutral",   # Затраты на удобрения с нейтр. З уд.агросрок
-    # Дополнительные специфичные параметры F1-F4
     "C_Sequestered",              # Csequestered (F1)
     "C_Net",                      # Cnet (F1)
     "K_Temp_Soil",                # Ktemp почвы (F2)
@@ -151,7 +150,6 @@ def generate_sample_dataset(rows: int = 1000) -> tuple:
         "E_Rotation_Efficiency": np.random.uniform(0.3, 1.3, rows).round(3),
         "Cost_Price_Season": np.random.randint(40, 66, rows),
         "Fertilizer_Costs_Neutral": np.random.randint(15, 26, rows),
-        # F1-F4
         "C_Sequestered": np.random.uniform(0.8, 3.5, rows).round(2),
         "C_Net": np.random.uniform(0.3, 1.8, rows).round(2),
         "K_Temp_Soil": np.random.uniform(0.9, 1.4, rows).round(2),

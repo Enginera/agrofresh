@@ -22,7 +22,7 @@ def apply_custom_styles():
             border-right: 1px solid rgba(52, 211, 153, 0.2);
         }
 
-        /* Заголовок модуля в контентной зоне */
+        /* Заголовок модуля */
         .module-header {
             display: flex;
             align-items: center;
@@ -62,7 +62,7 @@ def apply_custom_styles():
             margin: 2px 0 0 0;
         }
 
-        /* Карточки метрик (F1 - F6) */
+        /* Карточки метрик */
         .agro-card {
             background: #0e3d2d;
             border: 1px solid #165b43;
@@ -100,7 +100,7 @@ def apply_custom_styles():
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
         }
 
-        /* Плитки навигации функций F1-F6 */
+        /* Плитки каталога F1-F6 */
         .fn-tile {
             background: #0e3d2d;
             border: 2px solid #1a6b4f;
@@ -115,15 +115,9 @@ def apply_custom_styles():
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .fn-tile:hover {
-            background: #134e3a;
-            border-color: #34d399;
+            margin-bottom: 10px;
         }
 
-        /* Нижний блок источника в сайдбаре */
         .sidebar-footer {
             background: rgba(14, 61, 45, 0.7);
             border: 1px solid rgba(52, 211, 153, 0.2);
@@ -147,7 +141,7 @@ def apply_custom_styles():
     """, unsafe_allow_html=True)
 
 def render_top_header(subtitle: str = ""):
-    """Рендерит верхнюю плашку с логотипом, заголовком и кнопками печати/экспорта."""
+    """Рендерит верхнюю плашку с логотипом, заголовком и кнопками."""
     col_left, col_right = st.columns([3.5, 1.2])
     with col_left:
         st.markdown(f"""
@@ -162,9 +156,9 @@ def render_top_header(subtitle: str = ""):
     with col_right:
         c_p, c_e = st.columns(2)
         with c_p:
-            st.button("🖨️ Печать", use_container_width=True, help="Печать сводной формы")
+            st.button("🖨️ Печать", use_container_width=True)
         with c_e:
-            st.button("📥 Экспорт", use_container_width=True, help="Экспорт данных")
+            st.button("📥 Экспорт", use_container_width=True)
 
 def render_card(title: str, value_text: str):
     """Отрисовывает карточку показателя с белым полем для значения."""
