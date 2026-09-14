@@ -28,13 +28,13 @@ if "agro_data" not in st.session_state:
     st.session_state.agro_data = None
     st.session_state.agro_stats = None
 
-with st.expander("📂 Загрузка исходных данных F2.xlsx / Генерация 1000 полей", expanded=(st.session_state.agro_data is None)):
+with st.expander("📂 Загрузка таблицы F2.xlsx / Демо-генерация 1000 полей", expanded=(st.session_state.agro_data is None)):
     col_upload, col_demo = st.columns([3, 1])
     with col_upload:
         uploaded_file = st.file_uploader(
             "Выберите файл Excel (.xlsx, .xls)", 
             type=["xlsx", "xls"],
-            help="Таблица с расчетами параметров 6 функций углеродной нейтральности"
+            help="Таблица с расчетами параметров 6 функций F1-F6"
         )
         if uploaded_file is not None:
             try:
@@ -60,12 +60,12 @@ if filtered_df is not None and not filtered_df.empty:
         render_dashboard_visuals(filtered_df)
 
     elif current_page == "⏹ Параметры":
-        render_top_header("Параметры и настройки выборки")
-        st.markdown('<div class="section-title">Текущие канонические параметры полей</div>', unsafe_allow_html=True)
+        render_top_header("Параметры и описательная статистика полей")
+        st.markdown('<div class="section-title">Сводка параметров реестра (1000 полей)</div>', unsafe_allow_html=True)
         st.dataframe(filtered_df.describe().T, use_container_width=True)
 
     elif current_page == "🔀 Функции F1–F6":
-        if selected_sub_fn == "Обзор всех функций (Меню)" or selected_sub_fn is None:
+        if selected_sub_fn == "📋 Общий экран функций" or selected_sub_fn is None:
             render_fn_menu()
         elif "F1" in selected_sub_fn:
             render_f1(filtered_df)
@@ -81,12 +81,12 @@ if filtered_df is not None and not filtered_df.empty:
             render_f6(filtered_df)
 
     elif current_page == "⚪ Сводный анализ":
-        render_top_header("Сводный анализ и 95% доверительные интервалы")
-        tab_reg, tab_ci, tab_exp = st.tabs(["📋 Реестр полей", "📐 Оценка 95% CI", "💾 Экспорт отчета"])
+        render_top_header("Сводный анализ, доверительные интервалы (95% CI) и выгрузка")
+        tab_reg, tab_ci, tab_exp = st.tabs(["📋 База полей (1000)", "📐 95% Доверительные интервалы", "💾 Экспорт отчета"])
         
         with tab_reg:
             st.dataframe(filtered_df, use_container_width=True, height=520)
-            st.caption(f"Всего полей в фильтре: {len(filtered_df)}")
+            st.caption(f"Отображено записей: {len(filtered_df)}")
             
         with tab_ci:
             if st.session_state.agro_stats is not None:
@@ -110,4 +110,4 @@ if filtered_df is not None and not filtered_df.empty:
                 use_container_width=True
             )
 else:
-    st.info("👆 Загрузите Excel-файл или нажмите кнопку «Сгенерировать 1000 полей» для открытия модулей F1–F6.")
+    st.info("👆 Загрузите Excel-файл или нажмите кнопку «Сгенерировать 1000 полей» для открытия модулей.")

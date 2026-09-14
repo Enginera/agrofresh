@@ -8,49 +8,71 @@ from styles import render_card, render_top_header
 ECO_GREENS = ["#10b981", "#059669", "#34d399", "#6ee7b7", "#047857", "#a7f3d0", "#022c22"]
 
 def fmt(val, precision=2, suffix=""):
-    """Форматирует числовые значения для карточек."""
+    """Форматирует числовые значения под плашки карточек."""
     if pd.isna(val) or val is None:
         return "—"
     if precision == 0:
         return f"{val:,.0f}{suffix}".replace(",", " ")
     return f"{val:,.{precision}f}{suffix}".replace(",", " ")
 
+# ======================= ЭКРАНЫ ФУНКЦИЙ F1 - F6 ======================= #
+
 def render_fn_menu():
-    """Главная страница каталога F1–F6."""
+    """Главный экран каталога функций F1–F6 (плитки-кнопки по макету)."""
     render_top_header()
-    st.markdown('<div class="section-title">Расчётные модули углеродно-нейтрального земледелия (F1 – F6)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Расчётные функции углеродно-нейтрального земледелия</div>', unsafe_allow_html=True)
     
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown('<div class="fn-tile">F1 - "Планирования<br>севооборота"</div>', unsafe_allow_html=True)
+        if st.button("F1 – «Планирования севооборота»", use_container_width=True):
+            st.session_state.active_fn = "F1 - Планирования севооборота"
+            st.rerun()
         st.write("")
-        st.markdown('<div class="fn-tile">F2 - "Управления<br>удобрениями и обработкой почвы"</div>', unsafe_allow_html=True)
+        if st.button("F2 – «Управления удобрениями и обработкой почвы»", use_container_width=True):
+            st.session_state.active_fn = "F2 - Управления удобрениями и обработкой почвы"
+            st.rerun()
         st.write("")
-        st.markdown('<div class="fn-tile">F3 - "Мониторинга и<br>управления защитой растений"</div>', unsafe_allow_html=True)
+        if st.button("F3 – «Мониторинга и управления защитой растений»", use_container_width=True):
+            st.session_state.active_fn = "F3 - Мониторинга и управления защитой растений"
+            st.rerun()
+            
     with c2:
-        st.markdown('<div class="fn-tile">F4 - "Управления<br>урожайностью и качеством продукции"</div>', unsafe_allow_html=True)
+        if st.button("F4 – «Управления урожайностью и качеством продукции»", use_container_width=True):
+            st.session_state.active_fn = "F4 - Управления урожайностью и качеством продукции"
+            st.rerun()
         st.write("")
-        st.markdown('<div class="fn-tile">F5 - "Оценки углеродного следа,<br>прогнозирования, статистики, учета и отчетности"</div>', unsafe_allow_html=True)
+        if st.button("F5 – «Оценки углеродного следа, прогнозирования...»", use_container_width=True):
+            st.session_state.active_fn = "F5 - Оценки углеродного следа, прогнозирования..."
+            st.rerun()
         st.write("")
-        st.markdown('<div class="fn-tile">F6 - "Принятия<br>стратегических решений"</div>', unsafe_allow_html=True)
-    st.info("👈 Выберите интересующую функцию в левом меню сайдбара для просмотра детальных расчётов.")
+        if st.button("F6 – «Принятия стратегических решений»", use_container_width=True):
+            st.session_state.active_fn = "F6 - Принятия стратегических решений"
+            st.rerun()
+
+def render_back_button():
+    """Кнопка возврата к общему списку функций."""
+    if st.button("⬅ Назад ко всем функциям F1–F6"):
+        st.session_state.active_fn = "📋 Общий экран функций"
+        st.rerun()
 
 def render_f1(df: pd.DataFrame):
-    """F1 - Планирования севооборота."""
+    """Экран F1 - Планирования севооборота (точно по Скриншоту 6)."""
+    render_back_button()
     render_top_header('F1 - "Планирования севооборота"')
     c1, c2 = st.columns(2)
     with c1:
-        v1 = df["C_Sequestered"].mean() if "C_Sequestered" in df.columns else 2.14
+        v1 = df.get("C_Sequestered", pd.Series([2.14])).mean()
         render_card("Секвестрация углерода при выборе с/х культур в севообороте, Csequestered (т CO₂-экв./га).", fmt(v1))
         
-        v3 = df["E_Rotation_Efficiency"].mean() if "E_Rotation_Efficiency" in df.columns else 0.85
+        v3 = df.get("E_Rotation_Efficiency", pd.Series([0.85])).mean()
         render_card("Интегральный коэффициент эффективности севооборота E", fmt(v3, 3))
     with c2:
-        v2 = df["C_Net"].mean() if "C_Net" in df.columns else 0.65
+        v2 = df.get("C_Net", pd.Series([0.65])).mean()
         render_card("Расчет показателя углеродного следа за период агросрока Cnet (т CO₂-экв./га)", fmt(v2))
 
 def render_f2(df: pd.DataFrame):
-    """F2 - Управления удобрениями и обработкой почвы."""
+    """Экран F2 - Управления удобрениями и обработкой почвы (точно по Скриншоту 5)."""
+    render_back_button()
     render_top_header('F2 - "Управления удобрениями и обработкой почвы"')
     c1, c2 = st.columns(2)
     with c1:
@@ -65,7 +87,8 @@ def render_f2(df: pd.DataFrame):
         render_card("Секвестрация углерода от технологической операции», ΔСобработка, (kg CO2-eq/га)", fmt(df.get("Delta_C_Tillage", pd.Series([94.2])).mean(), 1))
 
 def render_f3(df: pd.DataFrame):
-    """F3 - Мониторинга и управления защитой растений."""
+    """Экран F3 - Мониторинга и управления защитой растений (точно по Скриншоту 4)."""
+    render_back_button()
     render_top_header('F3 - "Мониторинга и управления защитой растений"')
     c1, c2 = st.columns(2)
     with c1:
@@ -78,12 +101,13 @@ def render_f3(df: pd.DataFrame):
         render_card("Расчет углеродного следа от мероприятий защиты растений (за агросрок), (kg CO2-eq/га), Cсезон", fmt(df.get("CF_Protection_Season", pd.Series([42.8])).mean(), 1))
 
 def render_f4(df: pd.DataFrame):
-    """F4 - Управления урожайностью и качеством продукции."""
+    """Экран F4 - Управления урожайностью и качеством продукции (точно по Скриншоту 3)."""
+    render_back_button()
     render_top_header('F4 - "Управления урожайностью и качеством продукции"')
     c1, c2 = st.columns(2)
     with c1:
         render_card("Общие потери, (т/га), ОП", fmt(df.get("OP_Total_Losses", pd.Series([1.85])).mean(), 2, " т/га"))
-        render_card("Финальная урожайность, (т/га), Уфин", fmt(df.get("U_Fin_Yield", pd.Series([4.85])).mean(), 2, " т/га"))
+        render_card("Финальная урожайность, (т/га), Уфин", fmt(df.get("F5_Yield_Forecast", pd.Series([4.85])).mean(), 2, " т/га"))
         render_card("Показатель углеродного след технологической операции, (кг -CO2 экв./ га), СFу.след", fmt(df.get("CF_Tech_Operation", pd.Series([52.0])).mean(), 1))
         render_card("Показатель углеродного следа на тонну зерна получаемого в процессе уборки, (кг CO2 -экв./т), СFитог", fmt(df.get("CF_Grain_Total", pd.Series([74.3])).mean(), 1))
     with c2:
@@ -92,13 +116,14 @@ def render_f4(df: pd.DataFrame):
         render_card("Коэффициент качества продукции от 100% продуктивных свойств,(%), QF", fmt(df.get("QF_Quality", pd.Series([94.5])).mean(), 1, " %"))
 
 def render_f5(df: pd.DataFrame):
-    """F5 - Оценки углеродного следа, прогнозирования, статистики, учета и отчетности."""
+    """Экран F5 - Оценки углеродного следа, прогнозирования... (точно по Скриншоту 2)."""
+    render_back_button()
     render_top_header('F5 - "Оценки углеродного следа, прогнозирования, статистики, учета и отчетности"')
     c1, c2 = st.columns(2)
     with c1:
         render_card("Углеродоемкость (т CO2/га) У CO2", fmt(df.get("B_Carbon", pd.Series([68.4])).mean(), 2, " т/га"))
         render_card("Эмиссия операции вносящая наибольший вклад в углеродный след, (кг CO2-экв/га) Э CO2", fmt(df.get("CF_Leaf_Operations", pd.Series([482.0])).max(), 1))
-        render_card("Общие валовые выбросы углерода, (кг CO2-экв/га) OCO2", fmt(df.get("CF_Harvest", pd.Series([64.2])).sum() / max(1, len(df)), 1))
+        render_card("Общие валовые выбросы углерода, (кг CO2-экв/га) OCO2", fmt(df.get("CF_Harvest", pd.Series([64.2])).mean(), 1))
         render_card("Эмиссия углерода от технологии получения с/х продукции, (кг CO2-экв/га), Cem", fmt(df.get("C_Total_Agrosrok", pd.Series([850.0])).mean(), 1))
     with c2:
         render_card("Показатель углеродного следа для i-го агросрока, (кг CO2-экв/га), Ctotal", fmt(df.get("C_Total_Agrosrok", pd.Series([1240.0])).mean(), 1))
@@ -106,7 +131,8 @@ def render_f5(df: pd.DataFrame):
         render_card("Анализ эффективности с учетом секвестрации, (тыс. руб/ га)", fmt(df.get("B_Econ", pd.Series([80200])).mean() / 1000, 1, " тыс.₽"))
 
 def render_f6(df: pd.DataFrame):
-    """F6 - Принятия стратегических решений."""
+    """Экран F6 - Принятия стратегических решений (точно по Скриншоту 1)."""
+    render_back_button()
     render_top_header('F6 - "Принятия стратегических решений"')
     c1, c2 = st.columns(2)
     with c1:
@@ -120,8 +146,10 @@ def render_f6(df: pd.DataFrame):
         render_card("Себестоимость по заданным полям в агросезон (тыс руб/га)", fmt(df.get("Cost_Price_Season", pd.Series([54.0])).mean(), 0, " тыс.₽"))
         render_card("Затраты на удобрения по заданным полям с учетом углеродной нейтральности , (тыс руб/га) за агросезон, З уд.агросрок", fmt(df.get("Fertilizer_Costs_Neutral", pd.Series([19.5])).mean(), 0, " тыс.₽"))
 
+# ======================= ГРАФИЧЕСКИЙ ДАШБОРД ======================= #
+
 def render_dashboard_visuals(df: pd.DataFrame):
-    """Главный сводный дашборд с графиками."""
+    """Экран 1: Сводный Дашборд."""
     render_top_header("Сводный аналитический дашборд")
     
     k1, k2, k3, k4 = st.columns(4)
