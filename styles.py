@@ -1,170 +1,186 @@
 ﻿import streamlit as st
 
 def apply_custom_styles():
-    """Применяет фирменную палитру и карточки по макетам модуля."""
+    """Применяет стилизацию из HTML-прототипа."""
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap');
         
         html, body, [class*="css"] {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: #24342b;
+        }
+
+        .stApp {
+            background-color: #f3f6f3;
         }
 
         .main .block-container {
-            padding-top: 1.2rem;
+            padding-top: 1.5rem;
             padding-bottom: 2.5rem;
-            max-width: 96%;
+            max-width: 1550px;
         }
 
         /* Сайдбар */
         section[data-testid="stSidebar"] {
-            background-color: #06281c !important;
-            border-right: 1px solid rgba(52, 211, 153, 0.2);
+            background-color: #173b2a !important;
+            color: #ffffff !important;
+            border-right: none;
+        }
+        section[data-testid="stSidebar"] * {
+            color: #cfe0d6 !important;
+        }
+        section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+            color: #cfe0d6 !important;
         }
 
-        /* Заголовок модуля */
-        .module-header {
+        /* Верхняя шапка */
+        .header-box {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+            align-items: flex-start;
+            margin-bottom: 15px;
         }
-        .module-title-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .module-logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #0f4432;
-            border: 2px solid #34d399;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        .module-title {
-            font-size: 1.35rem;
+        .eyebrow {
+            color: #2e6c50;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
             font-weight: 800;
-            color: #ffffff;
-            letter-spacing: 0.02em;
-            margin: 0;
+        }
+        .main-title {
+            font-size: 28px;
+            font-weight: 850;
+            color: #24342b;
+            margin: 4px 0;
+            line-height: 1.15;
+        }
+        .sub-title {
+            color: #748178;
+            font-size: 13px;
+        }
+
+        /* Блок функций F1-F6 СВЕРХУ */
+        .fn-top-container {
+            background: #ffffff;
+            border: 1px solid #e0e7e1;
+            border-radius: 13px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 25px rgba(32,55,43,.06);
+        }
+        .fn-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .fn-card {
+            background: #f8faf8;
+            border: 1px solid #dbe5dd;
+            border-radius: 9px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .fn-card:hover {
+            border-color: #2e6c50;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(46,108,80,0.12);
+        }
+        .fn-badge {
+            font-size: 11px;
+            font-weight: 900;
+            color: #2e6c50;
+            margin-bottom: 3px;
+        }
+        .fn-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #24342b;
+            line-height: 1.25;
+            margin-bottom: 6px;
+        }
+        .fn-val {
+            font-size: 14px;
+            font-weight: 850;
+            color: #173b2a;
+        }
+
+        /* Карточки KPI */
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid #e0e7e1;
+            border-radius: 13px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 25px rgba(32,55,43,.06);
+            margin-bottom: 14px;
+        }
+        .kpi-card small {
+            color: #748178;
+            font-weight: 700;
+            font-size: 11px;
             text-transform: uppercase;
         }
-        .module-subtitle {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #a7f3d0;
-            margin: 2px 0 0 0;
+        .kpi-card .value {
+            font-size: 24px;
+            font-weight: 850;
+            color: #24342b;
+            margin-top: 4px;
         }
 
-        /* Карточки метрик */
-        .agro-card {
-            background: #0e3d2d;
-            border: 1px solid #165b43;
-            border-radius: 6px;
-            padding: 16px 14px 12px 14px;
-            min-height: 125px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            margin-bottom: 16px;
-            transition: transform 0.15s ease, border-color 0.15s ease;
+        /* Блоки графиков */
+        .chart-card {
+            background: #ffffff;
+            border: 1px solid #e0e7e1;
+            border-radius: 13px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(32,55,43,.06);
+            margin-bottom: 14px;
+            height: 100%;
         }
-        .agro-card:hover {
-            border-color: #34d399;
-            transform: translateY(-2px);
+        .chart-title {
+            font-weight: 850;
+            font-size: 15px;
+            color: #24342b;
+            margin: 0;
         }
-        .agro-card-title {
-            color: #ffffff;
-            font-size: 0.88rem;
-            font-weight: 600;
-            line-height: 1.3;
-            margin-bottom: 10px;
-        }
-        .agro-card-valbox {
-            background-color: #ffffff;
-            color: #092e20;
-            font-weight: 700;
-            font-size: 1.05rem;
-            text-align: center;
-            padding: 7px 12px;
-            border-radius: 4px;
-            align-self: center;
-            min-width: 140px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        .chart-meta {
+            color: #748178;
+            font-size: 12px;
+            margin-bottom: 8px;
         }
 
-        /* Плитки каталога F1-F6 */
-        .fn-tile {
-            background: #0e3d2d;
-            border: 2px solid #1a6b4f;
-            border-radius: 8px;
-            padding: 24px 16px;
-            text-align: center;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.05rem;
-            min-height: 110px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
-        }
-
-        .sidebar-footer {
-            background: rgba(14, 61, 45, 0.7);
-            border: 1px solid rgba(52, 211, 153, 0.2);
-            border-radius: 6px;
-            padding: 10px 12px;
+        /* Футер сайдбара */
+        .sidebar-note {
+            background: #24513c;
+            padding: 12px;
+            border-radius: 10px;
+            color: #cfe0d6 !important;
+            font-size: 11px;
+            line-height: 1.4;
             margin-top: 25px;
-            font-size: 0.75rem;
-            color: #a7f3d0;
-            line-height: 1.35;
-        }
-
-        .section-title {
-            color: #ecfdf5;
-            font-size: 1.15rem;
-            font-weight: 700;
-            border-left: 4px solid #10b981;
-            padding-left: 10px;
-            margin: 15px 0 15px 0;
         }
         </style>
     """, unsafe_allow_html=True)
 
-def render_top_header(subtitle: str = ""):
-    """Рендерит верхнюю плашку с логотипом, заголовком и кнопками."""
-    col_left, col_right = st.columns([3.5, 1.2])
-    with col_left:
+def render_top_header(title="Углеродный след агросезона", eyebrow="Аналитическая панель", subtitle="Аналитика данных Excel и визуализация ключевых показателей"):
+    """Шапка по макету с кнопками Печать и Экспорт."""
+    c_left, c_right = st.columns([3.5, 1.2])
+    with c_left:
         st.markdown(f"""
-            <div class="module-title-box">
-                <div class="module-logo">🌾</div>
+            <div class="header-box">
                 <div>
-                    <div class="module-title">МОДУЛЬ УГЛЕРОД НЕЙТРАЛЬНОГО ЗЕМЛЕДЕЛИЯ</div>
-                    {f'<div class="module-subtitle">{subtitle}</div>' if subtitle else ''}
+                    <div class="eyebrow">{eyebrow}</div>
+                    <div class="main-title">{title}</div>
+                    <div class="sub-title">{subtitle}</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
-    with col_right:
-        c_p, c_e = st.columns(2)
-        with c_p:
+    with c_right:
+        st.write("")
+        b1, b2 = st.columns(2)
+        with b1:
             st.button("🖨️ Печать", use_container_width=True)
-        with c_e:
-            st.button("📥 Экспорт", use_container_width=True)
-
-def render_card(title: str, value_text: str):
-    """Отрисовывает карточку показателя с белым полем для значения."""
-    st.markdown(f"""
-        <div class="agro-card">
-            <div class="agro-card-title">{title}</div>
-            <div class="agro-card-valbox">{value_text}</div>
-        </div>
-    """, unsafe_allow_html=True)
+        with b2:
+            st.button("📥 Экспорт", use_container_width=True, type="primary")

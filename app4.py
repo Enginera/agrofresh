@@ -3,14 +3,10 @@ import pandas as pd
 import io
 from parser import parse_agro_excel, generate_sample_dataset
 from dashboards import (
-    render_dashboard_visuals,
-    render_fn_menu,
-    render_f1,
-    render_f2,
-    render_f3,
-    render_f4,
-    render_f5,
-    render_f6
+    render_top_f1_f6_block,
+    render_kpis,
+    render_charts_grid,
+    render_summary_tables
 )
 from navigation import render_sidebar
 from styles import apply_custom_styles, render_top_header
@@ -28,13 +24,14 @@ if "agro_data" not in st.session_state:
     st.session_state.agro_data = None
     st.session_state.agro_stats = None
 
-with st.expander("📂 Загрузка таблицы F2.xlsx / Демо-генерация 1000 полей", expanded=(st.session_state.agro_data is None)):
+# Верхний спойлер загрузки данных
+with st.expander("📂 Загрузка Excel (F2.xlsx) / Быстрый старт (1000 полей)", expanded=(st.session_state.agro_data is None)):
     col_upload, col_demo = st.columns([3, 1])
     with col_upload:
         uploaded_file = st.file_uploader(
-            "Выберите файл Excel (.xlsx, .xls)", 
+            "Выберите файл таблицы (.xlsx, .xls)", 
             type=["xlsx", "xls"],
-            help="Таблица с расчетами параметров 6 функций F1-F6"
+            help="Таблица с расчетами параметров 6 функций углеродной нейтральности"
         )
         if uploaded_file is not None:
             try:
@@ -46,68 +43,71 @@ with st.expander("📂 Загрузка таблицы F2.xlsx / Демо-ген
                 st.error(f"❌ Ошибка при парсинге Excel: {e}")
                 
     with col_demo:
-        st.write("Быстрый старт:")
-        if st.button("Сгенерировать 1000 полей", use_container_width=True):
+        st.write("Демо-режим:")
+        if st.button("Сгенерировать 1000 полей", use_container_width=True, type="primary"):
             data, stats_df, total = generate_sample_dataset(1000)
             st.session_state.agro_data = data
             st.session_state.agro_stats = stats_df
-            st.success("✅ Сгенерировано 1000 полей со статистикой F1-F6!")
+            st.success("✅ Сгенерировано 1000 полей F1-F6!")
 
-current_page, selected_sub_fn, filtered_df = render_sidebar(st.session_state.agro_data)
+current_page, filtered_df = render_sidebar(st.session_state.agro_data)
 
 if filtered_df is not None and not filtered_df.empty:
-    if current_page == "🔷 Дашборд":
-        render_dashboard_visuals(filtered_df)
+    # 1. Верхний заголовок и действия
+    render_top_header()
 
-    elif current_page == "⏹ Параметры":
-        render_top_header("Параметры и описательная статистика полей")
-        st.markdown('<div class="section-title">Сводка параметров реестра (1000 полей)</div>', unsafe_allow_html=True)
+    # 2. БЛОК F1-F6 СВЕРХУ (как требовалось)
+    render_top_f1_f6_block(filtered_df)
+
+    # 3. Фильтры-селекторы сценариев
+    f_c1, f_c2, f_c3, f_c4 = st.columns([1.3, 1.3, 1, 0.8])
+    with f_c1:
+        st.selectbox("Культура", ["Горох + Кукуруза", "Все культуры", "Горох", "Кукуруза", "Лён", "Озимая пшеница", "Подсолнечник"])
+    with f_c2:
+        st.selectbox("Технология", ["Классическая", "Все технологии", "No-Till"])
+    with f_c3:
+        st.selectbox("Агросезон", ["Текущий расчёт", "Все периоды"])
+    with f_c4:
+        st.write("&nbsp;")
+        if st.button("🔄 Сбросить", use_container_width=True):
+            st.rerun()
+
+    # 4. KPI Метрики
+    render_kpis(filtered_df)
+
+    # 5. Маршрутизация по вкладкам навигации
+    if current_page == "◈ Дашборд":
+        render_charts_grid(filtered_df)
+        st.markdown("---")
+        render_summary_tables()
+
+    elif current_page == "▦ Параметры":
+        st.markdown("### Описательная статистика и реестр параметров (1000 полей)")
         st.dataframe(filtered_df.describe().T, use_container_width=True)
+        render_summary_tables()
 
-    elif current_page == "🔀 Функции F1–F6":
-        if selected_sub_fn == "📋 Общий экран функций" or selected_sub_fn is None:
-            render_fn_menu()
-        elif "F1" in selected_sub_fn:
-            render_f1(filtered_df)
-        elif "F2" in selected_sub_fn:
-            render_f2(filtered_df)
-        elif "F3" in selected_sub_fn:
-            render_f3(filtered_df)
-        elif "F4" in selected_sub_fn:
-            render_f4(filtered_df)
-        elif "F5" in selected_sub_fn:
-            render_f5(filtered_df)
-        elif "F6" in selected_sub_fn:
-            render_f6(filtered_df)
+    elif current_page == "⌘ Функции F1–F6":
+        st.markdown("### Реестр расчётов по всем функциям F1–F6")
+        st.dataframe(filtered_df, use_container_width=True, height=500)
 
-    elif current_page == "⚪ Сводный анализ":
-        render_top_header("Сводный анализ, доверительные интервалы (95% CI) и выгрузка")
-        tab_reg, tab_ci, tab_exp = st.tabs(["📋 База полей (1000)", "📐 95% Доверительные интервалы", "💾 Экспорт отчета"])
-        
-        with tab_reg:
-            st.dataframe(filtered_df, use_container_width=True, height=520)
-            st.caption(f"Отображено записей: {len(filtered_df)}")
-            
-        with tab_ci:
+    elif current_page == "◌ Сводный анализ":
+        st.markdown("### Доверительные интервалы (95% CI) и экспорт")
+        tab1, tab2 = st.tabs(["📐 95% Доверительные интервалы", "💾 Экспорт Excel"])
+        with tab1:
             if st.session_state.agro_stats is not None:
                 st.dataframe(st.session_state.agro_stats.T, use_container_width=True)
-            else:
-                st.info("Статистика рассчитывается автоматически при загрузке данных.")
-                
-        with tab_exp:
-            st.markdown("#### Выгрузка итоговых аналитических таблиц")
+        with tab2:
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 filtered_df.to_excel(writer, sheet_name='F1_F6_Data', index=False)
                 if st.session_state.agro_stats is not None:
                     st.session_state.agro_stats.to_excel(writer, sheet_name='Stats_95CI')
-            
             st.download_button(
-                label="📥 Скачать Excel (Данные F1-F6 + 95% CI)",
+                label="📥 Скачать итоговый отчёт Excel (F1-F6 + 95% CI)",
                 data=buffer.getvalue(),
                 file_name="agro_carbon_neutral_report.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
 else:
-    st.info("👆 Загрузите Excel-файл или нажмите кнопку «Сгенерировать 1000 полей» для открытия модулей.")
+    st.info("👆 Загрузите файл Excel или нажмите кнопку «Сгенерировать 1000 полей» для отображения аналитической панели.")
