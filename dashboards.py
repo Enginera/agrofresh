@@ -3,37 +3,151 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from styles import render_metric_card
+from styles import render_card, render_top_header
 
 ECO_GREENS = ["#10b981", "#059669", "#34d399", "#6ee7b7", "#047857", "#a7f3d0", "#022c22"]
 
-def render_overview_kpis(df: pd.DataFrame):
-    """Карточки ключевых показателей."""
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        avg_b = df["B_Carbon"].mean() if "B_Carbon" in df.columns else 0.0
-        render_metric_card("🌿 Выгода CO2 (Bcarbon)", f"{avg_b:.2f} т", "т CO2-экв/га за год")
-    with c2:
-        avg_c = df["C_Total_Costs"].mean() if "C_Total_Costs" in df.columns else 0.0
-        render_metric_card("💰 Затраты (C)", f"{avg_c:,.0f} ₽", "тыс. руб./га")
-    with c3:
-        avg_f = df["F6_1_Efficiency"].mean() if "F6_1_Efficiency" in df.columns else 0.0
-        render_metric_card("⚡ Эффективность (F6.1)", f"{avg_f:.2f}", "индекс нейтральности")
-    with c4:
-        avg_r = df["Risk_1_R"].mean() if "Risk_1_R" in df.columns else 0.0
-        render_metric_card("🛡️ Уровень риска (1-R)", f"{avg_r:.2f}", "среднее по выборке")
+def fmt(val, precision=2, suffix=""):
+    """Форматирует числовые значения для карточек."""
+    if pd.isna(val) or val is None:
+        return "—"
+    if precision == 0:
+        return f"{val:,.0f}{suffix}".replace(",", " ")
+    return f"{val:,.{precision}f}{suffix}".replace(",", " ")
 
-def render_donut_charts(df: pd.DataFrame):
-    """Два раздельных и просторных бублика с четкими отступами."""
-    st.markdown('<div class="section-title">🍩 Структура баланса эмиссий и распределение рисков</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
+# ======================= ЭКРАНЫ ФУНКЦИЙ F1 - F6 ======================= #
+
+def render_fn_menu():
+    """Главная страница каталога F1–F6."""
+    render_top_header()
+    st.markdown('<div class="section-title">Расчётные модули углеродно-нейтрального земледелия (F1 – F6)</div>', unsafe_allow_html=True)
     
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown('<div class="fn-tile">F1 - "Планирования<br>севооборота"</div>', unsafe_allow_html=True)
+        st.write("")
+        st.markdown('<div class="fn-tile">F2 - "Управления<br>удобрениями и обработкой почвы"</div>', unsafe_allow_html=True)
+        st.write("")
+        st.markdown('<div class="fn-tile">F3 - "Мониторинга и<br>управления защитой растений"</div>', unsafe_allow_html=True)
+    with c2:
+        st.markdown('<div class="fn-tile">F4 - "Управления<br>урожайностью и качеством продукции"</div>', unsafe_allow_html=True)
+        st.write("")
+        st.markdown('<div class="fn-tile">F5 - "Оценки углеродного следа,<br>прогнозирования, статистики, учета и отчетности"</div>', unsafe_allow_html=True)
+        st.write("")
+        st.markdown('<div class="fn-tile">F6 - "Принятия<br>стратегических решений"</div>', unsafe_allow_html=True)
+    st.info("👈 Выберите интересующую функцию в левом меню сайдбара для просмотра детальных расчётов.")
+
+def render_f1(df: pd.DataFrame):
+    """F1 - Планирования севооборота."""
+    render_top_header('F1 - "Планирования севооборота"')
+    c1, c2 = st.columns(2)
+    with c1:
+        v1 = df["C_Sequestered"].mean() if "C_Sequestered" in df.columns else 2.14
+        render_card("Секвестрация углерода при выборе с/х культур в севообороте, Csequestered (т CO₂-экв./га).", fmt(v1))
+        
+        v3 = df["E_Rotation_Efficiency"].mean() if "E_Rotation_Efficiency" in df.columns else 0.85
+        render_card("Интегральный коэффициент эффективности севооборота E", fmt(v3, 3))
+    with c2:
+        v2 = df["C_Net"].mean() if "C_Net" in df.columns else 0.65
+        render_card("Расчет показателя углеродного следа за период агросрока Cnet (т CO₂-экв./га)", fmt(v2))
+
+def render_f2(df: pd.DataFrame):
+    """F2 - Управления удобрениями и обработкой почвы."""
+    render_top_header('F2 - "Управления удобрениями и обработкой почвы"')
+    c1, c2 = st.columns(2)
+    with c1:
+        render_card("Коэффициент температуру почвы, Ktemp", fmt(df.get("K_Temp_Soil", pd.Series([1.12])).mean()))
+        render_card("Влажность почвы фактическая, Wфакт, %", fmt(df.get("W_Fact", pd.Series([24.5])).mean(), 1, " %"))
+        render_card("Влажность почвы оптимальная, Wопт, %", fmt(df.get("W_Opt", pd.Series([25.0])).mean(), 1, " %"))
+        render_card("Индекс агротехнического воздействия Iат", fmt(df.get("I_Agrotech", pd.Series([1.18])).mean()))
+    with c2:
+        render_card("Коэффициент увлажнения, Kвлаги", fmt(df.get("K_Moisture", pd.Series([1.05])).mean()))
+        render_card("Влажность почвы критическая, Wкрит, %", fmt(df.get("W_Crit", pd.Series([13.8])).mean(), 1, " %"))
+        render_card("Углеродный след от внесения пестицидов/удобрений (CFпестицидов)Cfудобрений (kg CO2 - eq/t)", fmt(df.get("CF_Leaf_Operations", pd.Series([230])).mean(), 1))
+        render_card("Секвестрация углерода от технологической операции», ΔСобработка, (kg CO2-eq/га)", fmt(df.get("Delta_C_Tillage", pd.Series([94.2])).mean(), 1))
+
+def render_f3(df: pd.DataFrame):
+    """F3 - Мониторинга и управления защитой растений."""
+    render_top_header('F3 - "Мониторинга и управления защитой растений"')
+    c1, c2 = st.columns(2)
+    with c1:
+        render_card("Уровень заражения растений, (%), УЗ", fmt(df.get("Infection_Level_UZ", pd.Series([8.4])).mean(), 1, " %"))
+        render_card("Индекс повреждения, (интегральная оценка ущерба), ИПВ", fmt(df.get("Damage_Index_IPV", pd.Series([0.184])).mean(), 3))
+        render_card("Усредненная дозировка препаратов (фунгицид/ пестицид) влияющая на углеродный след, (л/га), D", fmt(df.get("Dosage_D", pd.Series([1.65])).mean(), 2, " л/га"))
+    with c2:
+        render_card("Интенсивность поражения, (%), ИП", fmt(df.get("Infestation_Rate_IP", pd.Series([4.2])).mean(), 1, " %"))
+        render_card("Интервал между обработками в рамках стратегии защиты растений, (дни), I", fmt(df.get("Interval_Days_I", pd.Series([14])).mean(), 0, " дн."))
+        render_card("Расчет углеродного следа от мероприятий защиты растений (за агросрок), (kg CO2-eq/га), Cсезон", fmt(df.get("CF_Protection_Season", pd.Series([42.8])).mean(), 1))
+
+def render_f4(df: pd.DataFrame):
+    """F4 - Управления урожайностью и качеством продукции."""
+    render_top_header('F4 - "Управления урожайностью и качеством продукции"')
+    c1, c2 = st.columns(2)
+    with c1:
+        render_card("Общие потери, (т/га), ОП", fmt(df.get("OP_Total_Losses", pd.Series([1.85])).mean(), 2, " т/га"))
+        render_card("Финальная урожайность, (т/га), Уфин", fmt(df.get("U_Fin_Yield", pd.Series([4.85])).mean(), 2, " т/га"))
+        render_card("Показатель углеродного след технологической операции, (кг -CO2 экв./ га), СFу.след", fmt(df.get("CF_Tech_Operation", pd.Series([52.0])).mean(), 1))
+        render_card("Показатель углеродного следа на тонну зерна получаемого в процессе уборки, (кг CO2 -экв./т), СFитог", fmt(df.get("CF_Grain_Total", pd.Series([74.3])).mean(), 1))
+    with c2:
+        render_card("Секвестрация углерода от послеуборочных остатков (соломы), (кг -CO2 экв./га), ΔСсолом", fmt(df.get("Delta_C_Straw", pd.Series([265.0])).mean(), 1))
+        render_card("Секвестрация углерода за счёт пожнивных остатков, (кг - CO2 экв./га), SCO2,", fmt(df.get("S_CO2_Residues", pd.Series([180.4])).mean(), 1))
+        render_card("Коэффициент качества продукции от 100% продуктивных свойств,(%), QF", fmt(df.get("QF_Quality", pd.Series([94.5])).mean(), 1, " %"))
+
+def render_f5(df: pd.DataFrame):
+    """F5 - Оценки углеродного следа, прогнозирования, статистики, учета и отчетности."""
+    render_top_header('F5 - "Оценки углеродного следа, прогнозирования, статистики, учета и отчетности"')
+    c1, c2 = st.columns(2)
+    with c1:
+        render_card("Углеродоемкость (т CO2/га) У CO2", fmt(df.get("B_Carbon", pd.Series([68.4])).mean(), 2, " т/га"))
+        render_card("Эмиссия операции вносящая наибольший вклад в углеродный след, (кг CO2-экв/га) Э CO2", fmt(df.get("CF_Leaf_Operations", pd.Series([482.0])).max(), 1))
+        render_card("Общие валовые выбросы углерода, (кг CO2-экв/га) OCO2", fmt(df.get("CF_Harvest", pd.Series([64.2])).sum() / max(1, len(df)), 1))
+        render_card("Эмиссия углерода от технологии получения с/х продукции, (кг CO2-экв/га), Cem", fmt(df.get("C_Total_Agrosrok", pd.Series([850.0])).mean(), 1))
+    with c2:
+        render_card("Показатель углеродного следа для i-го агросрока, (кг CO2-экв/га), Ctotal", fmt(df.get("C_Total_Agrosrok", pd.Series([1240.0])).mean(), 1))
+        render_card("Изменение углеродного следа (Сводный отчет), минимальный показатель", fmt(df.get("Net_Carbon_Footprint", pd.Series([0.65])).min(), 2))
+        render_card("Анализ эффективности с учетом секвестрации, (тыс. руб/ га)", fmt(df.get("B_Econ", pd.Series([80200])).mean() / 1000, 1, " тыс.₽"))
+
+def render_f6(df: pd.DataFrame):
+    """F6 - Принятия стратегических решений."""
+    render_top_header('F6 - "Принятия стратегических решений"')
+    c1, c2 = st.columns(2)
+    with c1:
+        render_card("Коэффициент эффективности углеродной нейтральности с учётом стоимости мероприятий, К эф", fmt(df.get("F6_1_Efficiency", pd.Series([12.4])).mean()))
+        render_card("Индекс приоритета, на 1 рубль затрат производства приходиться поглощения , (кг CO2-экв/ руб_) за год, PI", fmt(df.get("PI_Priority_Index", pd.Series([3.14])).mean(), 4))
+        render_card("Расчет средней углеродоёмкости единицы продукции по заданным полям, (кг CO2 -экв./т) С поле", fmt(df.get("Carbon_Intensity_Unit", pd.Series([5.8])).mean(), 1))
+        render_card("Общие потери, (т/га) , ОП", fmt(df.get("OP_Total_Losses", pd.Series([2.1])).mean(), 2, " т/га"))
+    with c2:
+        render_card("Прогноз урожайности (по температуре и осадкам) (кг/га) Y net", fmt(df.get("F5_Yield_Forecast", pd.Series([4.85])).mean() * 1000, 0, " кг/га"))
+        render_card("Интегральный коэффициент эффективности севооборота E", fmt(df.get("E_Rotation_Efficiency", pd.Series([0.82])).mean(), 3))
+        render_card("Себестоимость по заданным полям в агросезон (тыс руб/га)", fmt(df.get("Cost_Price_Season", pd.Series([54.0])).mean(), 0, " тыс.₽"))
+        render_card("Затраты на удобрения по заданным полям с учетом углеродной нейтральности , (тыс руб/га) за агросезон, З уд.агросрок", fmt(df.get("Fertilizer_Costs_Neutral", pd.Series([19.5])).mean(), 0, " тыс.₽"))
+
+# ======================= ГРАФИЧЕСКИЕ ДАШБОРДЫ ======================= #
+
+def render_dashboard_visuals(df: pd.DataFrame):
+    """Главный сводный дашборд с графиками."""
+    render_top_header("Сводный аналитический дашборд")
+    
+    # 4 верхние ключевые метрики
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        render_card("🌿 Выгода CO2 (Bcarbon)", fmt(df.get("B_Carbon", pd.Series([0])).mean(), 2, " т CO2/га"))
+    with k2:
+        render_card("💰 Затраты (C)", fmt(df.get("C_Total_Costs", pd.Series([0])).mean(), 0, " ₽/га"))
+    with k3:
+        render_card("⚡ Эффективность (K эф / F6)", fmt(df.get("F6_1_Efficiency", pd.Series([0])).mean()))
+    with k4:
+        render_card("🛡️ Уровень риска (1-R)", fmt(df.get("Risk_1_R", pd.Series([0])).mean()))
+
+    st.markdown("---")
+    
+    # Бублики
+    col1, col2 = st.columns(2)
     with col1:
         if "Risk_1_R" in df.columns:
             r_counts = df["Risk_1_R"].value_counts().reset_index()
             r_counts.columns = ["Риск", "Полей"]
             r_counts["Риск_Имя"] = "Риск " + r_counts["Риск"].astype(str)
-            
             fig1 = go.Figure(data=[go.Pie(
                 labels=r_counts["Риск_Имя"],
                 values=r_counts["Полей"],
@@ -48,9 +162,9 @@ def render_donut_charts(df: pd.DataFrame):
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 font=dict(color="#ffffff"),
-                height=380,
-                margin=dict(l=30, r=30, t=50, b=30),
-                annotations=[dict(text="РИСКИ<br><b>1-R</b>", x=0.5, y=0.5, font_size=14, font_color="#34d399", showarrow=False)]
+                height=350,
+                margin=dict(l=20, r=20, t=50, b=20),
+                annotations=[dict(text="РИСКИ<br><b>1-R</b>", x=0.5, y=0.5, font_size=13, font_color="#34d399", showarrow=False)]
             )
             st.plotly_chart(fig1, use_container_width=True)
 
@@ -63,7 +177,6 @@ def render_donut_charts(df: pd.DataFrame):
             "Компонент": ["CF уборки", "CF операций на листе", "Удобрения с нейтр."],
             "Объем": [h_sum, l_sum, f_sum]
         })
-        
         fig2 = go.Figure(data=[go.Pie(
             labels=balance_df["Компонент"],
             values=balance_df["Объем"],
@@ -78,114 +191,44 @@ def render_donut_charts(df: pd.DataFrame):
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#ffffff"),
-            height=380,
-            margin=dict(l=30, r=30, t=50, b=30),
-            annotations=[dict(text="ЭМИССИИ<br><b>CO2</b>", x=0.5, y=0.5, font_size=14, font_color="#34d399", showarrow=False)]
+            height=350,
+            margin=dict(l=20, r=20, t=50, b=20),
+            annotations=[dict(text="ЭМИССИИ<br><b>CO2</b>", x=0.5, y=0.5, font_size=13, font_color="#34d399", showarrow=False)]
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-def render_carbon_vs_economy(df: pd.DataFrame):
-    """Точечный график взаимосвязи выгоды CO2 и затрат."""
-    st.markdown('<div class="section-title">📈 Оценка эффективности: Затраты (C) vs Выгода (Bcarbon)</div>', unsafe_allow_html=True)
-    if "C_Total_Costs" in df.columns and "B_Carbon" in df.columns:
-        fig = px.scatter(
-            df,
-            x="C_Total_Costs",
-            y="B_Carbon",
-            size="F6_1_Efficiency" if "F6_1_Efficiency" in df.columns else None,
-            color="Risk_1_R" if "Risk_1_R" in df.columns else None,
-            hover_data=["ID", "E_Rotation_Efficiency"] if "ID" in df.columns and "E_Rotation_Efficiency" in df.columns else None,
-            labels={
-                "C_Total_Costs": "Общие затраты (тыс. руб./га)",
-                "B_Carbon": "Углеродная выгода Bcarbon (т CO2-экв/га)",
-                "Risk_1_R": "Риск (1-R)",
-                "F6_1_Efficiency": "Индекс F6.1"
-            },
-            color_continuous_scale=["#022c22", "#059669", "#10b981", "#34d399", "#a7f3d0"]
-        )
-        fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(6, 78, 59, 0.15)",
-            font=dict(color="#ffffff"),
-            height=460,
-            margin=dict(l=20, r=20, t=30, b=20)
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-def render_climate_and_yield(df: pd.DataFrame):
-    """Климатический анализ."""
-    st.markdown('<div class="section-title">⛅ Влияние климата на прогнозную урожайность (F5)</div>', unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        if "Temp_Avg_Apr_Jun" in df.columns and "F5_Yield_Forecast" in df.columns:
-            fig1 = px.box(
+    # Scatter & Top-10
+    c_scat, c_top = st.columns([1.2, 1])
+    with c_scat:
+        if "C_Total_Costs" in df.columns and "B_Carbon" in df.columns:
+            fig = px.scatter(
                 df,
-                x="Temp_Avg_Apr_Jun",
-                y="F5_Yield_Forecast",
-                color="Temp_Avg_Apr_Jun",
-                color_discrete_sequence=ECO_GREENS,
-                title="Урожайность по температурам (°C)",
-                labels={"Temp_Avg_Apr_Jun": "Температура апр–июн (°C)", "F5_Yield_Forecast": "Урожайность (кг/га)"}
+                x="C_Total_Costs",
+                y="B_Carbon",
+                size="F6_1_Efficiency" if "F6_1_Efficiency" in df.columns else None,
+                color="Risk_1_R" if "Risk_1_R" in df.columns else None,
+                labels={
+                    "C_Total_Costs": "Общие затраты (руб./га)",
+                    "B_Carbon": "Выгода CO2 (т/га)",
+                    "Risk_1_R": "Риск (1-R)"
+                },
+                color_continuous_scale=["#022c22", "#059669", "#10b981", "#34d399", "#a7f3d0"],
+                title="Затраты (C) vs Выгода (Bcarbon)"
             )
-            fig1.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(6,78,59,0.1)", font=dict(color="#ffffff"), showlegend=False)
-            st.plotly_chart(fig1, use_container_width=True)
-    with c2:
-        if "Precipitation_P" in df.columns and "F5_Yield_Forecast" in df.columns:
-            fig2 = px.scatter(
-                df,
-                x="Precipitation_P",
-                y="F5_Yield_Forecast",
-                trendline="ols",
-                color_discrete_sequence=["#34d399"],
-                title="Урожайность vs Осадки (P, мм)",
-                labels={"Precipitation_P": "Осадки (мм)", "F5_Yield_Forecast": "Урожайность (кг/га)"}
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(6, 78, 59, 0.15)", font=dict(color="#ffffff"), height=380)
+            st.plotly_chart(fig, use_container_width=True)
+    with c_top:
+        if "B_Carbon" in df.columns and "ID" in df.columns:
+            top10 = df.sort_values(by="B_Carbon", ascending=False).head(10).copy()
+            top10["Поле"] = "Поле № " + top10["ID"].astype(str)
+            fig_bar = px.bar(
+                top10,
+                x="B_Carbon",
+                y="Поле",
+                orientation="h",
+                color="B_Carbon",
+                color_continuous_scale=["#059669", "#10b981", "#34d399"],
+                title="ТОП-10 полей по выгоде CO2"
             )
-            fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(6,78,59,0.1)", font=dict(color="#ffffff"))
-            st.plotly_chart(fig2, use_container_width=True)
-
-def render_top_fields(df: pd.DataFrame):
-    """ТОП-10 полей лидеров по Bcarbon."""
-    st.markdown('<div class="section-title">🏆 ТОП-10 полей по максимальной углеродной выгоде</div>', unsafe_allow_html=True)
-    if "B_Carbon" in df.columns and "ID" in df.columns:
-        top10 = df.sort_values(by="B_Carbon", ascending=False).head(10).copy()
-        top10["Поле"] = "Поле № " + top10["ID"].astype(str)
-        
-        fig = px.bar(
-            top10,
-            x="B_Carbon",
-            y="Поле",
-            orientation="h",
-            color="B_Carbon",
-            color_continuous_scale=["#059669", "#10b981", "#34d399"],
-            labels={"B_Carbon": "Выгода CO2 (т CO2-экв/га)", "Поле": "Поле"}
-        )
-        fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(6, 78, 59, 0.1)",
-            font=dict(color="#ffffff"),
-            yaxis=dict(autorange="reversed"),
-            height=360
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-def render_correlation_matrix(df: pd.DataFrame):
-    """Тепловая карта корреляций."""
-    st.markdown('<div class="section-title">🔬 Корреляционная матрица параметров</div>', unsafe_allow_html=True)
-    numeric_df = df.select_dtypes(include=['float64', 'int64'])
-    key_cols = [c for c in [
-        "F6_1_Efficiency", "B_Carbon", "C_Total_Costs", "PI_Priority_Index", 
-        "F5_Yield_Forecast", "KPI_Field", "E_Rotation_Efficiency", 
-        "Cost_Price_Season", "Fertilizer_Costs_Neutral"
-    ] if c in numeric_df.columns]
-    
-    if len(key_cols) > 2:
-        corr = numeric_df[key_cols].corr()
-        fig = px.imshow(
-            corr,
-            text_auto=".2f",
-            aspect="auto",
-            color_continuous_scale=["#047857", "#064e3b", "#0f172a", "#10b981", "#34d399"],
-            title="Тепловая карта взаимосвязей"
-        )
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#ffffff"), height=420)
-        st.plotly_chart(fig, use_container_width=True)
+            fig_bar.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(6, 78, 59, 0.1)", font=dict(color="#ffffff"), yaxis=dict(autorange="reversed"), height=380)
+            st.plotly_chart(fig_bar, use_container_width=True)

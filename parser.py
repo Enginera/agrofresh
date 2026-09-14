@@ -4,29 +4,51 @@ from scipy import stats
 
 CANONICAL_COLUMNS = [
     "ID",
-    "F6_1_Efficiency",
-    "CF_Harvest",
-    "B_Carbon",
-    "B_Econ",
-    "P_Carbon",
-    "Risk_1_R",
-    "C_Total_Costs",
-    "F6_2_Efficiency_Coeff",
-    "PI_Priority_Index",
-    "C_Total_Agrosrok",
-    "Net_Carbon_Footprint",
-    "CF_Leaf_Operations",
-    "F6_3_Index",
-    "C_Abs_F6_4",
-    "Temp_Avg_Apr_Jun",
-    "Precipitation_P",
-    "F5_Yield_Forecast",
-    "KPI_Field",
-    "Carbon_Intensity_Unit",
-    "OP_Total_Losses",
-    "E_Rotation_Efficiency",
-    "Cost_Price_Season",
-    "Fertilizer_Costs_Neutral"
+    "F6_1_Efficiency",           # К эф F6
+    "CF_Harvest",                 # Выбросы при уборке
+    "B_Carbon",                   # Углеродоемкость / выгода
+    "B_Econ",                     # Экономический эффект
+    "P_Carbon",                   # Углеродный потенциал
+    "Risk_1_R",                   # Риск (1-R)
+    "C_Total_Costs",              # Общие затраты C
+    "F6_2_Efficiency_Coeff",      # Коэфф. F6.2
+    "PI_Priority_Index",          # Индекс приоритета PI
+    "C_Total_Agrosrok",           # Показатель Ctotal
+    "Net_Carbon_Footprint",       # Изменение углеродного следа
+    "CF_Leaf_Operations",         # Эмиссия операций на листе
+    "F6_3_Index",                 # Индекс F6.3
+    "C_Abs_F6_4",                 # Абсорбция F6.4
+    "Temp_Avg_Apr_Jun",           # Температура апр-июн
+    "Precipitation_P",            # Осадки P
+    "F5_Yield_Forecast",          # Прогноз урожайности Ynet / F5
+    "KPI_Field",                  # KPI поля
+    "Carbon_Intensity_Unit",      # Средняя углеродоемкость C поле
+    "OP_Total_Losses",            # Общие потери ОП
+    "E_Rotation_Efficiency",      # Интегральный коэфф. севооборота E
+    "Cost_Price_Season",          # Себестоимость агросезона
+    "Fertilizer_Costs_Neutral",   # Затраты на удобрения с нейтр. З уд.агросрок
+    # Дополнительные специфичные параметры F1-F4
+    "C_Sequestered",              # Csequestered (F1)
+    "C_Net",                      # Cnet (F1)
+    "K_Temp_Soil",                # Ktemp почвы (F2)
+    "K_Moisture",                 # Kвлаги (F2)
+    "W_Fact",                     # Wфакт % (F2)
+    "W_Crit",                     # Wкрит % (F2)
+    "W_Opt",                      # Wопт % (F2)
+    "I_Agrotech",                 # Iат (F2)
+    "Delta_C_Tillage",            # ΔСобработка (F2)
+    "Infection_Level_UZ",         # УЗ % (F3)
+    "Infestation_Rate_IP",        # ИП % (F3)
+    "Damage_Index_IPV",           # ИПВ (F3)
+    "Interval_Days_I",            # I интервал (F3)
+    "Dosage_D",                   # D дозировка (F3)
+    "CF_Protection_Season",       # Cсезон (F3)
+    "Delta_C_Straw",              # ΔСсолом (F4)
+    "U_Fin_Yield",                # Уфин (F4)
+    "S_CO2_Residues",             # SCO2 (F4)
+    "CF_Tech_Operation",          # CFу.след (F4)
+    "QF_Quality",                 # QF % (F4)
+    "CF_Grain_Total"              # CFитог (F4)
 ]
 
 def clean_numeric_value(val):
@@ -40,8 +62,36 @@ def clean_numeric_value(val):
     except ValueError:
         return np.nan
 
+def calculate_ci_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    """Единая функция расчета описательной статистики и 95% CI."""
+    stats_dict = {}
+    for col in df.columns:
+        if not np.issubdtype(df[col].dtype, np.number):
+            continue
+        valid_vals = df[col].dropna()
+        n = len(valid_vals)
+        if n > 1:
+            mean = float(np.mean(valid_vals))
+            std = float(np.std(valid_vals, ddof=1))
+            var = float(np.var(valid_vals, ddof=1))
+            se = std / np.sqrt(n)
+            rel_err = (se / mean * 100) if mean != 0 else 0.0
+            t_crit = stats.t.ppf((1 + 0.95) / 2, n - 1)
+            ci = se * t_crit
+            stats_dict[col] = {
+                "Среднее": mean,
+                "Стандартное отклонение": std,
+                "Дисперсия": var,
+                "Стандартная ошибка": se,
+                "Относительная ошибка (%)": rel_err,
+                "Ширина дов. интервала (95%)": ci,
+                "Верхняя граница (95%)": mean + ci,
+                "Нижняя граница (95%)": mean - ci
+            }
+    return pd.DataFrame(stats_dict)
+
 def parse_agro_excel(file_source) -> tuple:
-    """Парсит Excel, очищает данные и считает статистику 95% CI."""
+    """Парсит загруженную Excel-таблицу."""
     df_raw = pd.read_excel(file_source, header=None)
     
     start_row_idx = None
@@ -70,32 +120,11 @@ def parse_agro_excel(file_source) -> tuple:
     df_main.columns = assigned_cols
     df_main.reset_index(drop=True, inplace=True)
     
-    stats_dict = {}
-    for col in df_main.columns:
-        valid_vals = df_main[col].dropna()
-        if len(valid_vals) > 1:
-            mean = float(np.mean(valid_vals))
-            std = float(np.std(valid_vals, ddof=1))
-            var = float(np.var(valid_vals, ddof=1))
-            se = std / np.sqrt(len(valid_vals))
-            rel_err = (se / mean * 100) if mean != 0 else np.nan
-            ci = se * stats.t.ppf((1 + 0.95) / 2, len(valid_vals) - 1)
-            stats_dict[col] = {
-                "Среднее": mean,
-                "Стандартное отклонение": std,
-                "Дисперсия": var,
-                "Стандартная ошибка": se,
-                "Относительная ошибка (%)": rel_err,
-                "Ширина дов. интервала (95%)": ci,
-                "Верхняя граница": mean + ci,
-                "Нижняя граница": mean - ci
-            }
-            
-    df_stats = pd.DataFrame(stats_dict)
+    df_stats = calculate_ci_statistics(df_main)
     return df_main, df_stats, len(df_main)
 
 def generate_sample_dataset(rows: int = 1000) -> tuple:
-    """Генератор демо-данных с подсчитанной статистикой."""
+    """Генерация демо-датасета 1000 полей со всеми переменными F1–F6."""
     np.random.seed(42)
     df = pd.DataFrame({
         "ID": np.arange(1, rows + 1),
@@ -121,25 +150,30 @@ def generate_sample_dataset(rows: int = 1000) -> tuple:
         "OP_Total_Losses": np.random.uniform(0.1, 4.5, rows).round(2),
         "E_Rotation_Efficiency": np.random.uniform(0.3, 1.3, rows).round(3),
         "Cost_Price_Season": np.random.randint(40, 66, rows),
-        "Fertilizer_Costs_Neutral": np.random.randint(15, 26, rows)
+        "Fertilizer_Costs_Neutral": np.random.randint(15, 26, rows),
+        # F1-F4
+        "C_Sequestered": np.random.uniform(0.8, 3.5, rows).round(2),
+        "C_Net": np.random.uniform(0.3, 1.8, rows).round(2),
+        "K_Temp_Soil": np.random.uniform(0.9, 1.4, rows).round(2),
+        "K_Moisture": np.random.uniform(0.85, 1.25, rows).round(2),
+        "W_Fact": np.random.uniform(18.0, 32.0, rows).round(1),
+        "W_Crit": np.random.uniform(12.0, 15.0, rows).round(1),
+        "W_Opt": np.random.uniform(22.0, 28.0, rows).round(1),
+        "I_Agrotech": np.random.uniform(0.7, 1.6, rows).round(2),
+        "Delta_C_Tillage": np.random.uniform(40.0, 180.0, rows).round(1),
+        "Infection_Level_UZ": np.random.uniform(2.0, 25.0, rows).round(1),
+        "Infestation_Rate_IP": np.random.uniform(1.0, 15.0, rows).round(1),
+        "Damage_Index_IPV": np.random.uniform(0.05, 0.45, rows).round(3),
+        "Interval_Days_I": np.random.randint(10, 25, rows),
+        "Dosage_D": np.random.uniform(0.5, 3.2, rows).round(2),
+        "CF_Protection_Season": np.random.uniform(15.0, 75.0, rows).round(1),
+        "Delta_C_Straw": np.random.uniform(120.0, 450.0, rows).round(1),
+        "U_Fin_Yield": np.random.uniform(3.5, 6.2, rows).round(2),
+        "S_CO2_Residues": np.random.uniform(80.0, 320.0, rows).round(1),
+        "CF_Tech_Operation": np.random.uniform(25.0, 95.0, rows).round(1),
+        "QF_Quality": np.random.uniform(85.0, 99.0, rows).round(1),
+        "CF_Grain_Total": np.random.uniform(45.0, 110.0, rows).round(1)
     })
     
-    # Расчет статистики для демо
-    stats_dict = {}
-    for col in df.columns:
-        vals = df[col].dropna()
-        if len(vals) > 1:
-            m = float(np.mean(vals))
-            s = float(np.std(vals, ddof=1))
-            stats_dict[col] = {
-                "Среднее": m,
-                "Стандартное отклонение": s,
-                "Дисперсия": float(np.var(vals, ddof=1)),
-                "Стандартная ошибка": s / np.sqrt(len(vals)),
-                "Относительная ошибка (%)": (s / np.sqrt(len(vals)) / m * 100) if m != 0 else 0,
-                "Ширина дов. интервала (95%)": 1.96 * s / np.sqrt(len(vals)),
-                "Верхняя граница": m + 1.96 * s / np.sqrt(len(vals)),
-                "Нижняя граница": m - 1.96 * s / np.sqrt(len(vals))
-            }
-    df_stats = pd.DataFrame(stats_dict)
+    df_stats = calculate_ci_statistics(df)
     return df, df_stats, len(df)
