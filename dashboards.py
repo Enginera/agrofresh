@@ -1,8 +1,8 @@
 ﻿"""
 dashboards.py - Аналитический модуль углеродно-нейтрального земледелия
 - Фильтры выборки и загрузка данных находятся в левом выезжающем сайдбаре.
-- Все расчетные функции F1–F6 расположены сверху и по умолчанию свёрнуты (expanded=False).
-- Далее расположены 4 KPI, 8 графиков и статус-таблицы.
+- Все расчетные функции F1–F6 расположены сверху и рассчитываются на основе активного Excel датасета.
+- Блоки F1–F6 по умолчанию свёрнуты.
 """
 import streamlit as st
 import pandas as pd
@@ -19,7 +19,7 @@ def render_carbon_neutral_dashboard():
     if "agro_data" not in st.session_state:
         st.session_state.agro_data = get_default_dataframe()
 
-    # 2. ЛЕВАЯ ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ (SIDEBAR): БРЕНДИНГ, ЗАГРУЗКА И ФИЛЬТРЫ
+    # 2. ЛЕВАЯ ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ (SIDEBAR)
     with st.sidebar:
         st.markdown("""
         <div style="padding: 6px 0 16px;">
@@ -33,15 +33,15 @@ def render_carbon_neutral_dashboard():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("### 📥 Источник данных")
-        uploaded_file = st.file_uploader("Загрузить Excel (.xlsx, .xls)", type=["xlsx", "xls"])
+        st.markdown("### 📥 Источник данных (Excel F4-F6)")
+        uploaded_file = st.file_uploader("Загрузить файл Excel (.xlsx, .xls)", type=["xlsx", "xls"])
         if uploaded_file is not None:
             new_df, err = parse_carbon_excel(uploaded_file)
             if err:
                 st.error(err)
             elif new_df is not None and not new_df.empty:
                 st.session_state.agro_data = new_df
-                st.success(f"Загружено {len(new_df)} строк")
+                st.success(f"Загружено {len(new_df)} строк из F4, F5, F6")
 
         st.markdown("---")
         st.markdown("### 🔍 Фильтры выборки")
@@ -74,7 +74,7 @@ def render_carbon_neutral_dashboard():
 
         st.markdown("""
         <div style="margin-top:24px; padding:12px; background:#f4f8f6; border-radius:10px; border:1px solid #e0eae5; font-size:11px; color:#5b8072; line-height:1.4;">
-            ℹ️ Фильтры автоматически пересчитывают показатели KPI, таблицы и все 8 диаграмм в реальном времени.
+            ℹ️ Параметры функций F1–F6, KPI и графики автоматически рассчитываются по загруженной таблице Excel.
         </div>
         """, unsafe_allow_html=True)
 
@@ -87,127 +87,143 @@ def render_carbon_neutral_dashboard():
 
     # 3. ОСНОВНАЯ ОБЛАСТЬ: ЗАГОЛОВОК
     st.markdown("""
-    <div class="hero-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-            <div class="eyebrow">Аналитическая панель</div>
-            <div class="main-title">Модуль углеродно-нейтрального земледелия</div>
-            <div class="subtitle">Интерактивная аналитика данных Excel и визуализация ключевых показателей агросезона</div>
-        </div>
+    <div class="hero-header">
+        <div class="eyebrow">Аналитическая панель</div>
+        <div class="main-title">Модуль углеродно-нейтрального земледелия</div>
+        <div class="subtitle">Интерактивная аналитика данных Excel (F4, F5, F6) и визуализация ключевых показателей агросезона</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # 4. РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ, ВСЕ СВЁРНУТЫ ПО УМОЛЧАНИЮ)
+    # ДИНАМИЧЕСКИЕ СРЕДНИЕ ИЗ ТАБЛИЦЫ ДЛЯ F1-F6
+    val_cseq = float(filt_df.get("cabs", pd.Series([14160.0])).mean() / 5000.0) if not filt_df.empty else 2.80
+    val_cnet = float(filt_df["footprint"].mean() / 50.0) if not filt_df.empty else 1.60
+    val_rote = float(filt_df.get("rot_e", pd.Series([7.89])).mean()) if not filt_df.empty else 7.89
+    val_temp = float(filt_df.get("temp", pd.Series([18.0])).mean()) if not filt_df.empty else 18.0
+    val_precip = float(filt_df.get("precip", pd.Series([180.0])).mean()) if not filt_df.empty else 180.0
+    val_op = float(filt_df.get("op", pd.Series([0.42])).mean()) if not filt_df.empty else 0.42
+    val_yield = float(filt_df["yield"].mean()) if not filt_df.empty else 4.80
+    val_op_cf = float(filt_df["operation_cf"].mean()) if not filt_df.empty else 112.0
+    val_footprint = float(filt_df["footprint"].mean()) if not filt_df.empty else 24.6
+    val_gross = float(filt_df["gross"].mean()) if not filt_df.empty else 3180.0
+    val_ctotal = float(filt_df.get("ctotal", pd.Series([3015.0])).mean()) if not filt_df.empty else 3015.0
+    val_change = float(filt_df["change_cf"].mean()) if not filt_df.empty else -8.5
+    val_eff = float(filt_df["efficiency"].mean()) if not filt_df.empty else 68.4
+    val_keff = float(filt_df.get("keff", pd.Series([0.86])).mean()) if not filt_df.empty else 0.86
+    val_pi = float(filt_df.get("pi", pd.Series([0.42])).mean()) if not filt_df.empty else 0.42
+    val_cfield = float(filt_df.get("cfield", pd.Series([31.7])).mean()) if not filt_df.empty else 31.7
+    val_ynet = float(filt_df.get("ynet", pd.Series([4820.0])).mean()) if not filt_df.empty else 4820.0
+    val_cost = float(filt_df["cost"].mean()) if not filt_df.empty else 52.5
+    val_fert_cost = float(filt_df.get("fert_cost", pd.Series([18.6])).mean()) if not filt_df.empty else 18.6
+
+    # 4. РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ, СВЁРНУТЫ ПО УМОЛЧАНИЮ)
     st.markdown("""
     <div style="display:flex; justify-content:space-between; align-items:baseline; margin: 8px 0 12px;">
-        <h3 style="margin:0; color:#143c2d; font-weight:800; font-size:18px;">⚡ Расчётные функции F1–F6</h3>
-        <span style="font-size:11px; color:#71817b;">Нажмите на нужный блок для ввода параметров</span>
+        <h3 style="margin:0; color:#143c2d; font-weight:800; font-size:18px;">⚡ Расчётные функции F1–F6 (Данные Excel)</h3>
+        <span style="font-size:11px; color:#71817b;">Значения рассчитаны по текущей выборке таблицы · Доступно ручное моделирование</span>
     </div>
     """, unsafe_allow_html=True)
 
     calc_col1, calc_col2 = st.columns(2)
 
     with calc_col1:
-        # F.1 - Свёрнут
+        # F.1
         with st.expander("🟢 F.1 — Планирование севооборота", expanded=False):
             st.caption("Секвестрация, углеродный след за период агросрока и интегральная эффективность.")
             c1_1, c1_2 = st.columns(2)
             with c1_1:
-                st.number_input("Csequestered (т CO₂-экв./га)", value=2.80, step=0.1, key="top_f1_cseq")
-                st.number_input("Cnet (т CO₂-экв./га)", value=1.60, step=0.1, key="top_f1_cnet")
+                st.number_input("Csequestered (т CO₂-экв./га)", value=round(val_cseq, 2), step=0.1, key="top_f1_cseq")
+                st.number_input("Cnet (т CO₂-экв./га)", value=round(val_cnet, 2), step=0.1, key="top_f1_cnet")
             with c1_2:
-                st.number_input("E (Коэффициент)", value=7.89, step=0.1, key="top_f1_e")
-                f1_sel_cult = st.selectbox("Культура F1", CULTURES_LIST, key="top_f1_cult")
-            st.success(f"F1: {f1_sel_cult} · Cseq: 2.80 · Cnet: 1.60 · E: 7.89")
+                st.number_input("E (Коэффициент севооборота)", value=round(val_rote, 2), step=0.1, key="top_f1_e")
+                f1_cult = st.selectbox("Культура F1", selected_cultures if selected_cultures else CULTURES_LIST, key="top_f1_cult")
+            st.info(f"F1 Расчёт: {f1_cult} · Cseq: {val_cseq:.2f} · Cnet: {val_cnet:.2f} · E: {val_rote:.2f}")
 
-        # F.2 - Свёрнут
+        # F.2
         with st.expander("🟢 F.2 — Управление удобрениями и обработкой почвы", expanded=False):
             st.caption("Параметры температуры, влажности, агротехнического воздействия и углеродных потоков.")
             c2_1, c2_2 = st.columns(2)
             with c2_1:
-                st.number_input("Ktemp (Коэфф. температуры)", value=1.05, step=0.01, key="top_f2_ktemp")
+                st.number_input("Ktemp (Коэфф. температуры)", value=round(val_temp / 17.0, 2), step=0.01, key="top_f2_ktemp")
                 st.number_input("Wфакт (Фактич. влажность, %)", value=24.0, step=0.5, key="top_f2_wf")
                 st.number_input("Wопт (Оптимальн. влажность, %)", value=27.0, step=0.5, key="top_f2_wo")
                 st.number_input("Iат (Индекс агротех. возд.)", value=0.82, step=0.01, key="top_f2_iat")
             with c2_2:
-                st.number_input("Kвлаги (Коэффициент)", value=0.89, step=0.01, key="top_f2_kvl")
+                st.number_input("Kвлаги (Коэффициент)", value=round(val_precip / 200.0, 2), step=0.01, key="top_f2_kvl")
                 st.number_input("Wкрит (Критич. влажность, %)", value=18.0, step=0.5, key="top_f2_wc")
-                st.number_input("CFпестицидов (кг CO₂-экв./т)", value=13.5, step=0.5, key="top_f2_cf")
+                st.number_input("CFпестицидов (кг CO₂-экв./т)", value=round(filt_df["pest"].mean() * 10, 1), step=0.5, key="top_f2_cf")
                 st.number_input("ΔCобработка (кг CO₂-экв./га)", value=-42.0, step=1.0, key="top_f2_dc")
 
-        # F.3 - Свёрнут
+        # F.3
         with st.expander("🟢 F.3 — Мониторинг и управление защитой растений", expanded=False):
             st.caption("Оценка заражения, повреждения, интервалов обработок и углеродного следа СЗР.")
             c3_1, c3_2 = st.columns(2)
             with c3_1:
                 st.number_input("УЗ (Уровень заражения, %)", value=18.0, step=1.0, key="top_f3_uz")
-                st.number_input("ИПВ (Индекс повреждения)", value=0.34, step=0.01, key="top_f3_ipv")
-                st.number_input("D (Дозировка, л/га)", value=2.50, step=0.1, key="top_f3_d")
+                st.number_input("ИПВ (Индекс повреждения)", value=round(val_op, 2), step=0.01, key="top_f3_ipv")
+                st.number_input("D (Дозировка, л/га)", value=round(filt_df["pest"].mean(), 2), step=0.1, key="top_f3_d")
             with c3_2:
                 st.number_input("ИП (Интенсивность поражения, %)", value=12.0, step=1.0, key="top_f3_ip")
                 st.number_input("I (Интервал между обработками, дни)", value=14, step=1, key="top_f3_i")
-                st.number_input("Cсезон (кг CO₂-экв./га)", value=86.0, step=1.0, key="top_f3_cs")
+                st.number_input("Cсезон (кг CO₂-экв./га)", value=round(filt_df["pest"].mean() * 45, 1), step=1.0, key="top_f3_cs")
 
     with calc_col2:
-        # F.4 - Свёрнут
+        # F.4
         with st.expander("🟢 F.4 — Управление урожайностью и качеством продукции", expanded=False):
             st.caption("Оценка потерь, урожайности, технологического следа и качества продукции.")
             c4_1, c4_2 = st.columns(2)
             with c4_1:
-                st.number_input("ОП (Общие потери, т/га)", value=0.42, step=0.01, key="top_f4_op")
-                st.number_input("Уфин (Финальная урожайность, т/га)", value=4.80, step=0.1, key="top_f4_uf")
-                st.number_input("CFу.след (кг CO₂-экв./га)", value=112.0, step=1.0, key="top_f4_cfuy")
-                st.number_input("CFитог (кг CO₂-экв./т)", value=24.6, step=0.1, key="top_f4_cfit")
+                st.number_input("ОП (Общие потери, т/га)", value=round(val_op, 2), step=0.01, key="top_f4_op")
+                st.number_input("Уфин (Финальная урожайность, т/га)", value=round(val_yield, 2), step=0.1, key="top_f4_uf")
+                st.number_input("CFу.след (кг CO₂-экв./га)", value=round(val_op_cf, 1), step=1.0, key="top_f4_cfuy")
+                st.number_input("CFитог (кг CO₂-экв./т)", value=round(val_footprint, 1), step=0.1, key="top_f4_cfit")
             with c4_2:
                 st.number_input("ΔCсолом (кг CO₂-экв./га)", value=-185.0, step=5.0, key="top_f4_dcs")
                 st.number_input("SCO₂ (кг CO₂-экв./га)", value=-96.0, step=2.0, key="top_f4_sco")
                 st.number_input("QF (Качество продукции, %)", value=92.0, step=1.0, key="top_f4_qf")
 
-        # F.5 - Свёрнут
+        # F.5
         with st.expander("🟢 F.5 — Оценка углеродного следа, учет и отчетность", expanded=False):
             st.caption("Сводная оценка углеродоемкости, валовых выбросов и эффективности.")
             c5_1, c5_2 = st.columns(2)
             with c5_1:
-                st.number_input("У CO₂ (Углеродоемкость, т CO₂/га)", value=1.84, step=0.05, key="top_f5_uco")
-                st.number_input("Э CO₂ (Эмиссия операции, кг CO₂/га)", value=2240.0, step=10.0, key="top_f5_eco")
-                st.number_input("OCO₂ (Валовые выбросы, кг CO₂/га)", value=3180.0, step=10.0, key="top_f5_oco")
-                st.number_input("Cem (Эмиссия технологии, кг CO₂/га)", value=2860.0, step=10.0, key="top_f5_cem")
+                st.number_input("У CO₂ (Углеродоемкость, т CO₂/га)", value=round(val_gross / 1000.0, 2), step=0.05, key="top_f5_uco")
+                st.number_input("Э CO₂ (Эмиссия операции, кг CO₂/га)", value=round(val_gross * 0.7, 1), step=10.0, key="top_f5_eco")
+                st.number_input("OCO₂ (Валовые выбросы, кг CO₂/га)", value=round(val_gross, 1), step=10.0, key="top_f5_oco")
+                st.number_input("Cem (Эмиссия технологии, кг CO₂/га)", value=round(val_gross * 0.9, 1), step=10.0, key="top_f5_cem")
             with c5_2:
-                st.number_input("Ctotal (След за агросрок, кг CO₂/га)", value=3015.0, step=10.0, key="top_f5_ctot")
-                st.number_input("ΔCF min (Изменение следа, кг CO₂/га)", value=-8.5, step=0.5, key="top_f5_dcf")
-                st.number_input("Эффективность (тыс. руб/га)", value=68.4, step=0.5, key="top_f5_eff")
+                st.number_input("Ctotal (След за агросрок, кг CO₂/га)", value=round(val_ctotal, 1), step=10.0, key="top_f5_ctot")
+                st.number_input("ΔCF min (Изменение следа, кг CO₂/га)", value=round(val_change, 1), step=0.5, key="top_f5_dcf")
+                st.number_input("Эффективность (тыс. руб/га)", value=round(val_eff, 1), step=0.5, key="top_f5_eff")
 
-        # F.6 - Свёрнут
+        # F.6
         with st.expander("🟢 F.6 — Принятие стратегических решений", expanded=False):
             st.caption("Оценка нейтральности, индекс приоритета затрат, прогноз урожайности и экономика.")
             c6_1, c6_2 = st.columns(2)
             with c6_1:
-                st.number_input("Kэф (Коэффициент)", value=0.86, step=0.01, key="top_f6_keff")
-                st.number_input("PI (Индекс приоритета, кг CO₂/руб)", value=0.42, step=0.01, key="top_f6_pi")
-                st.number_input("C поле (Углеродоемкость, кг CO₂/т)", value=31.7, step=0.5, key="top_f6_cpol")
-                st.number_input("Y net (Прогноз урожайности, кг/га)", value=4820.0, step=50.0, key="top_f6_ynet")
+                st.number_input("Kэф (Коэффициент)", value=round(val_keff, 2), step=0.01, key="top_f6_keff")
+                st.number_input("PI (Индекс приоритета, кг CO₂/руб)", value=round(val_pi, 3), step=0.01, key="top_f6_pi")
+                st.number_input("C поле (Углеродоемкость, кг CO₂/т)", value=round(val_cfield, 1), step=0.5, key="top_f6_cpol")
+                st.number_input("Y net (Прогноз урожайности, кг/га)", value=round(val_ynet, 1), step=50.0, key="top_f6_ynet")
             with c6_2:
-                st.number_input("E (Эффективность севооборота)", value=7.89, step=0.05, key="top_f6_e")
-                st.number_input("Себестоимость (тыс. руб/га)", value=52.5, step=0.5, key="top_f6_cost")
-                st.number_input("З уд.агросрок (тыс. руб/га)", value=18.6, step=0.2, key="top_f6_fert")
+                st.number_input("E (Эффективность севооборота)", value=round(val_rote, 2), step=0.05, key="top_f6_e")
+                st.number_input("Себестоимость (тыс. руб/га)", value=round(val_cost, 1), step=0.5, key="top_f6_cost")
+                st.number_input("З уд.агросрок (тыс. руб/га)", value=round(val_fert_cost, 1), step=0.2, key="top_f6_fert")
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
     # 5. БЛОК KPI
-    avg_footprint = filt_df["footprint"].mean() if not filt_df.empty else 0
-    avg_eff = filt_df["efficiency"].mean() if not filt_df.empty else 0
     avg_area = filt_df["area"].mean() if not filt_df.empty else 0
-    avg_cost = filt_df["cost"].mean() if not filt_df.empty else 0
 
     st.markdown(f"""
     <div class="kpi-container">
         <div class="kpi-card">
             <div class="kpi-label">Средний чистый след</div>
-            <div class="kpi-value">{avg_footprint:.1f}</div>
+            <div class="kpi-value">{val_footprint:.1f}</div>
             <div class="kpi-hint">кг CO₂-экв./т</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Средняя эффективность</div>
-            <div class="kpi-value">{avg_eff:.2f}</div>
+            <div class="kpi-value">{val_eff:.2f}</div>
             <div class="kpi-hint">показатель F6</div>
         </div>
         <div class="kpi-card">
@@ -217,7 +233,7 @@ def render_carbon_neutral_dashboard():
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Средняя себестоимость</div>
-            <div class="kpi-value">{avg_cost:.1f}</div>
+            <div class="kpi-value">{val_cost:.1f}</div>
             <div class="kpi-hint">тыс. руб./га</div>
         </div>
     </div>
@@ -318,4 +334,4 @@ def render_carbon_neutral_dashboard():
         })
         st.dataframe(tech_status, use_container_width=True, hide_index=True)
 
-    st.caption(f"Прототип · Источник данных: F2(3).xlsx · Активно строк: {len(filt_df)}")
+    st.caption(f"Прототип · Источник данных: F2(3).xlsx · Листы: F4, F5, F6 · Строк в расчете: {len(filt_df)}")
