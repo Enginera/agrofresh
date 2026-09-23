@@ -1,225 +1,235 @@
-﻿import streamlit as st
+﻿"""
+dashboards.py - Интерактивный дашборд углеродно-нейтрального земледелия (8 Графиков + Расчеты F1-F6)
+"""
+import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from styles import render_top_header
+from styles import apply_carbon_styles
+from parser import get_default_dataframe, parse_carbon_excel, CULTURES_LIST, TECHS_LIST
 
-# Цвета из оригинального JS: green, blue, pink, orange
-C_GREEN = "#2e6c50"
-C_BLUE = "#4d88a6"
-C_PINK = "#a33e72"
-C_ORANGE = "#e39a3d"
-C_GRID = "#edf1ee"
-C_MUTED = "#748178"
+def render_carbon_neutral_dashboard():
+    apply_carbon_styles()
 
-def fmt(val, precision=2, suffix=""):
-    if pd.isna(val) or val is None:
-        return "—"
-    if precision == 0:
-        return f"{val:,.0f}{suffix}".replace(",", " ")
-    return f"{val:,.{precision}f}{suffix}".replace(",", " ")
+    # Сессионное хранилище датасета
+    if "agro_data" not in st.session_state:
+        st.session_state.agro_data = get_default_dataframe()
 
-def render_top_f1_f6_block(df: pd.DataFrame):
-    """Блок F1-F6 СВЕРХУ со сводными метриками и раскрытием."""
-    f1_val = df.get("C_Sequestered", pd.Series([2.14])).mean()
-    f2_val = df.get("K_Temp_Soil", pd.Series([1.12])).mean()
-    f3_val = df.get("CF_Protection_Season", pd.Series([42.8])).mean()
-    f4_val = df.get("F5_Yield_Forecast", pd.Series([4.85])).mean()
-    f5_val = df.get("B_Carbon", pd.Series([69.89])).mean()
-    f6_val = df.get("F6_1_Efficiency", pd.Series([7.89])).mean()
+    # Верхний заголовок и панель действий
+    st.markdown("""
+    <div class="hero-header">
+        <div class="eyebrow">Аналитическая панель</div>
+        <div class="main-title">🌱 Модуль углеродно-нейтрального земледелия</div>
+        <div class="subtitle">Интерактивная аналитика данных Excel и визуализация ключевых показателей агросезона</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Панель действий: Загрузка Excel / Сброс
+    top_col1, top_col2, top_col3 = st.columns([2, 1, 1])
+    with top_col1:
+        uploaded_file = st.file_uploader("Загрузить файл Excel (.xlsx, .xls)", type=["xlsx", "xls"], label_visibility="collapsed")
+        if uploaded_file is not None:
+            new_df, err = parse_carbon_excel(uploaded_file)
+            if err:
+                st.error(err)
+            elif new_df is not None and not new_df.empty:
+                st.session_state.agro_data = new_df
+                st.success(f"Успешно загружено {len(new_df)} строк из Excel.")
+    with top_col2:
+        if st.button("🔄 Сбросить фильтры", use_container_width=True):
+            st.session_state.selected_cultures = CULTURES_LIST.copy()
+            st.session_state.selected_techs = TECHS_LIST.copy()
+            st.rerun()
+
+    df = st.session_state.agro_data
+
+    # Секция фильтров
+    st.markdown("### 🔍 Параметры выборки")
+    f_col1, f_col2, f_col3 = st.columns([2, 1.5, 1])
+    with f_col1:
+        selected_cultures = st.multiselect("Культура", CULTURES_LIST, default=CULTURES_LIST, key="selected_cultures")
+    with f_col2:
+        selected_techs = st.multiselect("Технология", TECHS_LIST, default=TECHS_LIST, key="selected_techs")
+    with f_col3:
+        season = st.selectbox("Агросезон", ["Текущий расчёт", "Все агросезоны"])
+
+    # Фильтрация данных
+    filt_df = df[df["culture"].isin(selected_cultures) & df["technology"].isin(selected_techs)]
+    if filt_df.empty:
+        filt_df = df.copy()
+
+    # Блок KPI
+    avg_footprint = filt_df["footprint"].mean() if not filt_df.empty else 0
+    avg_eff = filt_df["efficiency"].mean() if not filt_df.empty else 0
+    avg_area = filt_df["area"].mean() if not filt_df.empty else 0
+    avg_cost = filt_df["cost"].mean() if not filt_df.empty else 0
 
     st.markdown(f"""
-        <div class="fn-top-container">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="eyebrow">Расчётные функции F1–F6</span>
-                <span style="font-size:11px; color:#748178; font-weight:700;">Сводка агрегатов по 1000 полей</span>
-            </div>
-            <div class="fn-grid">
-                <div class="fn-card">
-                    <div class="fn-badge">F1 · Севооборот</div>
-                    <div class="fn-title">Секвестрация Cseq</div>
-                    <div class="fn-val">{fmt(f1_val, 2, " т/га")}</div>
-                </div>
-                <div class="fn-card">
-                    <div class="fn-badge">F2 · Удобрения</div>
-                    <div class="fn-title">Коэфф. Ktemp</div>
-                    <div class="fn-val">{fmt(f2_val, 2)}</div>
-                </div>
-                <div class="fn-card">
-                    <div class="fn-badge">F3 · Защита</div>
-                    <div class="fn-title">След Cсезон</div>
-                    <div class="fn-val">{fmt(f3_val, 1, " кг/га")}</div>
-                </div>
-                <div class="fn-card">
-                    <div class="fn-badge">F4 · Урожайность</div>
-                    <div class="fn-title">Урожай Уфин</div>
-                    <div class="fn-val">{fmt(f4_val, 2, " т/га")}</div>
-                </div>
-                <div class="fn-card">
-                    <div class="fn-badge">F5 · Углерод</div>
-                    <div class="fn-title">Выгода Bcarbon</div>
-                    <div class="fn-val">{fmt(f5_val, 1, " т/га")}</div>
-                </div>
-                <div class="fn-card">
-                    <div class="fn-badge">F6 · Стратегия</div>
-                    <div class="fn-title">Эффективность Kэф</div>
-                    <div class="fn-val">{fmt(f6_val, 2)}</div>
-                </div>
-            </div>
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <div class="kpi-label">Средний чистый след</div>
+            <div class="kpi-value">{avg_footprint:.1f}</div>
+            <div class="kpi-hint">кг CO₂-экв./т</div>
         </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Средняя эффективность</div>
+            <div class="kpi-value">{avg_eff:.2f}</div>
+            <div class="kpi-hint">показатель F6</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Площадь колебания</div>
+            <div class="kpi-value">{avg_area:.1f}</div>
+            <div class="kpi-hint">га, по выбранным строкам</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Средняя себестоимость</div>
+            <div class="kpi-value">{avg_cost:.1f}</div>
+            <div class="kpi-hint">тыс. руб./га</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
+
+    # Верхний блок расчётных функций F1-F6
+    with st.expander("⚡ Верхний блок расчетных функций F1–F6 (Сценарный ввод)", expanded=False):
+        c_f1, c_f2 = st.columns(2)
+        with c_f1:
+            st.markdown("**F1: Планирование севооборота**")
+            f1_cult = st.selectbox("F1 Культура", CULTURES_LIST, key="f1_c")
+            f1_area = st.number_input("Площадь, га", value=100.0, step=10.0, key="f1_a")
+            f1_cseq = st.number_input("Секвестрация Cseq, т CO₂/га", value=2.8, key="f1_seq")
+            f1_cnet = st.number_input("Углеродный след Cnet, т CO₂/га", value=1.6, key="f1_net")
+            st.info(f"F1 Прогноз: {f1_cult}, {f1_area:.1f} га · Cseq: {f1_cseq} · Cnet: {f1_cnet} т CO₂-экв./га")
+
+        with c_f2:
+            st.markdown("**F2: Управление удобрениями и почвой**")
+            f2_fert = st.number_input("Норма удобрений, кг/га", value=180.0, step=5.0, key="f2_f")
+            f2_soil = st.slider("Интенсивность обработки почвы, %", 0, 100, 70, key="f2_s")
+            st.info(f"F2 Параметры: Удобрения {f2_fert} кг/га | Интенсивность {f2_soil}%")
+
+    # Сетка графиков (8 штук из прототипа)
+    st.markdown("### 📊 Аналитические панели")
     
-    with st.expander("🔍 Развернуть детальные описания и таблицы функций F1–F6"):
-        t1, t2, t3, t4, t5, t6 = st.tabs(["F1 Севооборот", "F2 Почва", "F3 Защита", "F4 Урожай", "F5 Углерод", "F6 Стратегия"])
-        with t1:
-            st.markdown("**F1 — Планирования севооборота**: секвестрация, $C_{net}$, прогнозируемая урожайность и интегральная эффективность.")
-        with t2:
-            st.markdown("**F2 — Управления удобрениями и обработкой почвы**: параметры почвы, изменение запасов углерода и след операций.")
-        with t3:
-            st.markdown("**F3 — Мониторинга и управления защитой растений**: уровень заражения растений, интенсивность поражения и сезонный след.")
-        with t4:
-            st.markdown("**F4 — Управления урожайностью и качеством**: общие потери, урожайность, пожнивные остатки и след на тонну зерна.")
-        with t5:
-            st.markdown("**F5 — Оценки углеродного следа и учета**: операции, валовые выбросы, материалы и экономический эффект.")
-        with t6:
-            st.markdown("**F6 — Принятия стратегических решений**: коэффициент нейтральности с учётом стоимости, индекс приоритета PI и риски.")
+    # 1. Удельный след: No-Till vs Классическая (Широкая)
+    st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Удельный след: No-Till vs Классическая</h3><p>кг CO₂-экв./т · среднее по выбранным культурам</p></div></div>""", unsafe_allow_html=True)
+    c1_df = filt_df.groupby(["culture", "technology"])["footprint"].mean().reset_index()
+    fig1 = px.bar(
+        c1_df, x="culture", y="footprint", color="technology", barmode="group",
+        color_discrete_map={"Классическая": "#4e91ad", "No-Till": "#a93d72"},
+        labels={"culture": "Культура", "footprint": "След (кг CO₂-экв./т)", "technology": "Технология"}
+    )
+    fig1.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=320)
+    st.plotly_chart(fig1, use_container_width=True)
 
-def render_kpis(df: pd.DataFrame):
-    """4 верхние плашки KPI."""
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f"""
-            <div class="kpi-card">
-                <small>Средний чистый след</small>
-                <div class="value">{fmt(df.get("Net_Carbon_Footprint", pd.Series([0.65])).mean(), 2, " кг")}</div>
-            </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"""
-            <div class="kpi-card">
-                <small>Средняя эффективность</small>
-                <div class="value">{fmt(df.get("F6_1_Efficiency", pd.Series([7.89])).mean(), 2)}</div>
-            </div>
-        """, unsafe_allow_html=True)
-    with c3:
-        st.markdown(f"""
-            <div class="kpi-card">
-                <small>Средняя себестоимость</small>
-                <div class="value">{fmt(df.get("C_Total_Costs", pd.Series([52513.5])).mean(), 1, " ₽/га")}</div>
-            </div>
-        """, unsafe_allow_html=True)
-    with c4:
-        st.markdown(f"""
-            <div class="kpi-card">
-                <small>Расчётных строк полей</small>
-                <div class="value">{len(df):,}</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-def render_charts_grid(df: pd.DataFrame):
-    """6 графиков из HTML-шаблона на Plotly."""
-    
-    # 1-й ряд (2 графика)
-    r1_1, r1_2 = st.columns(2)
-    with r1_1:
-        st.markdown('<div class="chart-title">Удельный след: No-Till vs классическая</div><div class="chart-meta">кг CO₂-экв./т · среднее по культуре</div>', unsafe_allow_html=True)
-        crops = ["Горох", "Кукуруза", "Лён", "Озимая пшеница", "Подсолнечник", "Многолетние травы"]
-        no_till = [40.0, 17.7, 175.9, 9.4, 51.0, 12.9]
-        classic = [37.0, 15.8, 358.0, 10.3, 111.0, 13.7]
-        fig1 = go.Figure(data=[
-            go.Bar(name='No-Till', x=crops, y=no_till, marker_color=C_BLUE),
-            go.Bar(name='Классическая', x=crops, y=classic, marker_color=C_PINK)
-        ])
-        fig1.update_layout(
-            barmode='group', height=270, margin=dict(l=10, r=10, t=15, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
-        st.plotly_chart(fig1, use_container_width=True)
-
-    with r1_2:
-        st.markdown('<div class="chart-title">Структура выбросов по ресурсам</div><div class="chart-meta">горох + кукуруза</div>', unsafe_allow_html=True)
+    # 2 и 3 в две колонки
+    g_col1, g_col2 = st.columns(2)
+    with g_col1:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Структура выбросов по ресурсам</h3><p>технологические операции · техника · севооборот</p></div></div>""", unsafe_allow_html=True)
+        r_ops = filt_df["operation_cf"].mean() if not filt_df.empty else 0
+        r_tech = filt_df["tech_cf"].mean() if not filt_df.empty else 0
+        r_rot = filt_df["rotation_cf"].mean() if not filt_df.empty else 0
         fig2 = go.Figure(data=[go.Pie(
-            labels=["Технологические операции", "Техника", "Логистика"],
-            values=[29.9, 64.0, 6.1],
+            labels=["Технологические операции", "Техника", "Севооборот"],
+            values=[r_ops, r_tech, r_rot],
             hole=0.6,
-            marker=dict(colors=[C_BLUE, C_PINK, C_ORANGE])
+            marker=dict(colors=["#4e91ad", "#a93d72", "#e49a27"])
         )])
-        fig2.update_layout(
-            height=270, margin=dict(l=10, r=10, t=15, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
-        )
+        fig2.update_layout(margin=dict(t=10, b=10, l=10, r=10), height=300)
         st.plotly_chart(fig2, use_container_width=True)
 
-    # 2-й ряд (2 графика)
-    r2_1, r2_2 = st.columns(2)
-    with r2_1:
-        st.markdown('<div class="chart-title">Выбросы CO₂ по полевым операциям</div><div class="chart-meta">кг CO₂-экв./га</div>', unsafe_allow_html=True)
-        ops = ["Внесение удобрений", "Предпосевная обработка", "Уборка"]
-        vals_op = [2250.4, 2247.1, 2250.6]
-        fig3 = go.Figure(data=[go.Bar(
-            y=ops, x=vals_op, orientation='h', marker_color=C_GREEN
-        )])
-        fig3.update_layout(
-            height=270, margin=dict(l=10, r=10, t=15, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
-        )
+    with g_col2:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Эффективность по культуре</h3><p>среднее значение F6 · столбчатая диаграмма</p></div></div>""", unsafe_allow_html=True)
+        c3_df = filt_df.groupby("culture")["efficiency"].mean().reset_index()
+        fig3 = px.bar(c3_df, x="culture", y="efficiency", color_discrete_sequence=["#2d8b68"])
+        fig3.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
         st.plotly_chart(fig3, use_container_width=True)
 
-    with r2_2:
-        st.markdown('<div class="chart-title">Технология и углеродный след</div><div class="chart-meta">сравнение сценариев</div>', unsafe_allow_html=True)
-        fig4 = go.Figure(data=[go.Bar(
-            x=["No-Till", "Классическая"], y=[29.6, 27.6], marker_color=[C_BLUE, C_PINK]
-        )])
-        fig4.update_layout(
-            height=270, margin=dict(l=10, r=10, t=15, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
-        )
-        st.plotly_chart(fig4, use_container_width=True)
+    # 4. Выбросы CO₂ по технологическим операциям (Широкая горизонтальная)
+    st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Выбросы CO₂ по технологическим операциям</h3><p>кг CO₂-экв./га · данные F5</p></div></div>""", unsafe_allow_html=True)
+    c4_df = filt_df.groupby("operation")["gross"].mean().reset_index()
+    fig4 = px.bar(c4_df, y="operation", x="gross", orientation="h", color_discrete_sequence=["#2d7655"])
+    fig4.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=280)
+    st.plotly_chart(fig4, use_container_width=True)
 
-    # 3-й ряд (Широкий scatter)
-    st.markdown('<div class="chart-title">Зависимость углеродного следа от урожайности</div><div class="chart-meta">точки — расчётные поля выборки</div>', unsafe_allow_html=True)
-    if "F5_Yield_Forecast" in df.columns and "B_Carbon" in df.columns:
-        fig5 = px.scatter(
-            df, x="F5_Yield_Forecast", y="B_Carbon",
-            color="Risk_1_R" if "Risk_1_R" in df.columns else None,
-            labels={"F5_Yield_Forecast": "Урожайность, т/га", "B_Carbon": "Углеродный след / выгода, кг CO₂-экв./т"},
-            color_continuous_scale=[C_GREEN, C_BLUE, C_PINK, C_ORANGE]
-        )
-        fig5.update_layout(
-            height=320, margin=dict(l=10, r=10, t=15, b=10),
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
-        )
+    # 5 и 6 в две колонки
+    g_col3, g_col4 = st.columns(2)
+    with g_col3:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Зависимость углеродного следа от урожайности</h3><p>урожайность, т/га · след, кг CO₂-экв./т</p></div></div>""", unsafe_allow_html=True)
+        fig5 = px.scatter(filt_df, x="yield", y="footprint", color="technology",
+                          color_discrete_map={"Классическая": "#4e91ad", "No-Till": "#a93d72"})
+        fig5.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
         st.plotly_chart(fig5, use_container_width=True)
 
-    # 4-й ряд (Широкая интегральная эффективность)
-    st.markdown('<div class="chart-title">Интегральная эффективность по культуре</div><div class="chart-meta">среднее значение F6</div>', unsafe_allow_html=True)
-    eff_crops = ["Горох", "Кукуруза", "Лён", "Озимая пшеница", "Подсолнечник", "Многолетние травы"]
-    eff_vals = [5.63, 10.73, 2.79, 14.66, 3.77, 11.68]
-    fig6 = go.Figure(data=[go.Scatter(
-        x=eff_crops, y=eff_vals, fill='tozeroy', mode='lines+markers',
-        line=dict(color=C_GREEN, width=3), fillcolor='rgba(46,108,80,0.10)'
-    )])
-    fig6.update_layout(
-        height=280, margin=dict(l=10, r=10, t=15, b=10),
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
-    )
-    st.plotly_chart(fig6, use_container_width=True)
+    with g_col4:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Вид углеродных выбросов</h3><p>минеральные удобрения · пестициды · топливо</p></div></div>""", unsafe_allow_html=True)
+        c6_df = filt_df.groupby("culture")[["fert", "pest", "fuel"]].mean().reset_index()
+        fig6 = go.Figure()
+        fig6.add_trace(go.Bar(name="Удобрения", x=c6_df["culture"], y=c6_df["fert"], marker_color="#e49a27"))
+        fig6.add_trace(go.Bar(name="Пестициды", x=c6_df["culture"], y=c6_df["pest"], marker_color="#a93d72"))
+        fig6.add_trace(go.Bar(name="Топливо", x=c6_df["culture"], y=c6_df["fuel"], marker_color="#4e91ad"))
+        fig6.update_layout(barmode="group", template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
+        st.plotly_chart(fig6, use_container_width=True)
 
-def render_summary_tables():
-    """Две таблицы статусов из HTML-шаблона."""
-    st.markdown("### Параметры технологических сценариев")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("#### Культура")
-        st.dataframe(pd.DataFrame({
-            "Культура": ["Горох", "Кукуруза", "Лён", "Озимая пшеница"],
-            "Статус": ["Выбрано", "Выбрано", "Сравнение", "Сравнение"]
-        }), use_container_width=True, hide_index=True)
-    with c2:
-        st.markdown("#### Технология")
-        st.dataframe(pd.DataFrame({
-            "Технология": ["Классическая", "No-Till"],
-            "Статус": ["Выбрано", "Сравнение"]
-        }), use_container_width=True, hide_index=True)
+    # 7 и 8 в две колонки
+    g_col5, g_col6 = st.columns(2)
+    with g_col5:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Изменение углеродного следа</h3><p>сводный показатель по технологическим операциям</p></div></div>""", unsafe_allow_html=True)
+        c7_df = filt_df.groupby("operation")["change_cf"].mean().reset_index()
+        fig7 = px.line(c7_df, x="operation", y="change_cf", markers=True, color_discrete_sequence=["#2f7657"])
+        fig7.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
+        st.plotly_chart(fig7, use_container_width=True)
+
+    with g_col6:
+        st.markdown("""<div class="chart-card"><div class="chart-head"><h3>Себестоимость по заданным полям в агросезон</h3><p>тыс. руб./га · F6</p></div></div>""", unsafe_allow_html=True)
+        c8_df = filt_df.groupby("culture")["cost"].mean().reset_index()
+        fig8 = px.bar(c8_df, x="culture", y="cost", color_discrete_sequence=["#7a6fb1"])
+        fig8.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
+        st.plotly_chart(fig8, use_container_width=True)
+
+    # Секция детальных расчетных подмодулей F1-F6
+    st.markdown("### 🧮 Расчётные подмодули F1–F6")
+    
+    fns = [
+        ("F.1", "Планирование севооборота", [
+            ("Csequestered", "Секвестрация углерода при выборе с/х культур", "2.80", "т CO₂-экв./га"),
+            ("Cnet", "Расчет показателя углеродного следа за период агросрока", "1.60", "т CO₂-экв./га"),
+            ("E", "Интегральный коэффициент эффективности севооборота", "7.89", "коэффициент")
+        ]),
+        ("F.2", "Управление удобрениями и обработкой почвы", [
+            ("Ktemp", "Коэффициент температуры почвы", "1.05", "коэффициент"),
+            ("Wфакт", "Влажность почвы фактическая", "24", "%"),
+            ("Iат", "Индекс агротехнического воздействия", "0.82", "индекс"),
+            ("ΔCобработка", "Секвестрация углерода от технологической операции", "-42", "кг CO₂-экв./га")
+        ]),
+        ("F.3", "Мониторинг и управление защитой растений", [
+            ("УЗ", "Уровень заражения растения", "18", "%"),
+            ("ИПВ", "Индекс повреждения (интегральная оценка)", "0.34", "индекс"),
+            ("D", "Усредненная дозировка препаратов", "2.50", "л/га"),
+            ("Cсезон", "Углеродный след мероприятий защиты растений", "86", "кг CO₂-экв./га")
+        ]),
+        ("F.4", "Управление урожайностью и качеством", [
+            ("ОП", "Общие потери", "0.42", "т/га"),
+            ("Уфин", "Финальная урожайность", "4.80", "т/га"),
+            ("CFитог", "Показатель углеродного следа на тонну зерна", "24.6", "кг CO₂-экв./т"),
+            ("SCO₂", "Секвестрация за счёт пожнивных остатков", "-96", "кг CO₂-экв./га")
+        ]),
+        ("F.5", "Оценка углеродного следа, отчетность", [
+            ("У CO₂", "Углеродоемкость", "1.84", "т CO₂/га"),
+            ("OCO₂", "Общие валовые выбросы углерода", "3180", "кг CO₂-экв./га"),
+            ("Ctotal", "Углеродный след i-го агросрока", "3015", "кг CO₂-экв./га")
+        ]),
+        ("F.6", "Принятие стратегических решений", [
+            ("Kэф", "Коэффициент эффективности нейтральности", "0.86", "коэффициент"),
+            ("PI", "Индекс приоритета поглощения на 1 рубль затрат", "0.42", "кг CO₂/руб"),
+            ("Себестоимость", "Себестоимость по заданным полям", "52.5", "тыс. руб/га")
+        ])
+    ]
+
+    fn_cols = st.columns(2)
+    for i, (code, title, subs) in enumerate(fns):
+        with fn_cols[i % 2]:
+            with st.expander(f"{code} — {title}"):
+                for var, desc, def_val, unit in subs:
+                    st.text_input(f"{desc} ({var}) [{unit}]", value=def_val, key=f"sub_{code}_{var}")
+
+    st.caption(f"Источник данных: активный датасет ({len(filt_df)} строк)")
