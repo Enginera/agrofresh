@@ -1,6 +1,8 @@
 ﻿"""
 dashboards.py - Аналитический модуль углеродно-нейтрального земледелия
-Блок F1–F6 вынесен наверх перед KPI и графиками в соответствии с HTML-прототипом.
+- Фильтры выборки и загрузка данных вынесены в левую выезжающую панель (st.sidebar).
+- Расчетные функции F1–F6 расположены сверху основной панели.
+- Далее расположены 4 KPI и 8 аналитических диаграмм.
 """
 import streamlit as st
 import pandas as pd
@@ -13,60 +15,92 @@ from parser import get_default_dataframe, parse_carbon_excel, CULTURES_LIST, TEC
 def render_carbon_neutral_dashboard():
     apply_carbon_styles()
 
-    # Инициализация датасета в сессии
+    # 1. Инициализация датасета в сессии
     if "agro_data" not in st.session_state:
         st.session_state.agro_data = get_default_dataframe()
 
-    # 1. Верхний заголовок
-    st.markdown("""
-    <div class="hero-header">
-        <div class="eyebrow">Аналитическая панель</div>
-        <div class="main-title">🌱 Модуль углеродно-нейтрального земледелия</div>
-        <div class="subtitle">Интерактивная аналитика данных Excel и визуализация ключевых показателей агросезона</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # 2. ЛЕВАЯ ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ (SIDEBAR): БРЕНДИНГ, ЗАГРУЗКА И ФИЛЬТРЫ
+    with st.sidebar:
+        st.markdown("""
+        <div style="padding: 6px 0 16px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="background:#2f8c69; color:#fff; border-radius:10px; width:38px; height:38px; display:grid; place-items:center; font-size:20px;">🌱</div>
+                <div>
+                    <b style="font-size:14px; color:#143c2d; display:block; line-height:1.2;">Углеродно-нейтральное</b>
+                    <span style="font-size:11px; color:#71817b;">аналитическая панель</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Панель действий
-    top_col1, top_col2, top_col3 = st.columns([2.5, 1, 1])
-    with top_col1:
-        uploaded_file = st.file_uploader("Загрузить файл Excel (.xlsx, .xls)", type=["xlsx", "xls"], label_visibility="collapsed")
+        st.markdown("### 📥 Источник данных")
+        uploaded_file = st.file_uploader("Загрузить Excel (.xlsx, .xls)", type=["xlsx", "xls"])
         if uploaded_file is not None:
             new_df, err = parse_carbon_excel(uploaded_file)
             if err:
                 st.error(err)
             elif new_df is not None and not new_df.empty:
                 st.session_state.agro_data = new_df
-                st.success(f"Успешно загружено {len(new_df)} строк из Excel.")
-    with top_col2:
-        if st.button("🔄 Сбросить", use_container_width=True):
+                st.success(f"Загружено {len(new_df)} строк")
+
+        st.markdown("---")
+        st.markdown("### 🔍 Фильтры выборки")
+
+        selected_cultures = st.multiselect(
+            "Культуры",
+            CULTURES_LIST,
+            default=st.session_state.get("selected_cultures", CULTURES_LIST),
+            key="selected_cultures"
+        )
+
+        selected_techs = st.multiselect(
+            "Технологии",
+            TECHS_LIST,
+            default=st.session_state.get("selected_techs", TECHS_LIST),
+            key="selected_techs"
+        )
+
+        season = st.selectbox(
+            "Агросезон",
+            ["Текущий расчёт", "Все агросезоны"],
+            key="season_select"
+        )
+
+        st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+        if st.button("🔄 Сбросить фильтры", use_container_width=True):
             st.session_state.selected_cultures = CULTURES_LIST.copy()
             st.session_state.selected_techs = TECHS_LIST.copy()
             st.rerun()
-    with top_col3:
-        st.button("🖨️ Печать", use_container_width=True, on_click=lambda: None)
+
+        st.markdown("""
+        <div style="margin-top:24px; padding:12px; background:#f4f8f6; border-radius:10px; border:1px solid #e0eae5; font-size:11px; color:#5b8072; line-height:1.4;">
+            ℹ️ Фильтры автоматически пересчитывают показатели KPI, таблицы и все 8 диаграмм в реальном времени.
+        </div>
+        """, unsafe_allow_html=True)
 
     df = st.session_state.agro_data
 
-    # 2. Фильтры
-    st.markdown("### 🔍 Фильтры выборки")
-    f_col1, f_col2, f_col3 = st.columns([2, 1.5, 1])
-    with f_col1:
-        selected_cultures = st.multiselect("Культура", CULTURES_LIST, default=CULTURES_LIST, key="selected_cultures")
-    with f_col2:
-        selected_techs = st.multiselect("Технология", TECHS_LIST, default=TECHS_LIST, key="selected_techs")
-    with f_col3:
-        season = st.selectbox("Агросезон", ["Текущий расчёт", "Все агросезоны"])
-
+    # Фильтрация данных
     filt_df = df[df["culture"].isin(selected_cultures) & df["technology"].isin(selected_techs)]
     if filt_df.empty:
         filt_df = df.copy()
 
-    # 3. ВЕРХНИЙ БЛОК: РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ)
-    st.markdown("---")
+    # 3. ОСНОВНАЯ ОБЛАСТЬ: ЗАГОЛОВОК
     st.markdown("""
-    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
-        <h3 style="margin:0; color:#143c2d; font-weight:800;">⚡ Расчётные функции F1–F6</h3>
-        <span style="font-size:12px; color:#71817b;">Связано с аналитической панелью ниже · Параметры сохраняются на лету</span>
+    <div class="hero-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+            <div class="eyebrow">Аналитическая панель</div>
+            <div class="main-title">Модуль углеродно-нейтрального земледелия</div>
+            <div class="subtitle">Интерактивная аналитика данных Excel и визуализация ключевых показателей агросезона</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 4. РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ)
+    st.markdown("""
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin: 8px 0 12px;">
+        <h3 style="margin:0; color:#143c2d; font-weight:800; font-size:18px;">⚡ Расчётные функции F1–F6</h3>
+        <span style="font-size:11px; color:#71817b;">Параметры сохраняются и пересчитываются на лету</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -83,7 +117,7 @@ def render_carbon_neutral_dashboard():
             with c1_2:
                 st.number_input("E (Коэффициент)", value=7.89, step=0.1, key="top_f1_e")
                 f1_sel_cult = st.selectbox("Культура F1", CULTURES_LIST, key="top_f1_cult")
-            st.success(f"F1 Расчёт: {f1_sel_cult} · Cseq: 2.80 · Cnet: 1.60 · E: 7.89")
+            st.success(f"F1: {f1_sel_cult} · Cseq: 2.80 · Cnet: 1.60 · E: 7.89")
 
         # F.2
         with st.expander("🟢 F.2 — Управление удобрениями и обработкой почвы", expanded=False):
@@ -130,7 +164,7 @@ def render_carbon_neutral_dashboard():
 
         # F.5
         with st.expander("🟢 F.5 — Оценка углеродного следа, учет и отчетность", expanded=False):
-            st.caption("Сводная оценка углеродоемкости, валовых выбросов и эффективности с учетом секвестрации.")
+            st.caption("Сводная оценка углеродоемкости, валовых выбросов и эффективности.")
             c5_1, c5_2 = st.columns(2)
             with c5_1:
                 st.number_input("У CO₂ (Углеродоемкость, т CO₂/га)", value=1.84, step=0.05, key="top_f5_uco")
@@ -156,9 +190,9 @@ def render_carbon_neutral_dashboard():
                 st.number_input("Себестоимость (тыс. руб/га)", value=52.5, step=0.5, key="top_f6_cost")
                 st.number_input("З уд.агросрок (тыс. руб/га)", value=18.6, step=0.2, key="top_f6_fert")
 
-    st.markdown("---")
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
-    # 4. БЛОК KPI
+    # 5. БЛОК KPI
     avg_footprint = filt_df["footprint"].mean() if not filt_df.empty else 0
     avg_eff = filt_df["efficiency"].mean() if not filt_df.empty else 0
     avg_area = filt_df["area"].mean() if not filt_df.empty else 0
@@ -189,7 +223,7 @@ def render_carbon_neutral_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # 5. ГРАФИКИ (8 штук из прототипа)
+    # 6. АНАЛИТИЧЕСКИЕ ДИАГРАММЫ (8 шт.)
     st.markdown("### 📊 Аналитические диаграммы")
 
     # 1. Удельный след: No-Till vs Классическая
@@ -268,7 +302,7 @@ def render_carbon_neutral_dashboard():
         fig8.update_layout(template="plotly_white", margin=dict(t=10, b=10, l=10, r=10), height=300)
         st.plotly_chart(fig8, use_container_width=True)
 
-    # 6. Таблицы статуса культур и технологий
+    # 7. Таблицы статуса культур и технологий
     st.markdown("### 📋 Статус культур и технологий")
     t_col1, t_col2 = st.columns(2)
     with t_col1:
