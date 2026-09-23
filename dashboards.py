@@ -1,8 +1,8 @@
 ﻿"""
 dashboards.py - Аналитический модуль углеродно-нейтрального земледелия
-- Фильтры выборки и загрузка данных вынесены в левую выезжающую панель (st.sidebar).
-- Расчетные функции F1–F6 расположены сверху основной панели.
-- Далее расположены 4 KPI и 8 аналитических диаграмм.
+- Фильтры выборки и загрузка данных находятся в левом выезжающем сайдбаре.
+- Все расчетные функции F1–F6 расположены сверху и по умолчанию свёрнуты (expanded=False).
+- Далее расположены 4 KPI, 8 графиков и статус-таблицы.
 """
 import streamlit as st
 import pandas as pd
@@ -96,19 +96,19 @@ def render_carbon_neutral_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # 4. РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ)
+    # 4. РАСЧЁТНЫЕ ПОДМОДУЛИ F1–F6 (СВЕРХУ, ВСЕ СВЁРНУТЫ ПО УМОЛЧАНИЮ)
     st.markdown("""
     <div style="display:flex; justify-content:space-between; align-items:baseline; margin: 8px 0 12px;">
         <h3 style="margin:0; color:#143c2d; font-weight:800; font-size:18px;">⚡ Расчётные функции F1–F6</h3>
-        <span style="font-size:11px; color:#71817b;">Параметры сохраняются и пересчитываются на лету</span>
+        <span style="font-size:11px; color:#71817b;">Нажмите на нужный блок для ввода параметров</span>
     </div>
     """, unsafe_allow_html=True)
 
     calc_col1, calc_col2 = st.columns(2)
 
     with calc_col1:
-        # F.1
-        with st.expander("🟢 F.1 — Планирование севооборота", expanded=True):
+        # F.1 - Свёрнут
+        with st.expander("🟢 F.1 — Планирование севооборота", expanded=False):
             st.caption("Секвестрация, углеродный след за период агросрока и интегральная эффективность.")
             c1_1, c1_2 = st.columns(2)
             with c1_1:
@@ -119,7 +119,7 @@ def render_carbon_neutral_dashboard():
                 f1_sel_cult = st.selectbox("Культура F1", CULTURES_LIST, key="top_f1_cult")
             st.success(f"F1: {f1_sel_cult} · Cseq: 2.80 · Cnet: 1.60 · E: 7.89")
 
-        # F.2
+        # F.2 - Свёрнут
         with st.expander("🟢 F.2 — Управление удобрениями и обработкой почвы", expanded=False):
             st.caption("Параметры температуры, влажности, агротехнического воздействия и углеродных потоков.")
             c2_1, c2_2 = st.columns(2)
@@ -134,7 +134,7 @@ def render_carbon_neutral_dashboard():
                 st.number_input("CFпестицидов (кг CO₂-экв./т)", value=13.5, step=0.5, key="top_f2_cf")
                 st.number_input("ΔCобработка (кг CO₂-экв./га)", value=-42.0, step=1.0, key="top_f2_dc")
 
-        # F.3
+        # F.3 - Свёрнут
         with st.expander("🟢 F.3 — Мониторинг и управление защитой растений", expanded=False):
             st.caption("Оценка заражения, повреждения, интервалов обработок и углеродного следа СЗР.")
             c3_1, c3_2 = st.columns(2)
@@ -148,8 +148,8 @@ def render_carbon_neutral_dashboard():
                 st.number_input("Cсезон (кг CO₂-экв./га)", value=86.0, step=1.0, key="top_f3_cs")
 
     with calc_col2:
-        # F.4
-        with st.expander("🟢 F.4 — Управление урожайностью и качеством продукции", expanded=True):
+        # F.4 - Свёрнут
+        with st.expander("🟢 F.4 — Управление урожайностью и качеством продукции", expanded=False):
             st.caption("Оценка потерь, урожайности, технологического следа и качества продукции.")
             c4_1, c4_2 = st.columns(2)
             with c4_1:
@@ -162,7 +162,7 @@ def render_carbon_neutral_dashboard():
                 st.number_input("SCO₂ (кг CO₂-экв./га)", value=-96.0, step=2.0, key="top_f4_sco")
                 st.number_input("QF (Качество продукции, %)", value=92.0, step=1.0, key="top_f4_qf")
 
-        # F.5
+        # F.5 - Свёрнут
         with st.expander("🟢 F.5 — Оценка углеродного следа, учет и отчетность", expanded=False):
             st.caption("Сводная оценка углеродоемкости, валовых выбросов и эффективности.")
             c5_1, c5_2 = st.columns(2)
@@ -176,7 +176,7 @@ def render_carbon_neutral_dashboard():
                 st.number_input("ΔCF min (Изменение следа, кг CO₂/га)", value=-8.5, step=0.5, key="top_f5_dcf")
                 st.number_input("Эффективность (тыс. руб/га)", value=68.4, step=0.5, key="top_f5_eff")
 
-        # F.6
+        # F.6 - Свёрнут
         with st.expander("🟢 F.6 — Принятие стратегических решений", expanded=False):
             st.caption("Оценка нейтральности, индекс приоритета затрат, прогноз урожайности и экономика.")
             c6_1, c6_2 = st.columns(2)
