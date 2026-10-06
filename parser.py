@@ -24,15 +24,6 @@ def detect_workbook_type(excel_file):
         return "carbon"
 
 def parse_carbon_data(excel_file=None):
-    data = {"fields_stat": {}, "records": pd.DataFrame(), "sheets": {}}
-    data["fields_stat"] = {
-        "1": {"records": 5, "area_avg": 118.1, "yield_avg": 4.70, "cf_avg": 13.54, "gross_avg": 2184.8, "eff_avg": 6.70, "cost_avg": 52.0, "cultures": ["Лён", "многолетние травы", "озимая пшеница", "подсолнечник"], "techs": ["No-Till", "Классическая"]},
-        "2": {"records": 5, "area_avg": 113.0, "yield_avg": 5.70, "cf_avg": 6.44, "gross_avg": 2147.6, "eff_avg": 7.48, "cost_avg": 52.0, "cultures": ["Горох", "многолетние травы", "озимая пшеница"], "techs": ["No-Till", "Классическая"]},
-        "3": {"records": 5, "area_avg": 126.0, "yield_avg": 4.18, "cf_avg": 20.64, "gross_avg": 2257.8, "eff_avg": 5.68, "cost_avg": 50.6, "cultures": ["Горох", "озимая пшеница", "подсолнечник"], "techs": ["No-Till", "Классическая"]},
-        "4": {"records": 5, "area_avg": 121.1, "yield_avg": 6.16, "cf_avg": 14.92, "gross_avg": 2200.8, "eff_avg": 6.33, "cost_avg": 52.6, "cultures": ["Горох", "многолетние травы", "озимая пшеница"], "techs": ["No-Till", "Классическая"]},
-        "5": {"records": 5, "area_avg": 115.0, "yield_avg": 4.23, "cf_avg": 36.67, "gross_avg": 2279.2, "eff_avg": 5.86, "cost_avg": 51.2, "cultures": ["Горох", "Лён", "озимая пшеница", "подсолнечник"], "techs": ["No-Till"]},
-    }
-    
     mock = [
         {"culture": "Лён", "technology": "No-Till", "area": 243.0, "yield": 1.3, "footprint": 95.18, "operation_cf": 64.0, "tech_cf": 142.0, "rotation_cf": 12.0, "operation": "Уборка", "gross": 2422.0, "fert": 13.0, "pest": 1.0, "fuel": 9.0, "change_cf": 77.2, "efficiency": 4.16, "cost": 65.0},
         {"culture": "Озимая пшеница", "technology": "No-Till", "area": 227.0, "yield": 5.7, "footprint": 7.46, "operation_cf": 34.0, "tech_cf": 82.0, "rotation_cf": 8.0, "operation": "Предпосевная обработка", "gross": 2236.0, "fert": 13.0, "pest": 2.0, "fuel": 7.0, "change_cf": 0.0, "efficiency": 9.83, "cost": 44.0},
@@ -44,9 +35,19 @@ def parse_carbon_data(excel_file=None):
         {"culture": "Горох", "technology": "No-Till", "area": 363.0, "yield": 2.1, "footprint": 6.24, "operation_cf": 8.0, "tech_cf": 50.0, "rotation_cf": 9.0, "operation": "Предпосевная обработка", "gross": 2300.0, "fert": 11.0, "pest": 2.0, "fuel": 8.0, "change_cf": 0.0, "efficiency": 5.25, "cost": 50.0},
         {"culture": "Кукуруза", "technology": "No-Till", "area": 434.0, "yield": 3.7, "footprint": 34.55, "operation_cf": 98.0, "tech_cf": 135.0, "rotation_cf": 10.0, "operation": "Внесение удобрений", "gross": 2049.0, "fert": 10.0, "pest": 2.0, "fuel": 9.0, "change_cf": 0.0, "efficiency": 7.66, "cost": 54.0}
     ]
-
+    data = {
+        "records": pd.DataFrame(mock),
+        "sheets": {},
+        "fields_stat": {
+            "1": {"records": 5, "area_avg": 118.1, "yield_avg": 4.70, "cf_avg": 13.54, "gross_avg": 2184.8, "eff_avg": 6.70, "cost_avg": 52.0, "cultures": ["Лён", "многолетние травы", "озимая пшеница", "подсолнечник"], "techs": ["No-Till", "Классическая"]},
+            "2": {"records": 5, "area_avg": 113.0, "yield_avg": 5.70, "cf_avg": 6.44, "gross_avg": 2147.6, "eff_avg": 7.48, "cost_avg": 52.0, "cultures": ["Горох", "многолетние травы", "озимая пшеница"], "techs": ["No-Till", "Классическая"]},
+            "3": {"records": 5, "area_avg": 126.0, "yield_avg": 4.18, "cf_avg": 20.64, "gross_avg": 2257.8, "eff_avg": 5.68, "cost_avg": 50.6, "cultures": ["Горох", "озимая пшеница", "подсолнечник"], "techs": ["No-Till", "Классическая"]},
+            "4": {"records": 5, "area_avg": 121.1, "yield_avg": 6.16, "cf_avg": 14.92, "gross_avg": 2200.8, "eff_avg": 6.33, "cost_avg": 52.6, "cultures": ["Горох", "многолетние травы", "озимая пшеница"], "techs": ["No-Till", "Классическая"]},
+            "5": {"records": 5, "area_avg": 115.0, "yield_avg": 4.23, "cf_avg": 36.67, "gross_avg": 2279.2, "eff_avg": 5.86, "cost_avg": 51.2, "cultures": ["Горох", "Лён", "озимая пшеница", "подсолнечник"], "techs": ["No-Till"]},
+        }
+    }
+    
     if excel_file is None:
-        data["records"] = pd.DataFrame(mock)
         return data
 
     try:
@@ -86,14 +87,11 @@ def parse_carbon_data(excel_file=None):
                     "cost": pd.to_numeric(r6.get("Себестоимость", r6.iloc[25] if len(r6)>25 else 50.0), errors="coerce") or 50.0,
                 })
             data["records"] = pd.DataFrame(records)
-        else:
-            data["records"] = pd.DataFrame(mock)
     except Exception:
-        data["records"] = pd.DataFrame(mock)
+        pass
     return data
 
 def parse_organic_data(excel_file=None):
-    data = {"f1": pd.DataFrame(), "f2": pd.DataFrame(), "f3": pd.DataFrame(), "f4": pd.DataFrame(), "f5": pd.DataFrame()}
     mock_f4 = pd.DataFrame({
         "№": [1, 2, 3, 4, 5, 6],
         "Культура": ["Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник", "Лён"],
@@ -109,10 +107,8 @@ def parse_organic_data(excel_file=None):
     mock_f1 = pd.DataFrame({"E": [9.18, 3.55, 6.07, 8.50, 4.48, 3.88]})
     mock_f5 = pd.DataFrame({"Статус": ["Соответствует", "Соответствует", "Не соответствует", "Соответствует", "Не соответствует"]})
     
+    data = {"f1": mock_f1, "f2": pd.DataFrame(), "f3": pd.DataFrame(), "f4": mock_f4, "f5": mock_f5}
     if excel_file is None:
-        data["f4"] = mock_f4
-        data["f1"] = mock_f1
-        data["f5"] = mock_f5
         return data
 
     try:
@@ -130,7 +126,5 @@ def parse_organic_data(excel_file=None):
         if data["f5"].empty:
             data["f5"] = mock_f5
     except Exception:
-        data["f4"] = mock_f4
-        data["f1"] = mock_f1
-        data["f5"] = mock_f5
+        pass
     return data
