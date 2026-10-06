@@ -23,7 +23,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Загрузите XLSX-файл", type=["xlsx", "xls"], label_visibility="collapsed")
     
     if uploaded_file is not None:
-        file_bytes = uploaded_file.read()
+        file_bytes = uploaded_file.getvalue()
         detected_mode = detect_workbook_type(file_bytes)
         st.session_state.mode = detected_mode
         st.session_state.source_name = uploaded_file.name
