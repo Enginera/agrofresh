@@ -19,66 +19,61 @@ def apply_fullscreen_container_styles():
     iframe {
         width: 100% !important;
         border: none !important;
+        display: block !important;
     }
 
-    .top-nav-bar {
-        background-color: #143c2d;
-        padding: 12px 24px 4px 24px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+    div[data-testid="stHorizontalBlock"] {
+        background-color: #143c2d !important;
+        padding: 10px 24px !important;
+        margin: 0 !important;
+        border-bottom: 1px solid #1f5641 !important;
+        align-items: center !important;
     }
-    .top-nav-brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+
+    div[data-testid="stRadio"] {
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    .top-nav-icon {
-        background: #2f8c69;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: inline-grid;
-        place-items: center;
-        font-size: 18px;
+    div[data-testid="stRadio"] > div[role="radiogroup"] {
+        background-color: #0d281e !important;
+        padding: 4px 6px !important;
+        border-radius: 12px !important;
+        border: 1px solid #1f543f !important;
+        gap: 6px !important;
+        display: flex !important;
+        width: fit-content !important;
     }
-    .top-nav-title {
+
+    div[data-testid="stRadio"] label > div:first-child {
+        display: none !important;
+    }
+
+    div[data-testid="stRadio"] label {
+        background: transparent !important;
+        color: #a9c8b9 !important;
+        padding: 6px 16px !important;
+        border-radius: 8px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        border: none !important;
+    }
+    div[data-testid="stRadio"] label:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
-        font-weight: 750;
-        font-size: 16px;
-        letter-spacing: 0.02em;
+    }
+    div[data-testid="stRadio"] label p,
+    div[data-testid="stRadio"] label span {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: inherit !important;
     }
 
-    .top-radio-container {
-        background-color: #143c2d;
-        padding: 0px 24px 14px 24px;
-        border-bottom: 2px solid #1d5942;
-    }
-    .top-radio-container div[data-testid="stRadio"] {
-        background-color: transparent !important;
-    }
-    .top-radio-container div[data-testid="stRadio"] label {
-        color: #dcece5 !important;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 4px 12px;
-        border-radius: 8px;
-        transition: 0.2s;
-    }
-    .top-radio-container div[data-testid="stRadio"] label:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
-    .top-radio-container div[data-testid="stRadio"] label span {
-        color: #dcece5 !important;
-    }
-    .top-radio-container div[data-testid="stRadio"] div[role="radiogroup"] {
-        gap: 12px;
-        align-items: center;
-    }
-    .top-radio-container div[data-testid="stRadio"] input:checked + div {
-        background-color: #2f8c69 !important;
-        border-color: #2f8c69 !important;
+    div[data-testid="stRadio"] label:has(input:checked) {
+        background: #2f8c69 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
     }
     </style>
     """, unsafe_allow_html=True)
