@@ -1,15 +1,23 @@
 ﻿import streamlit as st
 
 def render_top_navigation():
-    """Переключатель режимов в верхней плашке Streamlit"""
-    c1, c2, _ = st.columns([1.5, 2, 4])
-    with c1:
-        st.markdown("<b style='font-size:15px; color:#143c2d;'>🌱 Агро-Модуль:</b>", unsafe_allow_html=True)
-    with c2:
+    st.markdown("""
+    <div class="top-nav-bar">
+        <div class="top-nav-brand">
+            <span class="top-nav-icon">🌱</span>
+            <span class="top-nav-title">Агро-Модуль:</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.container():
+        st.markdown('<div class="top-radio-container">', unsafe_allow_html=True)
         mode = st.radio(
-            "Режим",
+            "Выбор модуля",
             ["Углеродно-нейтральное (F1–F6)", "Органическое земледелие (ФЗ-280)"],
             horizontal=True,
             label_visibility="collapsed"
         )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
     return "carbon" if "Углеродно" in mode else "organic"
