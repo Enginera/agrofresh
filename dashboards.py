@@ -4,7 +4,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Цветовая палитра референса
 PALETTE = {
     "blue": "#4e91ad",
     "green": "#2d8b68",
@@ -15,9 +14,6 @@ PALETTE = {
 }
 
 def render_carbon_dashboard(carbon_data):
-    """
-    Дашборд Углеродно-нейтрального земледелия (Референс 1)
-    """
     df = carbon_data["records"]
     
     st.markdown("""
@@ -28,9 +24,8 @@ def render_carbon_dashboard(carbon_data):
     </div>
     """, unsafe_allow_html=True)
     
-    # 1. Фильтры
     col1, col2, col3 = st.columns([2, 1.5, 1])
-    all_cultures = sorted(df['culture'].unique()) if not df.empty else ["Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник", "Лён"]
+    all_cultures = sorted(df["culture"].unique()) if not df.empty else ["Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник", "Лён"]
     all_techs = ["No-Till", "Классическая"]
     
     with col1:
@@ -40,9 +35,8 @@ def render_carbon_dashboard(carbon_data):
     with col3:
         season = st.selectbox("Агросезон", ["Текущий расчёт", "Все агросезоны"])
         
-    f_df = df[(df['culture'].isin(sel_cultures)) & (df['technology'].isin(sel_techs))] if not df.empty else df
+    f_df = df[(df["culture"].isin(sel_cultures)) & (df["technology"].isin(sel_techs))] if not df.empty else df
 
-    # 2. Плашка статистики выбранного поля
     st.markdown("### 🌾 Статистика выбранного поля")
     field_col1, field_col2 = st.columns([1, 4])
     with field_col1:
@@ -68,11 +62,10 @@ def render_carbon_dashboard(carbon_data):
     </div>
     """, unsafe_allow_html=True)
 
-    # 3. Карточки KPI
-    avg_footprint = f_df['footprint'].mean() if not f_df.empty else 13.5
-    avg_eff = f_df['efficiency'].mean() if not f_df.empty else 6.7
-    avg_area = f_df['area'].mean() if not f_df.empty else 118.0
-    avg_cost = f_df['cost'].mean() if not f_df.empty else 52.0
+    avg_footprint = f_df["footprint"].mean() if not f_df.empty else 13.5
+    avg_eff = f_df["efficiency"].mean() if not f_df.empty else 6.7
+    avg_area = f_df["area"].mean() if not f_df.empty else 118.0
+    avg_cost = f_df["cost"].mean() if not f_df.empty else 52.0
 
     st.markdown(f"""
     <div class="kpi-container">
@@ -99,7 +92,6 @@ def render_carbon_dashboard(carbon_data):
     </div>
     """, unsafe_allow_html=True)
 
-    # 4. Расчётные функции (Аккордеон F1-F6)
     with st.expander("⚙️ Расчётные функции F1–F6 (Настройка сценарных параметров)", expanded=False):
         c_f1, c_f2 = st.columns(2)
         with c_f1:
@@ -125,27 +117,23 @@ def render_carbon_dashboard(carbon_data):
             st.selectbox("Сценарий оптимизации", ["Текущий расчет", "Снижение выбросов", "Максимальная маржинальность"], key="c_f6_sc")
         st.button("Сохранить параметры модели F1–F6")
 
-    # 5. Сетка диаграмм
     st.markdown("### 📊 Аналитические диаграммы")
-    
-    # График 1: No-Till vs Классическая
     if not f_df.empty:
         fig1 = px.bar(
-            f_df.groupby(['culture', 'technology'])['footprint'].mean().reset_index(),
-            x='culture', y='footprint', color='technology', barmode='group',
+            f_df.groupby(["culture", "technology"])["footprint"].mean().reset_index(),
+            x="culture", y="footprint", color="technology", barmode="group",
             color_discrete_map={"No-Till": PALETTE["blue"], "Классическая": PALETTE["pink"]},
             title="Удельный след: No-Till vs Классическая (кг CO₂-экв./т)",
-            labels={'footprint': 'кг CO₂-экв./т', 'culture': 'Культура', 'technology': 'Технология'}
+            labels={"footprint": "кг CO₂-экв./т", "culture": "Культура", "technology": "Технология"}
         )
         fig1.update_layout(plot_bgcolor="white", height=320, margin=dict(l=20, r=20, t=40, b=20))
         st.plotly_chart(fig1, use_container_width=True)
 
     g_col1, g_col2 = st.columns(2)
     with g_col1:
-        # График 2: Структура выбросов
         fig2 = go.Figure(data=[go.Pie(
-            labels=['Технологические операции', 'Техника', 'Севооборот'],
-            values=[f_df['operation_cf'].mean(), f_df['tech_cf'].mean(), f_df['rotation_cf'].mean()] if not f_df.empty else [50, 100, 10],
+            labels=["Технологические операции", "Техника", "Севооборот"],
+            values=[f_df["operation_cf"].mean(), f_df["tech_cf"].mean(), f_df["rotation_cf"].mean()] if not f_df.empty else [50, 100, 10],
             hole=.6,
             marker=dict(colors=[PALETTE["blue"], PALETTE["pink"], PALETTE["amber"]])
         )])
@@ -153,45 +141,38 @@ def render_carbon_dashboard(carbon_data):
         st.plotly_chart(fig2, use_container_width=True)
 
     with g_col2:
-        # График 3: Эффективность по культурам
         fig3 = px.bar(
-            f_df.groupby('culture')['efficiency'].mean().reset_index(),
-            x='culture', y='efficiency',
+            f_df.groupby("culture")["efficiency"].mean().reset_index(),
+            x="culture", y="efficiency",
             color_discrete_sequence=[PALETTE["green"]],
             title="Эффективность по культуре (показатель F6)",
-            labels={'efficiency': 'F6 Интегральный показатель', 'culture': 'Культура'}
+            labels={"efficiency": "F6 Интегральный показатель", "culture": "Культура"}
         )
         fig3.update_layout(plot_bgcolor="white", height=300, margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig3, use_container_width=True)
 
     g_col3, g_col4 = st.columns(2)
     with g_col3:
-        # График 4: Выбросы по операциям
         fig4 = px.bar(
-            f_df.groupby('operation')['gross'].mean().reset_index(),
-            y='operation', x='gross', orientation='h',
+            f_df.groupby("operation")["gross"].mean().reset_index(),
+            y="operation", x="gross", orientation="h",
             color_discrete_sequence=[PALETTE["dark_green"]],
             title="Выбросы CO₂ по операциям (кг CO₂-экв./га)",
-            labels={'gross': 'кг CO₂/га', 'operation': 'Операция'}
+            labels={"gross": "кг CO₂/га", "operation": "Операция"}
         )
         fig4.update_layout(plot_bgcolor="white", height=300, margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig4, use_container_width=True)
 
     with g_col4:
-        # График 5: Зависимость следа от урожайности
         fig5 = px.scatter(
-            f_df, x='yield', y='footprint', color='culture',
+            f_df, x="yield", y="footprint", color="culture",
             title="Углеродный след vs Урожайность",
-            labels={'yield': 'Урожайность, т/га', 'footprint': 'След, кг CO₂/т'}
+            labels={"yield": "Урожайность, т/га", "footprint": "След, кг CO₂/т"}
         )
         fig5.update_layout(plot_bgcolor="white", height=300, margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig5, use_container_width=True)
 
-
 def render_organic_dashboard(organic_data):
-    """
-    Дашборд Органического земледелия по ФЗ-280 (Референс 2)
-    """
     st.markdown("""
     <div class="dashboard-header">
         <div class="eyebrow">Модуль органического земледелия</div>
@@ -205,7 +186,6 @@ def render_organic_dashboard(organic_data):
     df2 = organic_data["f2"] if not organic_data["f2"].empty else pd.DataFrame()
     df1 = organic_data["f1"] if not organic_data["f1"].empty else pd.DataFrame()
 
-    # Фильтры
     col1, col2, col3 = st.columns(3)
     cultures = sorted(df4.iloc[:, 1].dropna().unique()) if len(df4.columns)>1 else ["Озимая пшеница", "Горох", "Лён", "Кукуруза", "Многолетние травы", "Подсолнечник"]
     techs = sorted(df4.iloc[:, 2].dropna().unique()) if len(df4.columns)>2 else ["No-Till", "Классическая"]
@@ -217,11 +197,10 @@ def render_organic_dashboard(organic_data):
     with col3:
         sel_legume = st.selectbox("Бобовая культура (азотфиксатор)", ["Все бобовые", "Соя", "Люцерна", "Клевер", "Горох"])
 
-    # 1. KPI метрики
-    ufin_val = pd.to_numeric(df4.iloc[:, 7], errors='coerce').mean() if len(df4.columns)>7 else 4.8
-    op_val = pd.to_numeric(df4.iloc[:, 6], errors='coerce').mean() if len(df4.columns)>6 else 0.42
-    qindex_val = pd.to_numeric(df4.iloc[:, 9], errors='coerce').mean() if len(df4.columns)>9 else 85.0
-    eff_e = pd.to_numeric(df1.iloc[:, 5], errors='coerce').mean() if len(df1.columns)>5 else 7.89
+    ufin_val = pd.to_numeric(df4.iloc[:, 7], errors="coerce").mean() if len(df4.columns)>7 else 4.8
+    op_val = pd.to_numeric(df4.iloc[:, 6], errors="coerce").mean() if len(df4.columns)>6 else 0.42
+    qindex_val = pd.to_numeric(df4.iloc[:, 9], errors="coerce").mean() if len(df4.columns)>9 else 85.0
+    eff_e = pd.to_numeric(df1.iloc[:, 5], errors="coerce").mean() if len(df1.columns)>5 else 7.89
 
     st.markdown(f"""
     <div class="kpi-container">
@@ -248,15 +227,11 @@ def render_organic_dashboard(organic_data):
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. Карточки соответствия ФЗ-280
     st.markdown("### 📜 Контроль требований органического регламента (ФЗ-280)")
     c_ring1, c_ring2 = st.columns(2)
-    
-    # Доли соответствия
     with c_ring1:
-        # Статус технологии
         fig_comp = go.Figure(data=[go.Pie(
-            labels=['Соответствует (глубина ≤ 5 см)', 'Не соответствует'],
+            labels=["Соответствует (глубина ≤ 5 см)", "Не соответствует"],
             values=[680, 320],
             hole=.6,
             marker=dict(colors=[PALETTE["green"], PALETTE["pink"]])
@@ -265,9 +240,8 @@ def render_organic_dashboard(organic_data):
         st.plotly_chart(fig_comp, use_container_width=True)
         
     with c_ring2:
-        # Статус удобрений
         fig_fert = go.Figure(data=[go.Pie(
-            labels=['Органическое сырье (разрешено)', 'Запрещенные мин. удобрения'],
+            labels=["Органическое сырье (разрешено)", "Запрещенные мин. удобрения"],
             values=[740, 260],
             hole=.6,
             marker=dict(colors=[PALETTE["green"], PALETTE["pink"]])
@@ -275,10 +249,8 @@ def render_organic_dashboard(organic_data):
         fig_fert.update_layout(title="Соответствие удобрений положениям ФЗ-280", height=280, margin=dict(l=10, r=10, t=40, b=10))
         st.plotly_chart(fig_fert, use_container_width=True)
 
-    # 3. Азотфиксация и топливная экономия
     st.markdown("### 🌾 Биологическая фиксация азота и ресурсосбережение (F2)")
     col_n1, col_n2 = st.columns(2)
-    
     with col_n1:
         n_df = pd.DataFrame({
             "Бобовая культура": ["Клевер", "Люцерна", "Соя", "Горох"],
@@ -297,7 +269,6 @@ def render_organic_dashboard(organic_data):
         fig_fuel.update_layout(plot_bgcolor="white", height=300)
         st.plotly_chart(fig_fuel, use_container_width=True)
 
-    # 4. Сводная таблица
     st.markdown("### 📋 Сводные показатели качества и урожайности")
     summary_data = pd.DataFrame({
         "Культура": ["Озимая пшеница", "Горох", "Кукуруза", "Многолетние травы", "Подсолнечник", "Лён"],

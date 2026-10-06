@@ -15,11 +15,10 @@ def render_sidebar(mode="carbon", source_name="Текущий файл"):
         st.markdown(f"""
         <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); padding: 12px 14px; border-radius: 10px; margin-bottom: 20px;">
             <small style="color: #9db9ad; display: block; font-size: 11px;">АКТИВНЫЙ РЕЖИМ</small>
-            <b style="color: #ffffff; font-size: 14px;">{'Углеродно-нейтральное' if mode == 'carbon' else 'Органическое земледелие (ФЗ-280)'}</b>
+            <b style="color: #ffffff; font-size: 14px;">{"Углеродно-нейтральное" if mode == "carbon" else "Органическое земледелие (ФЗ-280)"}</b>
         </div>
         """, unsafe_allow_html=True)
         
-        # Навигация по якорям
         if mode == "carbon":
             nav_items = ["Главная", "Статистика по полям", "Расчётные функции F1–F6", "Аналитика выбросов", "Культура и технологии"]
         else:

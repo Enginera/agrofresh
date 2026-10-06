@@ -1,12 +1,7 @@
 ﻿import streamlit as st
 
 def apply_global_styles(mode="carbon"):
-    """
-    Применяет глобальный CSS-дизайн в стиле HTML-прототипов.
-    mode: 'carbon' | 'organic'
-    """
     theme_accent = "#1e7655" if mode == "carbon" else "#2d8b68"
-    
     st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -30,12 +25,9 @@ def apply_global_styles(mode="carbon"):
         font-family: 'Inter', 'Segoe UI', sans-serif;
         color: var(--ink);
     }}
-    
     .stApp {{
         background: linear-gradient(180deg, #edf4f1 0%, #f6f9f7 100%);
     }}
-    
-    /* Стилизация Sidebar */
     section[data-testid="stSidebar"] {{
         background-color: var(--green-dark) !important;
         color: #dcece5 !important;
@@ -43,16 +35,6 @@ def apply_global_styles(mode="carbon"):
     section[data-testid="stSidebar"] * {{
         color: #dcece5 !important;
     }}
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stMultiSelect label {{
-        color: #a9c8b9 !important;
-        font-weight: 600;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }}
-    
-    /* Шапка дашборда */
     .dashboard-header {{
         margin-bottom: 20px;
     }}
@@ -76,8 +58,6 @@ def apply_global_styles(mode="carbon"):
         font-size: 13px;
         margin-bottom: 16px;
     }}
-    
-    /* Карточки KPI */
     .kpi-container {{
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -107,8 +87,6 @@ def apply_global_styles(mode="carbon"):
         font-size: 11px;
         color: #8a9993;
     }}
-    
-    /* Баннер информации о поле / сводке */
     .field-banner {{
         background: linear-gradient(135deg, #174f3a, #236f51);
         color: #ffffff !important;
@@ -142,51 +120,6 @@ def apply_global_styles(mode="carbon"):
         font-weight: 700;
         display: block;
         margin-top: 3px;
-    }}
-    
-    /* Таблицы */
-    .styled-table {{
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid var(--line);
-    }}
-    .styled-table th {{
-        background: #f8faf9;
-        color: var(--muted);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--line);
-        text-align: left;
-    }}
-    .styled-table td {{
-        padding: 10px 14px;
-        border-bottom: 1px solid #f1f4f2;
-    }}
-    .status-ok {{
-        color: #1e7655;
-        font-weight: 700;
-    }}
-    .status-bad {{
-        color: #a93d72;
-        font-weight: 700;
-    }}
-    
-    /* Чипы и теги */
-    .chip {{
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 6px;
-        background: #e8f2ed;
-        color: #1e7655;
-        font-size: 12px;
-        font-weight: 600;
-        margin: 2px;
     }}
     </style>
     """, unsafe_allow_html=True)
